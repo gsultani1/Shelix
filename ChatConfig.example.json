@@ -1,0 +1,44 @@
+{
+  "description": "Chat provider configuration. Copy this file to ChatConfig.json and add your API keys.",
+  "warning": "Keep ChatConfig.json secure - it contains API keys!",
+  
+  "apiKeys": {
+    "ANTHROPIC_API_KEY": "sk-ant-api03-your-key-here",
+    "OPENAI_API_KEY": "sk-your-openai-key-here"
+  },
+  
+  "defaults": {
+    "provider": "ollama",
+    "model": null,
+    "temperature": 0.7,
+    "maxTokens": 4096,
+    "stream": true,
+    "autoTrim": true
+  },
+  
+  "providers": {
+    "ollama": {
+      "endpoint": "http://localhost:11434/v1/chat/completions",
+      "defaultModel": "llama3.2"
+    },
+    "lmstudio": {
+      "endpoint": "http://localhost:1234/v1/chat/completions",
+      "defaultModel": "mistral-7b-instruct-v0.3"
+    },
+    "anthropic": {
+      "endpoint": "https://api.anthropic.com/v1/messages",
+      "defaultModel": "claude-sonnet-4-5-20250929"
+    },
+    "openai": {
+      "endpoint": "https://api.openai.com/v1/chat/completions",
+      "defaultModel": "gpt-4o"
+    }
+  },
+  
+  "notes": {
+    "ollama": "Free local AI - install from https://ollama.ai",
+    "lmstudio": "Free local AI - install from https://lmstudio.ai",
+    "anthropic": "Get API key from https://console.anthropic.com",
+    "openai": "Get API key from https://platform.openai.com"
+  }
+}

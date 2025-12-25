@@ -1,0 +1,43 @@
+# API Keys and Secrets (keep .example files)
+ChatConfig.json
+!ChatConfig.example.json
+ToolPreferences.json
+!ToolPreferences.example.json
+*.secret
+*.key
+
+# User Preferences (already listed above)
+
+# Logs and History
+ChatLogs/
+AIExecutionLog.json
+*.log
+
+# Backup files
+*_backup*
+*.bak
+profile_backup.txt
+
+# Temporary files
+*.tmp
+*.temp
+~$*
+
+# Windows system files
+Thumbs.db
+Desktop.ini
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Personal notes and plans
+plan.md
+notes.md
+todo.md
+
+# Test files
+test_*.ps1
+*_test.ps1

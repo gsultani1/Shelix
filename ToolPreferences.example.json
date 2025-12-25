@@ -1,0 +1,51 @@
+{
+  "description": "Tool preferences configuration. Copy this file to ToolPreferences.json to customize.",
+  
+  "fileViewer": {
+    "preferred": "bat",
+    "fallback": "cat",
+    "options": ["bat", "cat", "less", "more"]
+  },
+  
+  "markdownRenderer": {
+    "preferred": "glow",
+    "fallback": "native",
+    "options": ["glow", "native"]
+  },
+  
+  "fileNavigator": {
+    "preferred": "broot",
+    "fallback": "explorer",
+    "options": ["broot", "lf", "ranger", "explorer"]
+  },
+  
+  "fuzzyFinder": {
+    "preferred": "fzf",
+    "fallback": "native",
+    "options": ["fzf", "native"]
+  },
+  
+  "jsonProcessor": {
+    "preferred": "jq",
+    "fallback": "native",
+    "options": ["jq", "native"]
+  },
+  
+  "yamlProcessor": {
+    "preferred": "yq",
+    "fallback": "native",
+    "options": ["yq", "native"]
+  },
+  
+  "autoInstall": false,
+  "checkUpdates": true,
+  
+  "notes": {
+    "bat": "Install: winget install sharkdp.bat",
+    "glow": "Install: winget install charmbracelet.glow",
+    "broot": "Install: winget install dystroy.broot",
+    "fzf": "Install: winget install junegunn.fzf",
+    "jq": "Install: winget install jqlang.jq",
+    "yq": "Install: winget install MikeFarah.yq"
+  }
+}
