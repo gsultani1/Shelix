@@ -1,6 +1,7 @@
 # ===== MCPClient.ps1 =====
 # MCP (Model Context Protocol) Client for PowerShell
 # Connects to MCP servers via stdio transport and calls tools
+# Dear future me: I'm sorry
 
 # ===== MCP Server Registry =====
 $global:MCPServers = @{}
@@ -46,7 +47,7 @@ function Register-MCPServer {
         [string]$Name,
         [Parameter(Mandatory=$true)]
         [string]$Command,
-        [string[]]$Args = @(),
+        [string[]]$Arguments = @(),
         [string]$Description = "",
         [hashtable]$Env = @{}
     )
@@ -54,7 +55,7 @@ function Register-MCPServer {
     $global:MCPServers[$Name] = @{
         Name = $Name
         Command = $Command
-        Args = $Args
+        Args = $Arguments
         Description = $Description
         Env = $Env
         Registered = Get-Date
@@ -354,14 +355,14 @@ function Register-CommonMCPServers {
     # Filesystem server
     Register-MCPServer -Name "filesystem" `
         -Command "npx" `
-        -Args @("-y", "@modelcontextprotocol/server-filesystem", $env:USERPROFILE) `
+        -Arguments @("-y", "@modelcontextprotocol/server-filesystem", $env:USERPROFILE) `
         -Description "File system access and operations"
     
     # Brave Search
     if ($env:BRAVE_API_KEY) {
         Register-MCPServer -Name "brave-search" `
             -Command "npx" `
-            -Args @("-y", "@modelcontextprotocol/server-brave-search") `
+            -Arguments @("-y", "@modelcontextprotocol/server-brave-search") `
             -Description "Web search via Brave Search API" `
             -Env @{ BRAVE_API_KEY = $env:BRAVE_API_KEY }
     }
@@ -370,7 +371,7 @@ function Register-CommonMCPServers {
     if ($env:GITHUB_TOKEN) {
         Register-MCPServer -Name "github" `
             -Command "npx" `
-            -Args @("-y", "@modelcontextprotocol/server-github") `
+            -Arguments @("-y", "@modelcontextprotocol/server-github") `
             -Description "GitHub repository operations" `
             -Env @{ GITHUB_PERSONAL_ACCESS_TOKEN = $env:GITHUB_TOKEN }
     }
@@ -378,13 +379,13 @@ function Register-CommonMCPServers {
     # Memory/Knowledge Graph
     Register-MCPServer -Name "memory" `
         -Command "npx" `
-        -Args @("-y", "@modelcontextprotocol/server-memory") `
+        -Arguments @("-y", "@modelcontextprotocol/server-memory") `
         -Description "Persistent memory and knowledge graph"
     
     # Fetch (web fetching)
     Register-MCPServer -Name "fetch" `
         -Command "npx" `
-        -Args @("-y", "@modelcontextprotocol/server-fetch") `
+        -Arguments @("-y", "@modelcontextprotocol/server-fetch") `
         -Description "Fetch and parse web content"
     
     Write-Host "Registered common MCP servers. Use Get-MCPServers to list." -ForegroundColor Cyan
@@ -410,6 +411,90 @@ function Format-MCPToolsForAI {
     return $output
 }
 
+# ===== Auto-Connect Filesystem MCP =====
+function Initialize-FilesystemMCP {
+    <#
+    .SYNOPSIS
+    Auto-register and optionally connect the filesystem MCP server
+    #>
+    param([switch]$AutoConnect)
+    
+    # Check if npx is available
+    $npxPath = Get-Command npx -ErrorAction SilentlyContinue
+    if (-not $npxPath) {
+        Write-Host "MCP: Node.js/npx not found. Filesystem MCP not available." -ForegroundColor DarkGray
+        return $false
+    }
+    
+    # Register filesystem server with user's home directory
+    Register-MCPServer -Name "filesystem" `
+        -Command "npx" `
+        -Arguments @("-y", "@modelcontextprotocol/server-filesystem", $env:USERPROFILE) `
+        -Description "Local filesystem access" | Out-Null
+    
+    if ($AutoConnect) {
+        Write-Host "MCP: Connecting to filesystem server..." -ForegroundColor DarkCyan
+        $result = Connect-MCPServer -Name "filesystem"
+        if ($result) {
+            return $true
+        }
+    }
+    
+    return $false
+}
+
+# ===== Get All Available MCP Tools =====
+function Get-AllMCPTools {
+    <#
+    .SYNOPSIS
+    Get all tools from all connected MCP servers
+    #>
+    $allTools = @()
+    
+    foreach ($serverName in $global:MCPConnections.Keys) {
+        $conn = $global:MCPConnections[$serverName]
+        foreach ($tool in $conn.Tools) {
+            $allTools += @{
+                Server = $serverName
+                Name = $tool.name
+                Description = $tool.description
+                InputSchema = $tool.inputSchema
+            }
+        }
+    }
+    
+    return $allTools
+}
+
+# ===== Format MCP Tools for System Prompt =====
+function Get-MCPToolsPrompt {
+    <#
+    .SYNOPSIS
+    Generate MCP tools section for AI system prompt
+    #>
+    if ($global:MCPConnections.Count -eq 0) {
+        return ""
+    }
+    
+    $prompt = "`nMCP TOOLS (call external servers):`n"
+    
+    foreach ($serverName in $global:MCPConnections.Keys) {
+        $conn = $global:MCPConnections[$serverName]
+        $prompt += "[$serverName]`n"
+        
+        foreach ($tool in $conn.Tools) {
+            $prompt += "  {`"intent`":`"mcp_call`",`"server`":`"$serverName`",`"tool`":`"$($tool.name)`",`"toolArgs`":{...}}`n"
+            $prompt += "    - $($tool.name): $($tool.description)`n"
+        }
+    }
+    
+    $prompt += "`nExample: Read a file via MCP:`n"
+    $prompt += '{\"intent\":\"mcp_call\",\"server\":\"filesystem\",\"tool\":\"read_file\",\"toolArgs\":\"{\\\"path\\\":\\\"C:\\\\Users\\\\file.txt\\\"}\"}'
+    $prompt += "`n"
+    
+    return $prompt
+}
+
 # ===== Cleanup on Exit =====
 try {
     Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
@@ -423,6 +508,8 @@ Set-Alias mcp-connect Connect-MCPServer -Force
 Set-Alias mcp-disconnect Disconnect-MCPServer -Force
 Set-Alias mcp-call Invoke-MCPTool -Force
 Set-Alias mcp-register Register-CommonMCPServers -Force
+Set-Alias mcp-init Initialize-FilesystemMCP -Force
+Set-Alias mcp-tools Get-AllMCPTools -Force
 
 # ===== Export =====
 $global:MCPClientAvailable = $true

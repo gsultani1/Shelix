@@ -1,11 +1,123 @@
 # ===== WebTools.ps1 =====
 # Web search and retrieval tools for AI assistant
 
-# ===== DuckDuckGo Instant Answer API =====
+# ===== Search Engine Configuration =====
+# API keys are loaded from Config/.env file (see Config/.env.example)
+# Uses Get-ConfigValue which checks .env first, then falls back to environment variables
+
+function Initialize-SearchConfig {
+    # Called after ConfigLoader is loaded to get API keys
+    $global:SearchEngineConfig = @{
+        # DuckDuckGo - Free, no API key needed (always available as fallback)
+        DuckDuckGo = @{
+            Enabled = $true
+        }
+        
+        # RapidAPI Google Search - Fast Google results
+        # Get yours at: https://rapidapi.com/apigeek/api/google-search72
+        RapidAPI = @{
+            Enabled = $true
+            ApiKey = Get-ConfigValue -Key 'RAPIDAPI_KEY'
+            Host = 'google-search72.p.rapidapi.com'
+        }
+        
+        # Google Custom Search
+        # Get yours at: https://developers.google.com/custom-search/v1/overview
+        Google = @{
+            Enabled = $false
+            ApiKey = Get-ConfigValue -Key 'GOOGLE_SEARCH_API_KEY'
+            SearchEngineId = Get-ConfigValue -Key 'GOOGLE_SEARCH_ENGINE_ID'
+        }
+        
+        # Bing Search
+        # Get yours at: https://www.microsoft.com/en-us/bing/apis/bing-web-search-api
+        Bing = @{
+            Enabled = $false
+            ApiKey = Get-ConfigValue -Key 'BING_SEARCH_API_KEY'
+        }
+        
+        # SerpAPI - Unified search API
+        # Get yours at: https://serpapi.com/
+        SerpAPI = @{
+            Enabled = $false
+            ApiKey = Get-ConfigValue -Key 'SERPAPI_KEY'
+        }
+    }
+}
+
+# Initialize config (will use Get-ConfigValue from ConfigLoader)
+if (Get-Command Get-ConfigValue -ErrorAction SilentlyContinue) {
+    Initialize-SearchConfig
+} else {
+    # Fallback if ConfigLoader not loaded yet
+    $global:SearchEngineConfig = @{
+        DuckDuckGo = @{ Enabled = $true }
+        RapidAPI = @{ Enabled = $true; ApiKey = $env:RAPIDAPI_KEY; Host = 'google-search72.p.rapidapi.com' }
+    }
+}
+
+# ===== RapidAPI Google Search =====
+function Invoke-RapidAPISearch {
+    <#
+    .SYNOPSIS
+    Search using RapidAPI Google Search (requires API key)
+    #>
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$Query,
+        [int]$MaxResults = 5
+    )
+    
+    $config = $global:SearchEngineConfig.RapidAPI
+    if (-not $config.Enabled -or -not $config.ApiKey) {
+        return @{ Success = $false; Message = "RapidAPI not configured. Set `$env:RAPIDAPI_KEY" }
+    }
+    
+    try {
+        $encodedQuery = [System.Web.HttpUtility]::UrlEncode($Query)
+        $url = "https://$($config.Host)/search?q=$encodedQuery&num=$MaxResults"
+        
+        $headers = @{
+            'x-rapidapi-key' = $config.ApiKey
+            'x-rapidapi-host' = $config.Host
+        }
+        
+        $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get -TimeoutSec 15
+        
+        $results = @()
+        if ($response.items) {
+            foreach ($item in $response.items | Select-Object -First $MaxResults) {
+                $results += @{
+                    Title = $item.title
+                    Snippet = $item.snippet
+                    Url = $item.link
+                    Type = "Google"
+                }
+            }
+        }
+        
+        if ($results.Count -eq 0) {
+            return @{ Success = $false; Message = "No results from RapidAPI"; Results = @() }
+        }
+        
+        return @{
+            Success = $true
+            Query = $Query
+            ResultCount = $results.Count
+            Results = $results
+            Source = "RapidAPI"
+        }
+    }
+    catch {
+        return @{ Success = $false; Message = "RapidAPI error: $($_.Exception.Message)" }
+    }
+}
+
+# ===== Main Web Search (tries RapidAPI first, falls back to DuckDuckGo) =====
 function Invoke-WebSearch {
     <#
     .SYNOPSIS
-    Search the web and return results using DuckDuckGo API
+    Search the web - uses RapidAPI if configured, otherwise DuckDuckGo
     
     .PARAMETER Query
     Search query string
@@ -19,6 +131,16 @@ function Invoke-WebSearch {
         [int]$MaxResults = 5
     )
     
+    # Try RapidAPI first if configured
+    $rapidConfig = $global:SearchEngineConfig.RapidAPI
+    if ($rapidConfig.Enabled -and $rapidConfig.ApiKey) {
+        $result = Invoke-RapidAPISearch -Query $Query -MaxResults $MaxResults
+        if ($result.Success) {
+            return $result
+        }
+    }
+    
+    # Fallback to DuckDuckGo
     try {
         $encodedQuery = [System.Web.HttpUtility]::UrlEncode($Query)
         $url = "https://api.duckduckgo.com/?q=$encodedQuery&format=json&no_html=1&skip_disambig=1"
@@ -63,10 +185,46 @@ function Invoke-WebSearch {
         }
         
         if ($results.Count -eq 0) {
+            # Fallback: Try DuckDuckGo HTML search scraping
+            try {
+                $htmlUrl = "https://html.duckduckgo.com/html/?q=$encodedQuery"
+                $htmlResponse = Invoke-WebRequest -Uri $htmlUrl -UseBasicParsing -TimeoutSec 15 -Headers @{
+                    'User-Agent' = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+                
+                # Extract result links and snippets from HTML
+                $linkMatches = [regex]::Matches($htmlResponse.Content, '<a class="result__a" href="([^"]+)"[^>]*>([^<]+)</a>')
+                $snippetMatches = [regex]::Matches($htmlResponse.Content, '<a class="result__snippet"[^>]*>([^<]+)</a>')
+                
+                for ($i = 0; $i -lt [Math]::Min($linkMatches.Count, $MaxResults); $i++) {
+                    $title = $linkMatches[$i].Groups[2].Value -replace '&amp;', '&' -replace '&lt;', '<' -replace '&gt;', '>'
+                    $link = $linkMatches[$i].Groups[1].Value
+                    # DuckDuckGo uses redirect URLs, extract actual URL
+                    if ($link -match 'uddg=([^&]+)') {
+                        $link = [System.Web.HttpUtility]::UrlDecode($Matches[1])
+                    }
+                    $snippet = if ($i -lt $snippetMatches.Count) { 
+                        $snippetMatches[$i].Groups[1].Value -replace '&amp;', '&' -replace '&lt;', '<' -replace '&gt;', '>' -replace '<[^>]+>', ''
+                    } else { "" }
+                    
+                    $results += @{
+                        Title = $title
+                        Snippet = $snippet
+                        Url = $link
+                        Type = "Web"
+                    }
+                }
+            }
+            catch {
+                # HTML fallback failed too
+            }
+        }
+        
+        if ($results.Count -eq 0) {
             return @{
                 Success = $false
                 Query = $Query
-                Message = "No instant results found. Try a more specific query or use search_web to open Google."
+                Message = "No results found. Try 'open_browser_search' to search in your browser."
                 Results = @()
             }
         }

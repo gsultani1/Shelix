@@ -3,6 +3,8 @@ ChatConfig.json
 !ChatConfig.example.json
 ToolPreferences.json
 !ToolPreferences.example.json
+Config/.env
+!Config/.env.example
 *.secret
 *.key
 
@@ -38,6 +40,8 @@ plan.md
 notes.md
 todo.md
 release_plan.md
+cross_platform_plan.md
+scope.md 
 
 # Test files
 test_*.ps1

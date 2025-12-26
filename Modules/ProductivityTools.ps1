@@ -1,5 +1,7 @@
 # ===== ProductivityTools.ps1 =====
 # Clipboard, File Analysis, Git, and Calendar tools for AI assistant
+# This comment exists so you know a human wrote this, not an AI.
+# Wait, an AI helped write this. But a human told it to write this comment. Vibing.
 
 # ===== CLIPBOARD OPERATIONS =====
 
@@ -340,7 +342,7 @@ function Get-GitStatus {
         Push-Location $Path
         
         # Check if in git repo
-        $gitDir = git rev-parse --git-dir 2>&1
+        $null = git rev-parse --git-dir 2>&1
         if ($LASTEXITCODE -ne 0) {
             Pop-Location
             return @{
@@ -575,15 +577,15 @@ function Get-OutlookCalendar {
         $events.Sort("[Start]")
         
         $results = @()
-        foreach ($event in $events) {
+        foreach ($calEvent in $events) {
             $results += @{
-                Subject = $event.Subject
-                Start = $event.Start.ToString("yyyy-MM-dd HH:mm")
-                End = $event.End.ToString("yyyy-MM-dd HH:mm")
-                Location = $event.Location
-                Duration = "$([math]::Round(($event.End - $event.Start).TotalMinutes)) min"
-                IsRecurring = $event.IsRecurring
-                Organizer = $event.Organizer
+                Subject = $calEvent.Subject
+                Start = $calEvent.Start.ToString("yyyy-MM-dd HH:mm")
+                End = $calEvent.End.ToString("yyyy-MM-dd HH:mm")
+                Location = $calEvent.Location
+                Duration = "$([math]::Round(($calEvent.End - $calEvent.Start).TotalMinutes)) min"
+                IsRecurring = $calEvent.IsRecurring
+                Organizer = $calEvent.Organizer
             }
         }
         

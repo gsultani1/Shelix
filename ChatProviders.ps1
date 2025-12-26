@@ -1,6 +1,7 @@
 # ===== ChatProviders.ps1 =====
 # Multi-provider LLM chat system supporting Ollama, Anthropic, and LM Studio
 # Provides unified interface for different AI backends
+# If Warp had this, they wouldn't need $73M
 
 # ===== Provider Configuration =====
 $global:ChatProviders = @{
@@ -39,6 +40,15 @@ $global:ChatProviders = @{
         ApiKeyEnvVar = 'OPENAI_API_KEY'
         Format = 'openai'
         Description = 'OpenAI API (cloud)'
+    }
+    'llm' = @{
+        Name = 'LLM CLI'
+        Endpoint = $null  # Uses CLI, not HTTP
+        DefaultModel = 'gpt-4o-mini'
+        ApiKeyRequired = $false  # Managed by llm CLI
+        ApiKeyEnvVar = $null
+        Format = 'llm-cli'  # Special format for CLI wrapper
+        Description = 'Simon Willison llm CLI (100+ plugins)'
     }
 }
 
@@ -174,7 +184,7 @@ function Test-ChatProvider {
                 $headers["Authorization"] = "Bearer $(Get-ChatApiKey $Provider)"
             }
             
-            $response = Invoke-RestMethod -Uri $config.Endpoint -Method Post -Body $testBody -Headers $headers -TimeoutSec 10
+            $null = Invoke-RestMethod -Uri $config.Endpoint -Method Post -Body $testBody -Headers $headers -TimeoutSec 10
             Write-Host "  Endpoint responding" -ForegroundColor Green
             Write-Host "  Model: $($config.DefaultModel)" -ForegroundColor Gray
             return $true
@@ -192,7 +202,7 @@ function Test-ChatProvider {
                 "anthropic-version" = "2023-06-01"
             }
             
-            $response = Invoke-RestMethod -Uri $config.Endpoint -Method Post -Body $testBody -Headers $headers -TimeoutSec 10
+            $null = Invoke-RestMethod -Uri $config.Endpoint -Method Post -Body $testBody -Headers $headers -TimeoutSec 10
             Write-Host "  Endpoint responding" -ForegroundColor Green
             Write-Host "  Model: $($config.DefaultModel)" -ForegroundColor Gray
             return $true
@@ -371,26 +381,89 @@ function Invoke-AnthropicChat {
         "anthropic-version" = "2023-06-01"
     }
     
-    $response = Invoke-RestMethod -Uri $Endpoint -Method Post -Body $jsonBody -Headers $headers -ErrorAction Stop
+    $apiResponse = Invoke-RestMethod -Uri $Endpoint -Method Post -Body $jsonBody -Headers $headers -ErrorAction Stop
     
-    if ($null -eq $response.content -or $response.content.Count -eq 0) {
+    if ($null -eq $apiResponse.content -or $apiResponse.content.Count -eq 0) {
         throw "Anthropic returned empty response"
     }
     
-    $reply = ($response.content | Where-Object { $_.type -eq 'text' } | Select-Object -First 1).text
+    $reply = ($apiResponse.content | Where-Object { $_.type -eq 'text' } | Select-Object -First 1).text
     if ([string]::IsNullOrWhiteSpace($reply)) {
         throw "Anthropic returned empty message content"
     }
     
     return @{
         Content = $reply
-        Model = $response.model
+        Model = $apiResponse.model
         Usage = @{
-            prompt_tokens = $response.usage.input_tokens
-            completion_tokens = $response.usage.output_tokens
-            total_tokens = $response.usage.input_tokens + $response.usage.output_tokens
+            prompt_tokens = $apiResponse.usage.input_tokens
+            completion_tokens = $apiResponse.usage.output_tokens
+            total_tokens = $apiResponse.usage.input_tokens + $apiResponse.usage.output_tokens
         }
-        StopReason = $response.stop_reason
+        StopReason = $apiResponse.stop_reason
+    }
+}
+
+# ===== LLM CLI Wrapper =====
+function Invoke-LLMCliChat {
+    <#
+    .SYNOPSIS
+    Wrapper for Simon Willison's llm CLI tool
+    Provides access to 100+ plugins and models
+    #>
+    param(
+        [string]$Model = "gpt-4o-mini",
+        [array]$Messages,
+        [string]$SystemPrompt = $null
+    )
+    
+    # Check if llm is available
+    $llmPath = Get-Command llm -ErrorAction SilentlyContinue
+    if (-not $llmPath) {
+        throw "llm CLI not found. Install with: pip install llm"
+    }
+    
+    # Build the prompt from messages
+    $prompt = ""
+    foreach ($msg in $Messages) {
+        if ($msg.role -eq "user") {
+            $prompt += $msg.content + "`n"
+        }
+    }
+    $prompt = $prompt.Trim()
+    
+    # Build command arguments
+    $llmArgs = @()
+    if ($Model) {
+        $llmArgs += "-m"
+        $llmArgs += $Model
+    }
+    if ($SystemPrompt) {
+        $llmArgs += "-s"
+        $llmArgs += $SystemPrompt
+    }
+    
+    try {
+        # Execute llm CLI and capture output
+        $output = $prompt | llm @llmArgs 2>&1
+        
+        if ($LASTEXITCODE -ne 0) {
+            throw "llm CLI error: $output"
+        }
+        
+        return @{
+            Content = $output -join "`n"
+            Model = $Model
+            Usage = @{
+                prompt_tokens = 0  # llm CLI doesn't report tokens
+                completion_tokens = 0
+                total_tokens = 0
+            }
+            StopReason = "stop"
+        }
+    }
+    catch {
+        throw "LLM CLI error: $($_.Exception.Message)"
     }
 }
 
@@ -435,6 +508,9 @@ function Invoke-ChatCompletion {
         'anthropic' {
             # Anthropic streaming not yet implemented, fall back to non-streaming
             return Invoke-AnthropicChat -Endpoint $config.Endpoint -Model $Model -Messages $Messages -Temperature $Temperature -MaxTokens $MaxTokens -ApiKey $apiKey -SystemPrompt $SystemPrompt
+        }
+        'llm-cli' {
+            return Invoke-LLMCliChat -Model $Model -Messages $Messages -SystemPrompt $SystemPrompt
         }
         default {
             throw "Unknown API format: $($config.Format)"
@@ -598,6 +674,11 @@ function Get-ChatModels {
         Write-Host "  gpt-4o-mini (fast, cheap)" -ForegroundColor Gray
         Write-Host "  gpt-4-turbo (legacy)" -ForegroundColor Gray
     }
+    elseif ($Provider -eq 'llm') {
+        Write-Host "  Run 'llm models' to see all available models" -ForegroundColor Cyan
+        Write-Host "  Install plugins with: llm install <plugin>" -ForegroundColor Gray
+        Write-Host "  Plugin directory: https://llm.datasette.io/en/stable/plugins/directory.html" -ForegroundColor Gray
+    }
     else {
         Write-Host "  Default: $($config.DefaultModel)" -ForegroundColor Gray
     }
@@ -605,7 +686,32 @@ function Get-ChatModels {
     Write-Host ""
 }
 
+# ===== LLM CLI Helper =====
+function Get-LLMModels {
+    <#
+    .SYNOPSIS
+    List available models from llm CLI
+    #>
+    $llmPath = Get-Command llm -ErrorAction SilentlyContinue
+    if (-not $llmPath) {
+        Write-Host "llm CLI not installed. Install with: pip install llm" -ForegroundColor Red
+        return
+    }
+    llm models
+}
+
+function Install-LLMPlugin {
+    <#
+    .SYNOPSIS
+    Install an llm plugin
+    #>
+    param([Parameter(Mandatory=$true)][string]$Plugin)
+    llm install $Plugin
+}
+
 # ===== Aliases =====
 Set-Alias providers Show-ChatProviders -Force
 Set-Alias chat-test Test-ChatProvider -Force
 Set-Alias chat-models Get-ChatModels -Force
+Set-Alias llm-models Get-LLMModels -Force
+Set-Alias llm-install Install-LLMPlugin -Force

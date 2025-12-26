@@ -224,4 +224,20 @@ bash-help         # Bash migration guide
 zsh-help          # Zsh migration guide
 session-info      # Show current session
 profile-timing    # Show load performance
+workflows         # List available workflows
 ```
+
+---
+
+## Development Notes
+
+### Linter Warnings
+
+You may see PSScriptAnalyzer warnings like:
+```
+The cmdlet 'chat-ollama' uses an unapproved verb.
+```
+
+**These are intentional.** PowerShell prefers formal `Verb-Noun` naming (like `Get-Process`), but these are convenience aliases designed for quick daily use, not formal cmdlets. They work correctly and can be safely ignored.
+
+Affected functions: `chat-ollama`, `chat-anthropic`, `chat-local`, `chat-llm`, `profile-edit`, `pwd-full`, `pwd-short`

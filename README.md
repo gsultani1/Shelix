@@ -11,10 +11,11 @@
 ## Features
 
 ### 🤖 AI Chat Assistant
-- **Multi-provider support**: Ollama (local), Anthropic (Claude), OpenAI, LM Studio
+- **Multi-provider support**: Ollama, Anthropic Claude, OpenAI, LM Studio, + **llm CLI** (100+ plugins)
 - **Command execution**: AI can run safe PowerShell commands on your behalf
 - **Intent system**: Natural language actions like "create a doc called Report"
 - **Streaming responses**: Real-time output from AI providers
+- **MCP Client**: Connect to external MCP servers for extended capabilities
 
 ### 🔧 Available Intents
 
@@ -26,7 +27,33 @@
 | **Git** | `git_status`, `git_log`, `git_commit`, `git_push`, `git_pull`, `git_diff` |
 | **Calendar** | `calendar_today`, `calendar_week`, `calendar_create` (Outlook) |
 | **Web** | `web_search`, `wikipedia`, `fetch_url`, `search_web` |
-| **Apps** | `open_word`, `open_excel`, `open_notepad`, `open_calculator` |
+| **Apps** | `open_word`, `open_excel`, `open_notepad`, `open_folder`, `open_terminal` |
+| **MCP** | `mcp_servers`, `mcp_connect`, `mcp_tools`, `mcp_call` |
+| **Workflows** | `run_workflow`, `list_workflows`, `research_topic`, `daily_standup` |
+| **System** | `service_restart`, `system_info`, `network_status`, `process_list`, `process_kill` |
+
+### 🔄 Multi-Step Workflows
+
+Chain multiple intents together for complex tasks:
+
+```powershell
+# List available workflows
+workflows
+
+# Run a workflow
+workflow daily_standup
+workflow research_and_document -Params @{ topic = "AI agents" }
+
+# AI can trigger via intent:
+# {"intent":"run_workflow","name":"research_and_document","params":"{\"topic\":\"PowerShell\"}"}
+```
+
+**Built-in Workflows:**
+| Workflow | Description |
+|----------|-------------|
+| `daily_standup` | Show calendar + git status |
+| `research_and_document` | Search web + create notes doc |
+| `project_setup` | Create folder + init git |
 
 ### 🛠️ Terminal Tools Integration
 - **bat** - Syntax-highlighted file viewing
@@ -49,6 +76,10 @@ chat
 
 # Start AI chat with Claude
 chat-anthropic
+
+# Use llm CLI (100+ plugins)
+Set-DefaultChatProvider llm
+chat
 
 # Show available commands
 tips
@@ -120,15 +151,31 @@ While in chat mode:
 
 ## Requirements
 
-- PowerShell 5.1 or later
-- Windows 10/11
+- PowerShell 5.1+ (Windows) or PowerShell 7+ (Windows/Mac/Linux)
+- Windows 10/11, macOS, or Linux (PS 7)
 - Optional: Ollama for local AI
 - Optional: Anthropic/OpenAI API keys for cloud AI
+- Optional: Node.js for MCP servers
 
 ## Installation
 
-1. Clone or copy files to `~\Documents\WindowsPowerShell\`
-2. Edit `ChatConfig.json` with your API keys
+### PowerShell 5.1 (Windows Default)
+```powershell
+git clone https://github.com/gsultani1/PSAIgent.git "$HOME\Documents\WindowsPowerShell"
+```
+
+### PowerShell 7 (Cross-Platform)
+```powershell
+# Windows
+git clone https://github.com/gsultani1/PSAIgent.git "$HOME\Documents\PowerShell"
+
+# macOS/Linux
+git clone https://github.com/gsultani1/PSAIgent.git ~/.config/powershell
+```
+
+### Setup
+1. Copy `ChatConfig.example.json` to `ChatConfig.json`
+2. Add your API keys to `ChatConfig.json`
 3. Restart PowerShell or run `. $PROFILE`
 
 ## MCP (Model Context Protocol) Support
@@ -166,6 +213,19 @@ Register-MCPServer -Name "myserver" `
     -Args @("-y", "@org/mcp-server-name") `
     -Description "My custom server"
 ```
+
+## Development Notes
+
+### Linter Warnings
+
+You may see PSScriptAnalyzer warnings like:
+```
+The cmdlet 'chat-ollama' uses an unapproved verb.
+```
+
+**These are intentional.** PowerShell prefers formal `Verb-Noun` naming (like `Get-Process`), but these are convenience aliases designed for quick daily use, not formal cmdlets. They work correctly.
+
+Affected functions: `chat-ollama`, `chat-anthropic`, `chat-local`, `chat-llm`, `profile-edit`, `pwd-full`, `pwd-short`
 
 ## License
 

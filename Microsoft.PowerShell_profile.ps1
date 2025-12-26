@@ -1,4 +1,5 @@
 # ============= Microsoft.PowerShell_profile.ps1 =============
+# The fact that this works is proof that God loves PowerShell developers
 # Profile load timing
 $global:ProfileLoadStart = Get-Date
 $global:ProfileTimings = @{}
@@ -24,12 +25,12 @@ if ($Host.UI.RawUI.WindowTitle) { Clear-Host }
 $global:ModulesPath = "$PSScriptRoot\Modules"
 $global:DebugModuleLoading = $false  # Set to $true to see module load errors
 
-# Core modules (always load) - use direct dot-sourcing for reliability
-. "$PSScriptRoot\IntentAliasSystem.ps1"
-. "$PSScriptRoot\ChatProviders.ps1"
-
-# New modular components
+# Modular components (load FIRST so IntentAliasSystem can use them)
 if (Test-Path $global:ModulesPath) {
+    . "$global:ModulesPath\ConfigLoader.ps1"       # Load .env config FIRST
+    . "$global:ModulesPath\PlatformUtils.ps1"      # Cross-platform helpers (no dependencies)
+    . "$global:ModulesPath\SecurityUtils.ps1"      # Path/URL security (depends on PlatformUtils)
+    . "$global:ModulesPath\DocumentTools.ps1"      # OpenXML document creation
     . "$global:ModulesPath\SafetySystem.ps1"
     . "$global:ModulesPath\TerminalTools.ps1"
     . "$global:ModulesPath\NavigationUtils.ps1"
@@ -38,6 +39,10 @@ if (Test-Path $global:ModulesPath) {
     . "$global:ModulesPath\ProductivityTools.ps1"
     . "$global:ModulesPath\MCPClient.ps1"
 }
+
+# Core modules (load AFTER modules so real functions exist before stub checks)
+. "$PSScriptRoot\IntentAliasSystem.ps1"
+. "$PSScriptRoot\ChatProviders.ps1"
 
 # ===== Module Reload Functions =====
 function Update-IntentAliases {
@@ -1930,18 +1935,36 @@ function Get-ChatHistory {
 }
 
 function chat {
+    # TODO: Add AI girlfriend feature (just kidding) (unless?)
     param(
-        [ValidateSet('ollama', 'anthropic', 'lmstudio', 'openai')]
+        [Alias("p")]
+        [ValidateSet('ollama', 'anthropic', 'lmstudio', 'openai', 'llm')]
         [string]$Provider = $global:DefaultChatProvider,
+        
+        [Alias("m")]
+        [string]$Model,
+        
         [switch]$Stream,
         [switch]$AutoTrim
     )
-    Start-ChatSession -Provider $Provider -IncludeSafeCommands -Stream:$Stream -AutoTrim:$AutoTrim
+    
+    $params = @{
+        Provider = $Provider
+        IncludeSafeCommands = $true
+        Stream = $Stream
+        AutoTrim = $AutoTrim
+    }
+    if ($Model) { $params.Model = $Model }
+    
+    Start-ChatSession @params
 }
+
+Set-Alias cc chat -Force
 
 function chat-ollama { Start-ChatSession -Provider ollama -IncludeSafeCommands -Stream -AutoTrim }
 function chat-anthropic { Start-ChatSession -Provider anthropic -IncludeSafeCommands -AutoTrim }
 function chat-local { Start-ChatSession -Provider lmstudio -IncludeSafeCommands -Stream -AutoTrim }
+function chat-llm { Start-ChatSession -Provider llm -IncludeSafeCommands -AutoTrim }
 
 # ===== Safe Actions Table with Safety Classifications =====
 # Safety Levels: 'ReadOnly', 'SafeWrite', 'RequiresConfirmation'
@@ -2202,11 +2225,16 @@ function Get-SafeCommandsPrompt {
     $prompt = @'
 You are a helpful PowerShell assistant. Use INTENTS to perform actions.
 
-CRITICAL: Output JSON intents on their own line, NOT inside code blocks!
+CRITICAL RULES:
+1. Output JSON intents on their own line, NOT inside code blocks!
+2. Only output ONE intent per action - do not chain multiple intents
+3. For "create a document/doc/docx" use create_docx, NOT write_to_file
+4. For "create a spreadsheet/xlsx" use create_xlsx, NOT write_to_file
 
-DOCUMENTS (creates and opens):
+DOCUMENTS (creates files and opens them):
 {"intent":"create_docx","name":"My Document"}
 {"intent":"create_xlsx","name":"My Spreadsheet"}
+{"intent":"create_csv","name":"My Data"}
 
 APPS:
 {"intent":"open_word"}
@@ -2230,9 +2258,41 @@ CALENDAR:
 {"intent":"calendar_today"}
 {"intent":"calendar_week"}
 
-WEB:
+WEB SEARCH (returns results to AI):
 {"intent":"web_search","query":"search terms"}
 {"intent":"wikipedia","query":"topic"}
+{"intent":"open_browser_search","query":"search terms"} (opens browser, AI can't see results)
+
+MCP SERVERS:
+{"intent":"mcp_servers"}
+{"intent":"mcp_connect","server":"filesystem"}
+{"intent":"mcp_tools","server":"filesystem"}
+{"intent":"mcp_call","server":"filesystem","tool":"read_file","toolArgs":"{\"path\":\"C:\\\\file.txt\"}"}
+
+WORKFLOWS (multi-step):
+{"intent":"list_workflows"}
+{"intent":"run_workflow","name":"daily_standup"}
+{"intent":"run_workflow","name":"research_and_document","params":"{\"topic\":\"AI agents\"}"}
+{"intent":"research_topic","topic":"PowerShell automation"}
+
+SYSTEM AUTOMATION:
+{"intent":"service_status","name":"spooler"}
+{"intent":"service_restart","name":"spooler"}
+{"intent":"services_list","filter":"print"}
+{"intent":"scheduled_tasks","filter":"backup"}
+{"intent":"system_info"}
+{"intent":"network_status"}
+{"intent":"process_list","filter":"chrome"}
+{"intent":"process_kill","name":"notepad"}
+
+FILE/FOLDER:
+{"intent":"open_folder","path":"C:\\Users"}
+{"intent":"open_terminal","path":"C:\\Projects"}
+{"intent":"read_file_content","path":"C:\\file.txt"}
+{"intent":"file_stats","path":"C:\\file.txt"}
+{"intent":"write_to_file","path":"C:\\file.txt","content":"text content"}
+{"intent":"append_to_file","path":"C:\\file.txt","content":"more text"}
+{"intent":"list_files","path":"C:\\Users\\Documents"}
 
 POWERSHELL (only if no intent exists):
 EXECUTE: Get-Process
@@ -2242,7 +2302,13 @@ RULES:
 2. JSON must be on its own line, NOT in code blocks
 3. For "create a doc called X" use: {"intent":"create_docx","name":"X"}
 4. Be proactive - execute actions immediately
+5. Use MCP tools for filesystem access when connected
 '@
+    
+    # Append dynamic MCP tools if connected
+    if ($global:MCPConnections -and $global:MCPConnections.Count -gt 0) {
+        $prompt += "`n`n" + (Get-MCPToolsPrompt)
+    }
     
     return $prompt
 }
