@@ -116,19 +116,37 @@ Change the default chat provider in `ChatConfig.json`:
 
 ```
 WindowsPowerShell/
-├── Microsoft.PowerShell_profile.ps1  # Main profile
-├── ChatProviders.ps1                 # AI provider implementations
-├── IntentAliasSystem.ps1             # Intent routing system
+├── Microsoft.PowerShell_profile.ps1  # Main profile (~150 lines, loads modules)
 ├── ChatConfig.json                   # API keys and settings
 ├── ToolPreferences.json              # Tool preferences
 ├── NaturalLanguageMappings.json      # Command mappings
+├── UserAliases.ps1                   # Your custom persistent aliases
 ├── Modules/
-│   ├── SafetySystem.ps1              # Command validation
-│   ├── TerminalTools.ps1             # External tool integration
-│   ├── NavigationUtils.ps1           # Navigation helpers
+│   ├── ConfigLoader.ps1              # .env and config loading
+│   ├── PlatformUtils.ps1             # Cross-platform helpers
+│   ├── SecurityUtils.ps1             # Path/URL security
+│   ├── CommandValidation.ps1         # Command whitelist & safety
+│   ├── SystemUtilities.ps1           # uptime, hwinfo, ports, sudo, PATH
+│   ├── ArchiveUtils.ps1              # zip, unzip
+│   ├── DockerTools.ps1               # Docker shortcuts
+│   ├── DevTools.ps1                  # IDE launchers, dev checks
+│   ├── NaturalLanguage.ps1           # NL to command translation
+│   ├── AIExecution.ps1               # AI command gateway, rate limiting
+│   ├── ResponseParser.ps1            # Parse AI responses, format markdown
+│   ├── DocumentTools.ps1             # OpenXML document creation
+│   ├── SafetySystem.ps1              # AI execution safety
+│   ├── TerminalTools.ps1             # bat, glow, broot, fzf integration
+│   ├── NavigationUtils.ps1           # Navigation & git shortcuts
 │   ├── PackageManager.ps1            # Tool installation
 │   ├── WebTools.ps1                  # Web search APIs
-│   └── ProductivityTools.ps1         # Clipboard, Git, Calendar
+│   ├── ProductivityTools.ps1         # Clipboard, Git, Calendar
+│   ├── MCPClient.ps1                 # MCP protocol client
+│   ├── FzfIntegration.ps1            # Fuzzy finder integration
+│   ├── PersistentAliases.ps1         # User-defined aliases
+│   ├── ProfileHelp.ps1               # Help, tips, system prompt
+│   ├── ChatSession.ps1               # LLM chat loop
+│   ├── ChatProviders.ps1             # AI provider implementations
+│   └── IntentAliasSystem.ps1         # Intent routing system
 └── README.md
 ```
 

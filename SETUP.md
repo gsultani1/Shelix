@@ -135,16 +135,21 @@ All executions are logged and require confirmation for non-read-only commands.
 
 ```
 WindowsPowerShell/
-├── Microsoft.PowerShell_profile.ps1  # Main profile
-├── ChatProviders.ps1                  # LLM backends
-├── IntentAliasSystem.ps1              # Intent actions
+├── Microsoft.PowerShell_profile.ps1  # Main profile (~150 lines)
 ├── ChatConfig.json                    # API keys & settings
 ├── NaturalLanguageMappings.json       # Command translations
 ├── UserAliases.ps1                    # Your custom aliases
-└── Modules/
-    ├── SafetySystem.ps1               # AI safety & logging
-    ├── TerminalTools.ps1              # bat, glow, broot, etc.
-    └── NavigationUtils.ps1            # Navigation & git
+└── Modules/                           # 24 focused modules
+    ├── ConfigLoader.ps1               # Config & .env loading
+    ├── CommandValidation.ps1          # Command whitelist
+    ├── AIExecution.ps1                # AI command gateway
+    ├── ChatSession.ps1                # Chat loop
+    ├── ChatProviders.ps1              # LLM backends
+    ├── IntentAliasSystem.ps1          # Intent actions
+    ├── SystemUtilities.ps1            # sudo, ports, uptime
+    ├── DockerTools.ps1                # Docker shortcuts
+    ├── DevTools.ps1                   # IDE launchers
+    └── ...                            # See README for full list
 ```
 
 ---

@@ -1,17 +1,16 @@
-# ===== SafetySystem.ps1 =====
-# AI execution safety, rate limiting, audit trails, and undo capability
-# NOTE: $CommandSafety, $Actions, and validation functions are in CommandValidation.ps1
+# ===== AIExecution.ps1 =====
+# AI command execution gateway with safety validation, rate limiting, and logging
+
+# ===== Execution Logging Configuration =====
+$global:AIExecutionLog = @()
+$global:MaxExecutionsPerMessage = 3
+$global:ExecutionLogPath = "$env:USERPROFILE\Documents\ChatLogs\AIExecutionLog.json"
 
 # ===== Session Tracking for Audit Trail =====
 $global:SessionId = [guid]::NewGuid().ToString().Substring(0,12)
 $global:SessionStartTime = Get-Date
 $global:UserId = $env:USERNAME
 $global:ComputerName = $env:COMPUTERNAME
-
-# ===== Execution Logging =====
-$global:AIExecutionLog = @()
-$global:MaxExecutionsPerMessage = 3
-$global:ExecutionLogPath = "$env:USERPROFILE\Documents\ChatLogs\AIExecutionLog.json"
 
 # ===== Rate Limiting Configuration =====
 $global:RateLimitWindow = 60  # seconds
@@ -24,13 +23,26 @@ $global:MaxUndoHistory = 50
 
 # ===== Rate Limiting Functions =====
 function Test-RateLimit {
+    <#
+    .SYNOPSIS
+    Check if execution is within rate limits
+    #>
     $now = Get-Date
     $windowStart = $now.AddSeconds(-$global:RateLimitWindow)
     
-    $global:ExecutionTimestamps = $global:ExecutionTimestamps | Where-Object { $_ -gt $windowStart }
+    # Clean old timestamps
+    $validTimestamps = New-Object System.Collections.ArrayList
+    foreach ($ts in $global:ExecutionTimestamps) {
+        if ($ts -gt $windowStart) {
+            [void]$validTimestamps.Add($ts)
+        }
+    }
+    $global:ExecutionTimestamps = @($validTimestamps)
     
+    # Check if under limit
     if ($global:ExecutionTimestamps.Count -ge $global:MaxExecutionsPerWindow) {
-        $oldestInWindow = $global:ExecutionTimestamps | Sort-Object | Select-Object -First 1
+        $sortedTs = $global:ExecutionTimestamps | Sort-Object
+        $oldestInWindow = $sortedTs[0]
         $waitTime = [math]::Ceiling(($oldestInWindow.AddSeconds($global:RateLimitWindow) - $now).TotalSeconds)
         return @{
             Allowed = $false
@@ -48,8 +60,12 @@ function Add-ExecutionTimestamp {
 
 # ===== File Operation Tracking (Undo) =====
 function Add-FileOperation {
+    <#
+    .SYNOPSIS
+    Track a file operation for potential undo
+    #>
     param(
-        [string]$Operation,
+        [string]$Operation,  # Create, Copy, Move, Delete
         [string]$Path,
         [string]$OriginalPath = $null,
         [string]$BackupPath = $null,
@@ -71,6 +87,7 @@ function Add-FileOperation {
     
     $global:FileOperationHistory += $entry
     
+    # Trim history if too large
     if ($global:FileOperationHistory.Count -gt $global:MaxUndoHistory) {
         $global:FileOperationHistory = $global:FileOperationHistory[-$global:MaxUndoHistory..-1]
     }
@@ -79,6 +96,10 @@ function Add-FileOperation {
 }
 
 function Undo-LastFileOperation {
+    <#
+    .SYNOPSIS
+    Undo the last file operation if possible
+    #>
     param([int]$Count = 1)
     
     $undoable = $global:FileOperationHistory | Where-Object { -not $_.Undone } | Select-Object -Last $Count
@@ -147,6 +168,10 @@ function Undo-LastFileOperation {
 }
 
 function Get-FileOperationHistory {
+    <#
+    .SYNOPSIS
+    View recent file operations that can be undone
+    #>
     param(
         [int]$Last = 10,
         [switch]$ShowAll
@@ -169,8 +194,11 @@ function Get-FileOperationHistory {
     Write-Host "=================================`n" -ForegroundColor Cyan
 }
 
-# ===== Session Info =====
 function Get-SessionInfo {
+    <#
+    .SYNOPSIS
+    Display current session information for audit purposes
+    #>
     $duration = (Get-Date) - $global:SessionStartTime
     
     Write-Host "`n===== Session Information =====" -ForegroundColor Cyan
@@ -183,8 +211,12 @@ function Get-SessionInfo {
     Write-Host "================================`n" -ForegroundColor Cyan
 }
 
-# ===== AI Execution Dispatcher =====
+# ===== Main AI Execution Gateway =====
 function Invoke-AIExec {
+    <#
+    .SYNOPSIS
+    Universal AI command execution gateway with safety validation and logging
+    #>
     param(
         [Parameter(Mandatory=$true)][string]$Command,
         [string]$RequestSource = "AI",
@@ -195,6 +227,7 @@ function Invoke-AIExec {
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $executionId = [guid]::NewGuid().ToString().Substring(0,8)
     
+    # Log the attempt with full audit trail
     $logEntry = @{
         Id = $executionId
         Timestamp = $timestamp
@@ -211,7 +244,7 @@ function Invoke-AIExec {
     }
     
     try {
-        # Rate limit check
+        # Step 0: Check rate limit
         $rateCheck = Test-RateLimit
         if (-not $rateCheck.Allowed) {
             $logEntry.Status = "RateLimited"
@@ -228,7 +261,7 @@ function Invoke-AIExec {
             }
         }
         
-        # Validate command
+        # Step 1: Validate command is in safe actions list
         Write-Host "[AIExec-$executionId] Validating command: $Command" -ForegroundColor DarkCyan
         $validation = Test-PowerShellCommand $Command
         
@@ -248,7 +281,7 @@ function Invoke-AIExec {
         
         Write-Host "[AIExec-$executionId] Command validated: $($validation.Category) - $($validation.SafetyLevel)" -ForegroundColor Green
         
-        # Confirmation
+        # Step 2: Handle confirmation for non-read-only commands
         if ($validation.SafetyLevel -ne 'ReadOnly' -and -not $AutoConfirm -and -not $DryRun) {
             Write-Host "  [AIExec-$executionId] Command requires confirmation" -ForegroundColor Yellow
             $confirmed = Show-CommandConfirmation $Command $validation.SafetyLevel $validation.Description
@@ -259,7 +292,7 @@ function Invoke-AIExec {
                 $logEntry.Error = "User cancelled execution"
                 $global:AIExecutionLog += $logEntry
                 
-                Write-Host "[AIExec-$executionId] Execution cancelled by user" -ForegroundColor Yellow
+                Write-Host " [AIExec-$executionId] Execution cancelled by user" -ForegroundColor Yellow
                 return @{
                     Success = $false
                     Output = "Command execution cancelled by user"
@@ -271,11 +304,11 @@ function Invoke-AIExec {
             $logEntry.Confirmed = $true
         }
         
-        # Dry run
+        # Step 3: Execute command (or simulate for dry run)
         if ($DryRun) {
-            Write-Host "[AIExec-$executionId] DRY RUN - Would execute: $Command" -ForegroundColor Magenta
+            Write-Host " [AIExec-$executionId] DRY RUN - Would execute: $Command" -ForegroundColor Magenta
             $logEntry.Status = "DryRun"
-            $logEntry.Output = "Dry run completed"
+            $logEntry.Output = "Dry run completed - command would be executed"
             $global:AIExecutionLog += $logEntry
             
             return @{
@@ -287,33 +320,23 @@ function Invoke-AIExec {
             }
         }
         
-        # Execute
-        Write-Host "[AIExec-$executionId] Executing command..." -ForegroundColor Cyan
+        Write-Host " [AIExec-$executionId] Executing command..." -ForegroundColor Cyan
         $startTime = Get-Date
         
-        # Lazy-load ThreadJob on first use
-        if (Get-Command Enable-ThreadJob -ErrorAction SilentlyContinue) {
-            Enable-ThreadJob
-        } elseif (-not (Get-Module ThreadJob)) {
-            Import-Module ThreadJob -ErrorAction SilentlyContinue
-        }
-        
-        $job = Start-ThreadJob -ScriptBlock { param($cmd) Invoke-Expression $cmd } -ArgumentList $Command
-        $completed = Wait-Job $job -Timeout 30
-        
-        if ($completed) {
-            $output = Receive-Job $job | Out-String
+        # Execute directly with error handling
+        try {
+            $output = Invoke-Expression $Command 2>&1 | Out-String
             $executionTime = ((Get-Date) - $startTime).TotalSeconds
-            Remove-Job $job
             
             $logEntry.Status = "Success"
             $logEntry.Output = $output.Trim()
             $logEntry.ExecutionTime = $executionTime
             $global:AIExecutionLog += $logEntry
             
+            # Record execution for rate limiting
             Add-ExecutionTimestamp
             
-            Write-Host "[AIExec-$executionId] Command completed ($([math]::Round($executionTime, 2))s)" -ForegroundColor Green
+            Write-Host " [AIExec-$executionId] Command completed successfully ($([math]::Round($executionTime, 2))s)" -ForegroundColor Green
             
             return @{
                 Success = $true
@@ -322,20 +345,21 @@ function Invoke-AIExec {
                 ExecutionId = $executionId
                 ExecutionTime = $executionTime
             }
-        } else {
-            Stop-Job $job
-            Remove-Job $job
+        }
+        catch {
+            $executionTime = ((Get-Date) - $startTime).TotalSeconds
+            $errorMsg = $_.Exception.Message
             
-            $logEntry.Status = "Timeout"
-            $logEntry.Error = "Command execution timed out (30s limit)"
-            $logEntry.ExecutionTime = 30
+            $logEntry.Status = "ExecutionError"
+            $logEntry.Error = $errorMsg
+            $logEntry.ExecutionTime = $executionTime
             $global:AIExecutionLog += $logEntry
             
-            Write-Host "[AIExec-$executionId] Command timed out (30s limit)" -ForegroundColor Red
+            Write-Host " [AIExec-$executionId] Command error: $errorMsg" -ForegroundColor Red
             
             return @{
                 Success = $false
-                Output = "Command execution timed out (30 second limit)"
+                Output = "Error: $errorMsg"
                 Error = $true
                 ExecutionId = $executionId
             }
@@ -344,9 +368,12 @@ function Invoke-AIExec {
     } catch {
         $logEntry.Status = "Error"
         $logEntry.Error = $_.Exception.Message
+        if ($startTime) {
+            $logEntry.ExecutionTime = ((Get-Date) - $startTime).TotalSeconds
+        }
         $global:AIExecutionLog += $logEntry
         
-        Write-Host "[AIExec-$executionId] Execution failed: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host " [AIExec-$executionId] Execution failed: $($_.Exception.Message)" -ForegroundColor Red
         
         return @{
             Success = $false
@@ -355,6 +382,7 @@ function Invoke-AIExec {
             ExecutionId = $executionId
         }
     } finally {
+        # Save execution log to disk
         Save-AIExecutionLog
     }
 }
@@ -366,6 +394,7 @@ function Save-AIExecutionLog {
             New-Item -ItemType Directory -Path $logDir -Force | Out-Null
         }
         
+        # Keep only last 1000 entries to prevent log bloat
         if ($global:AIExecutionLog.Count -gt 1000) {
             $global:AIExecutionLog = $global:AIExecutionLog[-1000..-1]
         }
@@ -378,6 +407,10 @@ function Save-AIExecutionLog {
 }
 
 function Get-AIExecutionLog {
+    <#
+    .SYNOPSIS
+    View AI execution log
+    #>
     param(
         [int]$Last = 10,
         [string]$Status = "",
@@ -408,10 +441,25 @@ function Get-AIExecutionLog {
         Write-Host "[$($_.Timestamp)] [$($_.Id)] " -ForegroundColor Gray -NoNewline
         Write-Host $_.Status -ForegroundColor $statusColor -NoNewline
         Write-Host " - $($_.Command)" -ForegroundColor White
+        
+        if ($_.Output -and $_.Output.Length -gt 0) {
+            $truncatedOutput = if ($_.Output.Length -gt 100) { $_.Output.Substring(0, 100) + "..." } else { $_.Output }
+            Write-Host "    Output: $truncatedOutput" -ForegroundColor DarkGray
+        }
+        
+        if ($_.Error) {
+            Write-Host "    Error: $($_.Error)" -ForegroundColor Red
+        }
+        
+        if ($_.ExecutionTime -gt 0) {
+            Write-Host "    Time: $([math]::Round($_.ExecutionTime, 2))s" -ForegroundColor DarkCyan
+        }
+        
+        Write-Host ""
     }
 }
 
-# Load existing log on startup
+# ===== Load existing execution log on startup =====
 if (Test-Path $global:ExecutionLogPath) {
     try {
         $global:AIExecutionLog = Get-Content $global:ExecutionLogPath -Raw | ConvertFrom-Json
@@ -421,102 +469,11 @@ if (Test-Path $global:ExecutionLogPath) {
     }
 }
 
-# ===== Safe Actions Helper =====
-function Get-SafeActions {
-    param(
-        [string]$Category = '',
-        [string]$Command = ''
-    )
-    
-    if ($Command) {
-        foreach ($cat in $global:Actions.Keys) {
-            if ($global:Actions[$cat].ContainsKey($Command.ToLower())) {
-                return @{
-                    Category = $cat
-                    Command = $Command.ToLower()
-                    Description = $global:Actions[$cat][$Command.ToLower()]
-                }
-            }
-        }
-        Write-Host "Command '$Command' not found in safe actions" -ForegroundColor Yellow
-        return $null
-    }
-    
-    if ($Category) {
-        if ($global:Actions.ContainsKey($Category)) {
-            Write-Host "`n===== $Category Commands =====" -ForegroundColor Cyan
-            $global:Actions[$Category].GetEnumerator() | Sort-Object Key | ForEach-Object {
-                Write-Host "  $($_.Key)" -ForegroundColor Green -NoNewline
-                Write-Host " - $($_.Value)" -ForegroundColor Gray
-            }
-            Write-Host ""
-        } else {
-            Write-Host "Category '$Category' not found" -ForegroundColor Red
-        }
-    } else {
-        Write-Host "`n===== Safe Actions Categories =====" -ForegroundColor Cyan
-        $global:Actions.Keys | Sort-Object | ForEach-Object {
-            $count = $global:Actions[$_].Count
-            Write-Host "  $_" -ForegroundColor Green -NoNewline
-            Write-Host " ($count commands)" -ForegroundColor Gray
-        }
-        Write-Host ""
-    }
-}
-
-function Test-SafeAction {
-    param([Parameter(Mandatory=$true)][string]$Command)
-    
-    $validation = Test-PowerShellCommand $Command
-    if ($validation.IsValid) {
-        Write-Host "'$Command' is a safe action ($($validation.SafetyLevel))" -ForegroundColor Green
-        Write-Host "   Category: $($validation.Category)" -ForegroundColor Gray
-        Write-Host "   Description: $($validation.Description)" -ForegroundColor Gray
-        return $true
-    } else {
-        Write-Host "'$Command' is not in the safe actions list" -ForegroundColor Red
-        return $false
-    }
-}
-
-function Invoke-SafeAction {
-    param(
-        [Parameter(Mandatory=$true)][string]$Command,
-        [switch]$Force
-    )
-    
-    $validation = Test-PowerShellCommand $Command
-    
-    if (-not $validation.IsValid) {
-        Write-Host "Command '$Command' is not in the safe actions list" -ForegroundColor Red
-        return $false
-    }
-    
-    if (-not $Force -and $validation.SafetyLevel -ne 'ReadOnly') {
-        $confirmed = Show-CommandConfirmation $Command $validation.SafetyLevel $validation.Description
-        if (-not $confirmed) {
-            Write-Host "Command execution cancelled." -ForegroundColor Yellow
-            return $false
-        }
-    }
-    
-    try {
-        Write-Host "Executing: $Command" -ForegroundColor Cyan
-        Invoke-Expression $Command
-        Write-Host "Command completed." -ForegroundColor Green
-        return $true
-    } catch {
-        Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-        return $false
-    }
-}
-
 # ===== Aliases =====
 Set-Alias undo Undo-LastFileOperation -Force
 Set-Alias file-history Get-FileOperationHistory -Force
 Set-Alias session-info Get-SessionInfo -Force
-Set-Alias actions Get-SafeActions -Force
-Set-Alias safe-check Test-SafeAction -Force
-Set-Alias safe-run Invoke-SafeAction -Force
 Set-Alias ai-exec Invoke-AIExec -Force
 Set-Alias exec-log Get-AIExecutionLog -Force
+
+Write-Verbose "AIExecution loaded: Invoke-AIExec, Get-AIExecutionLog, Undo-LastFileOperation, Get-SessionInfo"

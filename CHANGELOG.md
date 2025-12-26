@@ -4,6 +4,45 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.0] - 2025-12-25
+
+### Changed - Major Refactoring
+
+#### Modular Architecture
+- **Profile reduced from ~2000 lines to ~150 lines** - All functionality extracted to modules
+- Moved `ChatProviders.ps1` and `IntentAliasSystem.ps1` to `Modules/` folder
+- Created 9 new focused modules for better maintainability
+
+#### New Modules Created
+| Module | Purpose |
+|--------|---------|
+| `SystemUtilities.ps1` | `sudo`, `ports`, `procs`, `uptime`, `hwinfo`, PATH management |
+| `ArchiveUtils.ps1` | `zip`, `unzip`, `Get-ArchiveContents` |
+| `DockerTools.ps1` | `dps`, `dpsa`, `dlog`, `dexec`, `dstop`, `dclean` |
+| `DevTools.ps1` | `open`, `code`, `cursor`, `windsurf`, `Test-DevTools` |
+| `NaturalLanguage.ps1` | `Convert-NaturalLanguageToCommand`, token estimation |
+| `AIExecution.ps1` | `Invoke-AIExec`, rate limiting, undo tracking, session info |
+| `ResponseParser.ps1` | `Convert-JsonIntent`, `Format-Markdown` |
+| `ProfileHelp.ps1` | `Show-ProfileTips`, `Get-ProfileTiming`, system prompt |
+| `ChatSession.ps1` | `Start-ChatSession`, `chat`, `Save-Chat`, `Import-Chat` |
+
+#### Fixed
+- **AI no longer searches web on every message** - System prompt updated to only use intents for explicit action requests
+- Consolidated duplicate code from profile and SafetySystem.ps1 into CommandValidation.ps1
+
+#### Module Load Order (24 modules)
+```
+ConfigLoader → PlatformUtils → SecurityUtils → CommandValidation
+→ SystemUtilities → ArchiveUtils → DockerTools → DevTools
+→ NaturalLanguage → AIExecution → ResponseParser → DocumentTools
+→ SafetySystem → TerminalTools → NavigationUtils → PackageManager
+→ WebTools → ProductivityTools → MCPClient → FzfIntegration
+→ PersistentAliases → ProfileHelp → ChatSession
+→ IntentAliasSystem → ChatProviders
+```
+
+---
+
 ## [1.0.0] - 2025-12-25 MERRY CHRISTMAS
 
 ### Added
