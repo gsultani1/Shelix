@@ -2512,4 +2512,4 @@ Register-ArgumentCompleter -CommandName Show-IntentHelp -ParameterName Category 
     }
 }
 
-Write-Host "IntentAliasSystem loaded. Run 'intent-help' for usage." -ForegroundColor Green
+Write-Host "Shelix loaded. Run 'intent-help' for usage." -ForegroundColor Green

@@ -707,13 +707,17 @@ function chat {
     Start-ChatSession @params
 }
 
-function chat-ollama { Start-ChatSession -Provider ollama -IncludeSafeCommands -Stream -AutoTrim }
-function chat-anthropic { Start-ChatSession -Provider anthropic -IncludeSafeCommands -AutoTrim }
-function chat-local { Start-ChatSession -Provider lmstudio -IncludeSafeCommands -Stream -AutoTrim }
-function chat-llm { Start-ChatSession -Provider llm -IncludeSafeCommands -AutoTrim }
+function Start-ChatOllama { Start-ChatSession -Provider ollama -IncludeSafeCommands -Stream -AutoTrim }
+function Start-ChatAnthropic { Start-ChatSession -Provider anthropic -IncludeSafeCommands -AutoTrim }
+function Start-ChatLocal { Start-ChatSession -Provider lmstudio -IncludeSafeCommands -Stream -AutoTrim }
+function Start-ChatLLM { Start-ChatSession -Provider llm -IncludeSafeCommands -AutoTrim }
 
 # ===== Aliases =====
 Set-Alias cc chat -Force
+Set-Alias chat-ollama Start-ChatOllama -Force
+Set-Alias chat-anthropic Start-ChatAnthropic -Force
+Set-Alias chat-local Start-ChatLocal -Force
+Set-Alias chat-llm Start-ChatLLM -Force
 
 # ===== SQLite Storage Layer (Phase 3 stub) =====
 # Future: Replace JSON files with SQLite for portable storage and FTS5 full-text search.
