@@ -69,11 +69,18 @@ function Show-ProfileTips {
     Write-Host "  fh, ff, fd                  - Fuzzy history/file/dir (fzf)" -ForegroundColor White
     Write-Host "  rg [pattern]                - Fast search (ripgrep)" -ForegroundColor White
     
+    Write-Host "`nPlugins:" -ForegroundColor Yellow
+    Write-Host "  plugins                     - List active & disabled plugins" -ForegroundColor White
+    Write-Host "  new-plugin [name]           - Scaffold a new plugin" -ForegroundColor White
+    Write-Host "  Enable-ShelixPlugin [name]  - Activate a disabled plugin" -ForegroundColor White
+    Write-Host "  Disable-ShelixPlugin [name] - Deactivate a loaded plugin" -ForegroundColor White
+    Write-Host "  reload-plugins              - Reload all plugins" -ForegroundColor White
+
     Write-Host "`nModule Management:" -ForegroundColor Yellow
     Write-Host "  reload-all                  - Reload all modules" -ForegroundColor White
     Write-Host "  reload-intents              - Reload intent system" -ForegroundColor White
     Write-Host "  reload-providers            - Reload chat providers" -ForegroundColor White
-    
+
     Write-Host "`n==============================================`n" -ForegroundColor Cyan
 }
 
@@ -94,6 +101,16 @@ function Get-ProfileTiming {
         Write-Host "  $mod : $status" -ForegroundColor $color
     }
     
+    # Show plugin load times
+    if ($global:LoadedPlugins -and $global:LoadedPlugins.Count -gt 0) {
+        Write-Host "`nPlugins:" -ForegroundColor Yellow
+        foreach ($name in $global:LoadedPlugins.Keys) {
+            $p = $global:LoadedPlugins[$name]
+            $vStr = if ($p.Version) { " v$($p.Version)" } else { "" }
+            Write-Host "  $name$vStr : $($p.LoadTimeMs)ms ($($p.Intents.Count) intents)" -ForegroundColor Green
+        }
+    }
+
     Write-Host "`nTo load modules manually:" -ForegroundColor Yellow
     Write-Host "  Enable-TerminalIcons  - Load Terminal-Icons" -ForegroundColor Gray
     Write-Host "  Enable-PoshGit        - Load posh-git" -ForegroundColor Gray
@@ -213,7 +230,14 @@ User: "what time is it" -> (just answer, no intent needed)
     if ($global:MCPConnections -and $global:MCPConnections.Count -gt 0) {
         $prompt += "`n`n" + (Get-MCPToolsPrompt)
     }
-    
+
+    if ($global:LoadedPlugins -and $global:LoadedPlugins.Count -gt 0) {
+        $pluginPrompt = Get-PluginIntentsPrompt
+        if ($pluginPrompt) {
+            $prompt += "`n`n" + $pluginPrompt
+        }
+    }
+
     return $prompt
 }
 

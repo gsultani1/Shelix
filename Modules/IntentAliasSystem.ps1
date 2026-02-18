@@ -2456,7 +2456,19 @@ function Get-IntentInfo {
     }
     
     Write-Host "`n===== Intent: $Name =====" -ForegroundColor Cyan
-    
+
+    # Source attribution: plugin or core?
+    $source = "core"
+    if ($global:LoadedPlugins) {
+        foreach ($pName in $global:LoadedPlugins.Keys) {
+            if ($global:LoadedPlugins[$pName].Intents -contains $Name) {
+                $source = "plugin: $pName"
+                break
+            }
+        }
+    }
+    Write-Host "Source: $source" -ForegroundColor DarkCyan
+
     if ($global:IntentMetadata.ContainsKey($Name)) {
         $meta = $global:IntentMetadata[$Name]
         Write-Host "Category: $($meta.Category)" -ForegroundColor Gray

@@ -95,7 +95,10 @@ When adding new intents to `IntentAliasSystem.ps1`:
 │   ├── ProfileHelp.ps1               # Help, tips, system prompt
 │   ├── ChatSession.ps1               # LLM chat loop
 │   ├── ChatProviders.ps1             # AI provider implementations
-│   └── IntentAliasSystem.ps1         # Intent routing and definitions
+│   ├── IntentAliasSystem.ps1         # Intent routing and definitions
+│   └── PluginLoader.ps1             # Drop-in plugin system
+├── Plugins/
+│   └── _Example.ps1                 # Sample plugin (underscore = inactive)
 ```
 
 ## Testing
@@ -114,7 +117,16 @@ Before submitting a PR:
 3. Add to README documentation
 4. Test with `Test-ChatProvider <name>`
 
-### New Intent
+### New Intent (via Plugin — recommended)
+1. Run `new-plugin 'MyPlugin'` to scaffold, or create a `.ps1` file in `Plugins/`
+2. Define `$PluginIntents` — a hashtable mapping intent names to scriptblocks (required)
+3. Define `$PluginMetadata` — category, description, parameters (recommended)
+4. Optionally define `$PluginInfo` (version/author), `$PluginCategories`, and `$PluginWorkflows`
+5. Run `reload-plugins` to load — plugin intents appear in `intent-help`, AI chat, and tab-completion
+6. Use `Enable-ShelixPlugin` / `Disable-ShelixPlugin` to toggle without deleting files
+7. See `Plugins/_Example.ps1` for the full template with all conventions
+
+### New Intent (core)
 1. Add to `$global:IntentAliases` in `IntentAliasSystem.ps1`
 2. Add metadata to `$global:IntentMetadata` if needed
 3. Update system prompt in `Get-SafeCommandsPrompt` if AI should know about it

@@ -69,10 +69,16 @@ if (Test-Path $global:ModulesPath) {
 . "$global:ModulesPath\IntentAliasSystem.ps1"
 . "$global:ModulesPath\ChatProviders.ps1"
 
+# Plugins (load AFTER core so registries exist for merging)
+. "$global:ModulesPath\PluginLoader.ps1"
+
 # ===== Module Reload Functions =====
 function Update-IntentAliases {
     . "$global:ModulesPath\IntentAliasSystem.ps1" -ErrorAction SilentlyContinue
-    Write-Host "Intent aliases reloaded." -ForegroundColor Green
+    # Re-merge plugins since reloading core wipes the global hashtables
+    $global:LoadedPlugins = [ordered]@{}
+    Import-ShelixPlugins -Quiet
+    Write-Host "Intent aliases reloaded (plugins re-merged)." -ForegroundColor Green
 }
 Set-Alias reload-intents Update-IntentAliases -Force
 
@@ -82,6 +88,15 @@ function Update-ChatProviders {
 }
 Set-Alias reload-providers Update-ChatProviders -Force
 
+function Update-ShelixPlugins {
+    # Unregister all current plugin contributions, then re-load from disk
+    foreach ($pName in @($global:LoadedPlugins.Keys)) {
+        Unregister-ShelixPlugin -Name $pName
+    }
+    Import-ShelixPlugins
+}
+Set-Alias reload-plugins Update-ShelixPlugins -Force
+
 function Update-AllModules {
     . "$global:ModulesPath\IntentAliasSystem.ps1" -ErrorAction SilentlyContinue
     . "$global:ModulesPath\ChatProviders.ps1" -ErrorAction SilentlyContinue
@@ -90,6 +105,9 @@ function Update-AllModules {
             . $_.FullName -ErrorAction SilentlyContinue
         }
     }
+    # Re-merge plugins after core reload
+    $global:LoadedPlugins = [ordered]@{}
+    Import-ShelixPlugins
     Write-Host "All modules reloaded." -ForegroundColor Green
 }
 Set-Alias reload-all Update-AllModules -Force
