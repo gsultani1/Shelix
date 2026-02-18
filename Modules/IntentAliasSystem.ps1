@@ -371,6 +371,21 @@ $global:IntentMetadata = @{
         )
         Safety      = 'RequiresConfirmation'
     }
+    'remove_scheduled_workflow' = @{
+        Category    = 'workflow'
+        Description = 'Remove a scheduled workflow (unregister task and delete bootstrap script)'
+        Parameters  = @(
+            @{ Name = 'workflow'; Required = $true; Description = 'Workflow name to unschedule' }
+        )
+        Safety      = 'RequiresConfirmation'
+    }
+    'list_scheduled_workflows' = @{
+        Category    = 'workflow'
+        Description = 'List Shelix-managed scheduled workflows'
+        Parameters  = @(
+            @{ Name = 'filter'; Required = $false; Description = 'Filter by workflow name' }
+        )
+    }
     'list_workflows'         = @{ Category = 'workflow'; Description = 'List available workflows'; Parameters = @() }
     
     # File content operations
@@ -1363,15 +1378,22 @@ $global:IntentAliases = @{
 `$ErrorActionPreference = 'Stop'
 `$errorLog = '$errorLog'
 try {
-    # Dot-source required modules (absolute paths, no `$PROFILE dependency)
     `$global:ModulesPath = '$modulesPath'
-    . '$modulesPath\ConfigLoader.ps1'
-    . '$modulesPath\PlatformUtils.ps1'
-    . '$modulesPath\SecurityUtils.ps1'
-    . '$modulesPath\CommandValidation.ps1'
-    . '$modulesPath\SystemUtilities.ps1'
-    . '$modulesPath\ProductivityTools.ps1'
-    . '$modulesPath\IntentAliasSystem.ps1'
+
+    # Load order-sensitive core modules first (other modules depend on these)
+    `$orderedModules = @('ConfigLoader.ps1', 'PlatformUtils.ps1', 'SecurityUtils.ps1', 'CommandValidation.ps1')
+    foreach (`$mod in `$orderedModules) {
+        . (Join-Path `$global:ModulesPath `$mod)
+    }
+
+    # Dynamically load all remaining modules (except IntentAliasSystem and interactive-only modules)
+    `$lastModules = @('IntentAliasSystem.ps1', 'ChatProviders.ps1', 'ChatSession.ps1')
+    Get-ChildItem (Join-Path `$global:ModulesPath '*.ps1') |
+        Where-Object { `$_.Name -notin `$orderedModules -and `$_.Name -notin `$lastModules } |
+        ForEach-Object { . `$_.FullName }
+
+    # IntentAliasSystem loads last (depends on all other modules)
+    . (Join-Path `$global:ModulesPath 'IntentAliasSystem.ps1')
 
     Invoke-Workflow -Name '$workflow'
 } catch {
@@ -1403,7 +1425,127 @@ try {
             @{ Success = $false; Output = "Failed to register task: $($_.Exception.Message)"; Error = $true }
         }
     }
-    
+
+    "remove_scheduled_workflow" = {
+        param($workflow)
+
+        if (-not $workflow) {
+            return @{ Success = $false; Output = "Error: workflow name required"; Error = $true }
+        }
+
+        $taskFolder = "\Shelix"
+        $taskName = "Workflow_$workflow"
+        $modulesPath = $global:ModulesPath
+        $scriptsDir = Join-Path (Split-Path $modulesPath -Parent) "ScheduledScripts"
+        $scriptPath = Join-Path $scriptsDir "Shelix_$workflow.ps1"
+
+        $taskRemoved = $false
+        $scriptRemoved = $false
+        $errors = @()
+
+        # Unregister the scheduled task if it exists
+        try {
+            $existingTask = Get-ScheduledTask -TaskName $taskName -TaskPath "$taskFolder\" -ErrorAction SilentlyContinue
+            if ($existingTask) {
+                Unregister-ScheduledTask -TaskName $taskName -TaskPath "$taskFolder\" -Confirm:$false -ErrorAction Stop
+                $taskRemoved = $true
+            }
+            else {
+                $errors += "Task '$taskFolder\$taskName' not found in Task Scheduler"
+            }
+        }
+        catch {
+            $errors += "Failed to unregister task: $($_.Exception.Message)"
+        }
+
+        # Delete the bootstrap script if it exists
+        try {
+            if (Test-Path $scriptPath) {
+                Remove-Item -Path $scriptPath -Force -ErrorAction Stop
+                $scriptRemoved = $true
+            }
+            else {
+                $errors += "Bootstrap script not found: $scriptPath"
+            }
+        }
+        catch {
+            $errors += "Failed to delete script: $($_.Exception.Message)"
+        }
+
+        # Report what was cleaned up
+        if ($taskRemoved -or $scriptRemoved) {
+            $parts = @()
+            if ($taskRemoved) { $parts += "task unregistered" }
+            if ($scriptRemoved) { $parts += "script deleted" }
+            $output = "Removed scheduled workflow '$workflow' ($($parts -join ', '))"
+            if ($errors.Count -gt 0) {
+                $output += ". Warnings: $($errors -join '; ')"
+            }
+            @{ Success = $true; Output = $output }
+        }
+        else {
+            @{ Success = $false; Output = "Scheduled workflow '$workflow' not found. $($errors -join '; ')"; Error = $true }
+        }
+    }
+
+    "list_scheduled_workflows" = {
+        param($filter)
+
+        try {
+            $taskFolder = "\Shelix\"
+            $tasks = Get-ScheduledTask -TaskPath $taskFolder -ErrorAction SilentlyContinue
+
+            if (-not $tasks) {
+                return @{ Success = $true; Output = "No scheduled workflows found in \Shelix\" }
+            }
+
+            if ($filter) {
+                $tasks = $tasks | Where-Object { $_.TaskName -like "*$filter*" }
+            }
+
+            $output = "Scheduled Workflows ($($tasks.Count) found):"
+
+            foreach ($task in $tasks | Sort-Object TaskName) {
+                $wfName = $task.TaskName -replace '^Workflow_', ''
+                $state = $task.State
+
+                # Determine trigger type
+                $triggerInfo = "Unknown"
+                if ($task.Triggers.Count -gt 0) {
+                    $trig = $task.Triggers[0]
+                    $triggerInfo = switch -Wildcard ($trig.CimClass.CimClassName) {
+                        '*Daily*'  { "Daily at $($trig.StartBoundary -replace '.*T(\d{2}:\d{2}).*', '$1')" }
+                        '*Weekly*' { "Weekly at $($trig.StartBoundary -replace '.*T(\d{2}:\d{2}).*', '$1')" }
+                        '*Boot*'   { "At startup" }
+                        '*Logon*'  { "At logon" }
+                        default    { $trig.CimClass.CimClassName -replace '.*_Task', '' -replace 'Trigger$', '' }
+                    }
+                    # Check for repetition interval (interval schedule type)
+                    if ($trig.Repetition -and $trig.Repetition.Interval) {
+                        $triggerInfo = "Every $($trig.Repetition.Interval)"
+                    }
+                }
+
+                # Get last run info
+                $lastResult = "Never run"
+                $taskInfo = Get-ScheduledTaskInfo -TaskName $task.TaskName -TaskPath $taskFolder -ErrorAction SilentlyContinue
+                if ($taskInfo -and $taskInfo.LastRunTime -ne [DateTime]::MinValue) {
+                    $resultCode = $taskInfo.LastTaskResult
+                    $lastResult = if ($resultCode -eq 0) { "Success" }
+                                  elseif ($resultCode -eq 267011) { "Never run" }
+                                  else { "Error (0x{0:X})" -f $resultCode }
+                }
+
+                $output += "`n  [$state] $wfName — $triggerInfo | Last: $lastResult"
+            }
+
+            @{ Success = $true; Output = $output }
+        }
+        catch {
+            @{ Success = $false; Output = "Failed to list scheduled workflows: $($_.Exception.Message)"; Error = $true }
+        }
+    }
+
     "list_workflows"         = {
         $output = "Available workflows:`n"
         foreach ($name in $global:Workflows.Keys | Sort-Object) {
@@ -2367,13 +2509,6 @@ $global:Workflows = @{
         Steps       = @(
             @{ Intent = "create_folder"; ParamMap = @{ path = "project" } }
             @{ Intent = "git_init"; ParamMap = @{ path = "project" } }
-        )
-    }
-    "debug_logger"          = @{
-        Name        = "Debug Logger"
-        Description = "Log timestamp and git status for debugging"
-        Steps       = @(
-            @{ Intent = "git_status" }
         )
     }
 }
