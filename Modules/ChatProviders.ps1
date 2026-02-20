@@ -78,7 +78,7 @@ $global:ChatProviders = @{
 $global:DefaultChatProvider = 'ollama'
 
 # ===== Config File Loading =====
-$global:ChatConfigPath = "$global:ShelixHome\config\ChatConfig.json"
+$global:ChatConfigPath = "$global:BildsyPSHome\config\ChatConfig.json"
 $global:ChatConfig = $null
 
 function Import-ChatConfig {

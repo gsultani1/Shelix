@@ -29,7 +29,7 @@ function Invoke-SecretScan {
     foreach ($filePath in $Paths) {
         if (-not (Test-Path $filePath)) { continue }
         try {
-            $lines = Get-Content $filePath -ErrorAction Stop
+            $lines = @(Get-Content $filePath -ErrorAction Stop)
         }
         catch { continue }
 
@@ -57,7 +57,7 @@ function Invoke-SecretScan {
             }
         }
     }
-    return $findings
+    return @(,$findings)
 }
 
 function Test-GitStagedSecrets {
@@ -124,8 +124,8 @@ function Test-StartupSecrets {
     #>
     $filesToScan = @()
 
-    # Shelix config directory
-    $configDir = "$global:ShelixHome\config"
+    # BildsyPS config directory
+    $configDir = "$global:BildsyPSHome\config"
     if (Test-Path $configDir) {
         Get-ChildItem $configDir -File -ErrorAction SilentlyContinue | ForEach-Object {
             $filesToScan += $_.FullName
@@ -133,7 +133,7 @@ function Test-StartupSecrets {
     }
 
     # Project root sensitive files (in case old copies still exist)
-    $projectRoot = if ($global:ShelixModulePath) { $global:ShelixModulePath } else { Split-Path $PROFILE -Parent }
+    $projectRoot = if ($global:BildsyPSModulePath) { $global:BildsyPSModulePath } else { Split-Path $PROFILE -Parent }
     $rootFiles = @('ChatConfig.json', 'Config\.env', 'UserSkills.json')
     foreach ($f in $rootFiles) {
         $path = Join-Path $projectRoot $f
@@ -149,7 +149,7 @@ function Test-GitignoreCovers {
     .SYNOPSIS
     Validate that .gitignore covers known sensitive files. Returns array of unprotected file names.
     #>
-    $projectRoot = if ($global:ShelixModulePath) { $global:ShelixModulePath } else { Split-Path $PROFILE -Parent }
+    $projectRoot = if ($global:BildsyPSModulePath) { $global:BildsyPSModulePath } else { Split-Path $PROFILE -Parent }
     $gitignorePath = Join-Path $projectRoot '.gitignore'
     if (-not (Test-Path $gitignorePath)) { return @('(.gitignore missing)') }
 

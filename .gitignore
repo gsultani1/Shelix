@@ -8,7 +8,7 @@ Config/.env
 *.secret
 *.key
 ChatConfig.json
-
+Config\.env
 # User Preferences (already listed above)
 
 # User Skills

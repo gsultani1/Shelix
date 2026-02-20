@@ -1,5 +1,5 @@
 # ===== run-tests.ps1 =====
-# Shelix test launcher. Requires Pester 5.x.
+# BildsyPS test launcher. Requires Pester 5.x.
 #
 # Usage:
 #   .\run-tests.ps1              # Offline tests only (no API keys needed)
@@ -57,7 +57,7 @@ $config.TestResult.Enabled = $true
 $config.TestResult.OutputPath = Join-Path $PSScriptRoot 'Tests\TestResults.xml'
 $config.TestResult.OutputFormat = 'NUnitXml'
 
-Write-Host "`n===== Shelix Test Runner =====" -ForegroundColor Cyan
+Write-Host "`n===== BildsyPS Test Runner =====" -ForegroundColor Cyan
 Write-Host "  Files: $($testFiles.Count)" -ForegroundColor Gray
 $modeLabel = if ($All) { 'All (offline + live + admin)' } elseif ($Live) { 'Offline + Live' } else { 'Offline only' }
 Write-Host "  Mode:  $modeLabel" -ForegroundColor Gray

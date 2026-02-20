@@ -285,7 +285,7 @@ function Get-BrowserUrlFromHistory {
         if (-not (Test-Path $historyDb)) { continue }
 
         # Copy the DB to a temp file (browser holds a lock)
-        $tempDb = Join-Path $env:TEMP "shelix_browser_history_$bName.sqlite"
+        $tempDb = Join-Path $env:TEMP "bildsyps_browser_history_$bName.sqlite"
         try {
             Copy-Item $historyDb $tempDb -Force -ErrorAction Stop
         }

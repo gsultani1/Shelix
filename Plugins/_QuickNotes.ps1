@@ -1,15 +1,15 @@
-# ============= _QuickNotes.ps1 — Shelix Quick Notes Plugin =============
+# ============= _QuickNotes.ps1 — BildsyPS Quick Notes Plugin =============
 # Lightweight note-taking via intents. Notes are stored as JSON in the
 # plugin config directory and searchable via intent or direct function call.
 #
-# Enable with: Enable-ShelixPlugin 'QuickNotes'
+# Enable with: Enable-BildsyPSPlugin 'QuickNotes'
 # Configure:   Set-PluginConfig -Plugin QuickNotes -Key max_notes -Value 200
 
 $PluginInfo = @{
     Version          = '1.0.0'
-    Author           = 'Shelix'
+    Author           = 'BildsyPS'
     Description      = 'Quick note-taking — add, list, search, and delete notes via intents'
-    MinShelixVersion = '0.9.0'
+    MinBildsyPSVersion = '0.9.0'
 }
 
 $PluginCategories = @{

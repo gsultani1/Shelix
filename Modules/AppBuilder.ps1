@@ -3,8 +3,8 @@
 # Three lanes: powershell (default, ps2exe), python-tk (PyInstaller), python-web (PyInstaller).
 # Depends on: ChatProviders.ps1, CodeArtifacts.ps1, SecretScanner.ps1, ChatStorage.ps1
 
-$global:AppBuilderPath = "$global:ShelixHome\builds"
-$global:AppBuilderBranding = $true  # inject "Built with Shelix" branding
+$global:AppBuilderPath = "$global:BildsyPSHome\builds"
+$global:AppBuilderBranding = $true  # inject "Built with BildsyPS" branding
 
 # ===== System Prompts =====
 
@@ -44,7 +44,7 @@ RULES:
 5. Use proper error handling with try/catch blocks.
 6. Dark theme: Background=#1e1e1e, Foreground=#e0e0e0, Accent=#7c3aed, Font=Segoe UI
 7. Add a Help menu with an "About" item that shows a MessageBox:
-   "Built with Shelix — AI-powered shell orchestrator`nhttps://github.com/gsultani/shelix"
+   "Built with BildsyPS — AI-powered shell orchestrator`nhttps://github.com/gsultani/bildsyps"
 8. If the app uses data persistence, use a JSON file in: Join-Path $env:APPDATA $appName
 9. Add proper form disposal and cleanup.
 10. The script must work when compiled to .exe via ps2exe.
@@ -64,11 +64,11 @@ RULES:
 5. Dark theme: bg=#1e1e1e, fg=#e0e0e0, accent=#7c3aed, font=("Segoe UI", 10)
 6. Add a mandatory startup splash screen (1.5 seconds):
    - 400x200 window, centered, no title bar (overrideredirect=True)
-   - Dark background (#1e1e1e), text "Built with Shelix" in #7c3aed, 16pt
+   - Dark background (#1e1e1e), text "Built with BildsyPS" in #7c3aed, 16pt
    - Below: app name in #e0e0e0, 12pt
    - Auto-close after 1500ms via root.after()
 7. Add a Help menu with "About" that shows:
-   messagebox.showinfo("About", "Built with Shelix\nhttps://github.com/gsultani/shelix")
+   messagebox.showinfo("About", "Built with BildsyPS\nhttps://github.com/gsultani/bildsyps")
 8. If the app uses data persistence, use JSON or SQLite in:
    Path.home() / f'.{app_name}' / 'data.json'
 9. Use if __name__ == '__main__': guard.
@@ -96,9 +96,9 @@ RULES:
 3. ALLOWED imports: stdlib + pywebview + requests. Nothing else.
 4. Dark theme in CSS: background=#1e1e1e, color=#e0e0e0, accent=#7c3aed, font-family="Segoe UI"
 5. Add a branded startup splash overlay in index.html:
-   - Full-screen overlay div, dark bg, "Built with Shelix" in accent color
+   - Full-screen overlay div, dark bg, "Built with BildsyPS" in accent color
    - Fades out after 1.5 seconds via CSS animation + JS setTimeout
-   - Footer: <footer style="text-align:center;padding:8px;color:#666;font-size:11px">Built with Shelix</footer>
+   - Footer: <footer style="text-align:center;padding:8px;color:#666;font-size:11px">Built with BildsyPS</footer>
 6. If the app uses data persistence, use JSON or SQLite in:
    Path.home() / f'.{app_name}' / 'data.json'
 7. Use if __name__ == '__main__': guard in app.py.
@@ -132,7 +132,7 @@ RULES:
    file contents
    <<<END
 6. For deletions, use an empty REPLACE block.
-7. Preserve all existing branding (Shelix splash/about).
+7. Preserve all existing branding (BildsyPS splash/about).
 8. If the change requires a fundamentally different approach, say FULL_REGENERATION_NEEDED on its own line.
 '@
 
@@ -405,7 +405,7 @@ function Test-GeneratedCode {
 
         # Syntax check
         if ($ext -eq '.ps1') {
-            $tempFile = Join-Path $env:TEMP "shelix_validate_$(Get-Random).ps1"
+            $tempFile = Join-Path $env:TEMP "bildsyps_validate_$(Get-Random).ps1"
             try {
                 $code | Set-Content $tempFile -Encoding UTF8
                 $tokens = $null
@@ -421,7 +421,7 @@ function Test-GeneratedCode {
         }
         elseif ($ext -eq '.py') {
             if (Get-Command python -ErrorAction SilentlyContinue) {
-                $tempFile = Join-Path $env:TEMP "shelix_validate_$(Get-Random).py"
+                $tempFile = Join-Path $env:TEMP "bildsyps_validate_$(Get-Random).py"
                 try {
                     $code | Set-Content $tempFile -Encoding UTF8
                     $result = & python -c "import ast; ast.parse(open(r'$tempFile', encoding='utf-8').read()); print('OK')" 2>&1
@@ -442,8 +442,12 @@ function Test-GeneratedCode {
             @{ Pattern = '\bpickle\.loads\s*\('; Name = 'pickle.loads()' }
             @{ Pattern = '\bmarshal\.loads\s*\('; Name = 'marshal.loads()' }
             @{ Pattern = '\bos\.popen\s*\(';   Name = 'os.popen()' }
+            @{ Pattern = '\bos\.system\s*\(';  Name = 'os.system()' }
+            @{ Pattern = '\bsubprocess\b';     Name = 'subprocess' }
             @{ Pattern = '\bInvoke-Expression\b'; Name = 'Invoke-Expression' }
             @{ Pattern = '\biex\s';            Name = 'iex (Invoke-Expression alias)' }
+            @{ Pattern = 'Remove-Item\b.*-Recurse'; Name = 'Remove-Item -Recurse' }
+            @{ Pattern = 'Start-Process\b.*-Verb\s+RunAs'; Name = 'Start-Process -Verb RunAs' }
         )
 
         foreach ($dp in $dangerousPatterns) {
@@ -454,7 +458,7 @@ function Test-GeneratedCode {
 
         # Secret scan
         if (Get-Command Invoke-SecretScan -ErrorAction SilentlyContinue) {
-            $tempScan = Join-Path $env:TEMP "shelix_secretscan_$(Get-Random)$ext"
+            $tempScan = Join-Path $env:TEMP "bildsyps_secretscan_$(Get-Random)$ext"
             try {
                 $code | Set-Content $tempScan -Encoding UTF8
                 $findings = Invoke-SecretScan -Paths @($tempScan)
@@ -474,7 +478,7 @@ function Test-GeneratedCode {
 
 # ===== Branding Injection =====
 
-function Invoke-ShelixBranding {
+function Invoke-BildsyPSBranding {
     <#
     .SYNOPSIS
     Verify branding is present in generated code. Patch it in if LLM omitted it.
@@ -487,7 +491,7 @@ function Invoke-ShelixBranding {
 
     if ($NoBranding) { return $Files }
 
-    $brandingText = 'Built with Shelix'
+    $brandingText = 'Built with BildsyPS'
 
     switch ($Framework) {
         'powershell' {
@@ -496,11 +500,11 @@ function Invoke-ShelixBranding {
                 # Inject About dialog before the last closing brace or at the end
                 $aboutSnippet = @'
 
-# --- Shelix Branding ---
+# --- BildsyPS Branding ---
 $aboutItem = New-Object System.Windows.Forms.ToolStripMenuItem("About")
 $aboutItem.Add_Click({
     [System.Windows.Forms.MessageBox]::Show(
-        "Built with Shelix — AI-powered shell orchestrator`nhttps://github.com/gsultani/shelix",
+        "Built with BildsyPS — AI-powered shell orchestrator`nhttps://github.com/gsultani/bildsyps",
         "About", [System.Windows.Forms.MessageBoxButtons]::OK,
         [System.Windows.Forms.MessageBoxIcon]::Information)
 })
@@ -525,10 +529,10 @@ if ($form.MainMenuStrip) {
                 # Add About menu import and function before mainloop
                 $aboutSnippet = @'
 
-# --- Shelix Branding ---
-def _shelix_about():
+# --- BildsyPS Branding ---
+def _bildsyps_about():
     from tkinter import messagebox
-    messagebox.showinfo("About", "Built with Shelix\nhttps://github.com/gsultani/shelix")
+    messagebox.showinfo("About", "Built with BildsyPS\nhttps://github.com/gsultani/bildsyps")
 '@
                 if ($Files[$key] -match '\.mainloop\(\)') {
                     $Files[$key] = $Files[$key] -replace '(\.mainloop\(\))', "$aboutSnippet`n`$1"
@@ -542,7 +546,7 @@ def _shelix_about():
             $key = 'web/index.html'
             if ($Files.ContainsKey($key) -and $Files[$key] -notmatch [regex]::Escape($brandingText)) {
                 # Add branded footer before </body>
-                $footer = '<footer style="text-align:center;padding:8px;color:#666;font-size:11px">Built with Shelix</footer>'
+                $footer = '<footer style="text-align:center;padding:8px;color:#666;font-size:11px">Built with BildsyPS</footer>'
                 if ($Files[$key] -match '</body>') {
                     $Files[$key] = $Files[$key] -replace '</body>', "$footer`n</body>"
                 }
@@ -836,14 +840,14 @@ function Get-AppBuilds {
 
             if ($builds.Count -eq 0) {
                 Write-Host "No builds yet. Use: build `"description of your app`"" -ForegroundColor DarkGray
-                return
+                return @()
             }
 
             Write-Host "`n===== App Builds =====" -ForegroundColor Cyan
             foreach ($b in $builds) {
                 $statusColor = switch ($b.Status) { 'completed' { 'Green' }; 'failed' { 'Red' }; default { 'Yellow' } }
                 $brandTag = if ($b.Branded) { '' } else { ' [unbranded]' }
-                $timeTag = if ($b.BuildTime) { " (${$b.BuildTime}s)" } else { '' }
+                $timeTag = if ($b.BuildTime) { " ($($b.BuildTime)s)" } else { '' }
                 Write-Host "  $($b.Name) " -ForegroundColor Yellow -NoNewline
                 Write-Host "[$($b.Framework)] " -ForegroundColor DarkGray -NoNewline
                 Write-Host "$($b.Status)$brandTag$timeTag" -ForegroundColor $statusColor
@@ -856,7 +860,7 @@ function Get-AppBuilds {
                 }
             }
             Write-Host ""
-            return
+            return $builds
         }
         catch { }
     }
@@ -938,7 +942,7 @@ function New-AppBuild {
     LLM model override.
 
     .PARAMETER NoBranding
-    Skip Shelix branding injection.
+    Skip BildsyPS branding injection.
 
     .PARAMETER IconPath
     Path to .ico file for the executable.
@@ -987,7 +991,7 @@ function New-AppBuild {
             $Name = ($Matches[1].Trim() -replace '[^\w\-]', '-').Trim('-')
             if ($Name.Length -gt 40) { $Name = $Name.Substring(0, 40) }
         }
-        if (-not $Name) { $Name = "shelix-app-$(Get-Date -Format 'yyyyMMdd-HHmmss')" }
+        if (-not $Name) { $Name = "bildsyps-app-$(Get-Date -Format 'yyyyMMdd-HHmmss')" }
     }
     $Name = ($Name -replace '[^\w\-]', '-').Trim('-').ToLower()
 
@@ -1018,7 +1022,7 @@ function New-AppBuild {
     }
 
     # Step 4b: Branding injection
-    $codeResult.Files = Invoke-ShelixBranding -Files $codeResult.Files -Framework $framework -NoBranding:$NoBranding
+    $codeResult.Files = Invoke-BildsyPSBranding -Files $codeResult.Files -Framework $framework -NoBranding:$NoBranding
 
     # Step 5: Write source files
     $sourceDir = Join-Path $global:AppBuilderPath "$Name\source"

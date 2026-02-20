@@ -2,8 +2,9 @@
 # SQLite-backed chat session storage with FTS5 full-text search
 # Requires PowerShell 7+ and Microsoft.Data.Sqlite (loaded from Modules/lib/)
 
-$global:ChatDbPath = "$global:ShelixHome\data\shelix.db"
+$global:ChatDbPath = "$global:BildsyPSHome\data\bildsyps.db"
 $global:ChatDbReady = $false
+if (-not $global:ChatLogsPath) { $global:ChatLogsPath = "$global:BildsyPSHome\logs\sessions" }
 
 # ===== Assembly Loading =====
 function Initialize-SqliteAssembly {

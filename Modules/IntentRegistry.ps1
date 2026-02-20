@@ -418,7 +418,7 @@ $global:IntentMetadata = @{
     }
     'list_scheduled_workflows'  = @{
         Category    = 'workflow'
-        Description = 'List Shelix-managed scheduled workflows'
+        Description = 'List BildsyPS-managed scheduled workflows'
         Parameters  = @(
             @{ Name = 'filter'; Required = $false; Description = 'Filter by workflow name' }
         )

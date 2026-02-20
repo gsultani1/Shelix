@@ -72,8 +72,8 @@ function Show-ProfileTips {
     Write-Host "`nPlugins:" -ForegroundColor Yellow
     Write-Host "  plugins                     - List active & disabled plugins" -ForegroundColor White
     Write-Host "  new-plugin [name]           - Scaffold a new plugin" -ForegroundColor White
-    Write-Host "  Enable-ShelixPlugin [name]  - Activate a disabled plugin" -ForegroundColor White
-    Write-Host "  Disable-ShelixPlugin [name] - Deactivate a loaded plugin" -ForegroundColor White
+    Write-Host "  Enable-BildsyPSPlugin [name]  - Activate a disabled plugin" -ForegroundColor White
+    Write-Host "  Disable-BildsyPSPlugin [name] - Deactivate a loaded plugin" -ForegroundColor White
     Write-Host "  reload-plugins              - Reload all plugins" -ForegroundColor White
     Write-Host "  test-plugin -Name [name]    - Run plugin self-tests" -ForegroundColor White
     Write-Host "  test-plugin -All            - Test all plugins" -ForegroundColor White

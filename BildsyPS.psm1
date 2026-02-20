@@ -1,23 +1,23 @@
-# ===== Shelix.psm1 =====
-# Root module for the Shelix PowerShell module.
+# ===== BildsyPS.psm1 =====
+# Root module for the BildsyPS PowerShell module.
 # Replicates the profile load order for use with Import-Module.
 
 $ModuleRoot = $PSScriptRoot
-$global:ShelixModulePath = $ModuleRoot
+$global:BildsyPSModulePath = $ModuleRoot
 $global:ModulesPath = "$ModuleRoot\Modules"
-$global:ShelixVersion = '1.3.0'
+$global:BildsyPSVersion = '1.3.0'
 
-# ===== Initialize ShelixHome =====
-$global:ShelixHome = "$env:USERPROFILE\.shelix"
+# ===== Initialize BildsyPSHome =====
+$global:BildsyPSHome = "$env:USERPROFILE\.bildsyps"
 
-function Initialize-ShelixHome {
+function Initialize-BildsyPSHome {
     $dirs = @(
-        "$global:ShelixHome\config",
-        "$global:ShelixHome\logs\sessions",
-        "$global:ShelixHome\plugins",
-        "$global:ShelixHome\skills",
-        "$global:ShelixHome\aliases",
-        "$global:ShelixHome\data"
+        "$global:BildsyPSHome\config",
+        "$global:BildsyPSHome\logs\sessions",
+        "$global:BildsyPSHome\plugins",
+        "$global:BildsyPSHome\skills",
+        "$global:BildsyPSHome\aliases",
+        "$global:BildsyPSHome\data"
     )
     foreach ($d in $dirs) {
         if (-not (Test-Path $d)) {
@@ -26,7 +26,7 @@ function Initialize-ShelixHome {
     }
 }
 
-Initialize-ShelixHome
+Initialize-BildsyPSHome
 
 # ===== Module Loading (dependency order) =====
 if (Test-Path $global:ModulesPath) {
@@ -93,7 +93,7 @@ function Update-IntentAliases {
     $global:LoadedUserSkills = [ordered]@{}
     Import-UserSkills -Quiet
     $global:LoadedPlugins = [ordered]@{}
-    Import-ShelixPlugins -Quiet
+    Import-BildsyPSPlugins -Quiet
     Write-Host "Intent aliases reloaded (skills + plugins re-merged)." -ForegroundColor Green
 }
 
@@ -107,11 +107,11 @@ function Update-ChatProviders {
     Write-Host "Chat providers reloaded." -ForegroundColor Green
 }
 
-function Update-ShelixPlugins {
+function Update-BildsyPSPlugins {
     foreach ($pName in @($global:LoadedPlugins.Keys)) {
-        Unregister-ShelixPlugin -Name $pName
+        Unregister-BildsyPSPlugin -Name $pName
     }
-    Import-ShelixPlugins
+    Import-BildsyPSPlugins
 }
 
 function Update-AllModules {
@@ -123,30 +123,30 @@ function Update-AllModules {
         }
     }
     $global:LoadedPlugins = [ordered]@{}
-    Import-ShelixPlugins
+    Import-BildsyPSPlugins
     Write-Host "All modules reloaded." -ForegroundColor Green
 }
 
 # ===== Install Helper =====
-function Install-Shelix {
+function Install-BildsyPS {
     <#
     .SYNOPSIS
-    Initialize Shelix user directories and copy example configs.
-    Optionally adds Import-Module Shelix to the user's profile.
+    Initialize BildsyPS user directories and copy example configs.
+    Optionally adds Import-Module BildsyPS to the user's profile.
 
     .PARAMETER AddToProfile
-    If set, appends 'Import-Module Shelix' to the user's PowerShell profile.
+    If set, appends 'Import-Module BildsyPS' to the user's PowerShell profile.
     #>
     param([switch]$AddToProfile)
 
-    Initialize-ShelixHome
+    Initialize-BildsyPSHome
 
     # Copy example configs to user config dir if they don't already exist
     $templatesDir = "$ModuleRoot\templates"
     if (Test-Path $templatesDir) {
         Get-ChildItem $templatesDir -File | ForEach-Object {
             $destName = $_.Name -replace '\.example', ''
-            $destPath = Join-Path "$global:ShelixHome\config" $destName
+            $destPath = Join-Path "$global:BildsyPSHome\config" $destName
             if (-not (Test-Path $destPath)) {
                 Copy-Item $_.FullName $destPath
                 Write-Host "  Created: $destPath" -ForegroundColor Green
@@ -154,27 +154,27 @@ function Install-Shelix {
         }
     }
 
-    Write-Host "`nShelix home initialized at: $global:ShelixHome" -ForegroundColor Cyan
-    Write-Host "  config:  $global:ShelixHome\config\" -ForegroundColor DarkGray
-    Write-Host "  data:    $global:ShelixHome\data\" -ForegroundColor DarkGray
-    Write-Host "  logs:    $global:ShelixHome\logs\" -ForegroundColor DarkGray
-    Write-Host "  plugins: $global:ShelixHome\plugins\" -ForegroundColor DarkGray
-    Write-Host "  skills:  $global:ShelixHome\skills\" -ForegroundColor DarkGray
+    Write-Host "`nBildsyPS home initialized at: $global:BildsyPSHome" -ForegroundColor Cyan
+    Write-Host "  config:  $global:BildsyPSHome\config\" -ForegroundColor DarkGray
+    Write-Host "  data:    $global:BildsyPSHome\data\" -ForegroundColor DarkGray
+    Write-Host "  logs:    $global:BildsyPSHome\logs\" -ForegroundColor DarkGray
+    Write-Host "  plugins: $global:BildsyPSHome\plugins\" -ForegroundColor DarkGray
+    Write-Host "  skills:  $global:BildsyPSHome\skills\" -ForegroundColor DarkGray
 
     if ($AddToProfile) {
         $profilePath = $PROFILE.CurrentUserAllHosts
         if (-not $profilePath) { $profilePath = $PROFILE }
         $profileContent = if (Test-Path $profilePath) { Get-Content $profilePath -Raw } else { '' }
-        if ($profileContent -notmatch 'Import-Module\s+Shelix') {
-            "`nImport-Module Shelix" | Out-File $profilePath -Append -Encoding UTF8
-            Write-Host "`nAdded 'Import-Module Shelix' to $profilePath" -ForegroundColor Green
+        if ($profileContent -notmatch 'Import-Module\s+BildsyPS') {
+            "`nImport-Module BildsyPS" | Out-File $profilePath -Append -Encoding UTF8
+            Write-Host "`nAdded 'Import-Module BildsyPS' to $profilePath" -ForegroundColor Green
         }
         else {
-            Write-Host "`n'Import-Module Shelix' already in profile." -ForegroundColor DarkGray
+            Write-Host "`n'Import-Module BildsyPS' already in profile." -ForegroundColor DarkGray
         }
     }
     else {
-        Write-Host "`nTo auto-load Shelix, run: Install-Shelix -AddToProfile" -ForegroundColor DarkGray
+        Write-Host "`nTo auto-load BildsyPS, run: Install-BildsyPS -AddToProfile" -ForegroundColor DarkGray
     }
 }
 
@@ -182,7 +182,7 @@ function Install-Shelix {
 Set-Alias reload-intents  Update-IntentAliases  -Force
 Set-Alias reload-skills   Update-UserSkills     -Force
 Set-Alias reload-providers Update-ChatProviders  -Force
-Set-Alias reload-plugins  Update-ShelixPlugins  -Force
+Set-Alias reload-plugins  Update-BildsyPSPlugins  -Force
 Set-Alias reload-all      Update-AllModules     -Force
 
-Write-Verbose "Shelix $global:ShelixVersion loaded. Type 'tips' for quick reference."
+Write-Verbose "BildsyPS $global:BildsyPSVersion loaded. Type 'tips' for quick reference."

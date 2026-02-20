@@ -485,4 +485,4 @@ Register-ArgumentCompleter -CommandName Show-IntentHelp -ParameterName Category 
     }
 }
 
-Write-Host "Shelix loaded. Run 'intent-help' for usage." -ForegroundColor Green
+Write-Host "BildsyPS loaded. Run 'intent-help' for usage." -ForegroundColor Green

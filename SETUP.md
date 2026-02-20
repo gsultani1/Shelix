@@ -1,4 +1,4 @@
-# Shelix Setup Guide
+# BildsyPS Setup Guide
 
 ## Quick Start
 
@@ -215,10 +215,10 @@ agent-tools    # List all available tools
 ## File Structure
 
 ```
-Shelix/
+BildsyPS/
 ├── Microsoft.PowerShell_profile.ps1  # Main profile (loads modules)
 ├── ChatConfig.json                    # API keys & settings
-├── Shelix.psm1 / Shelix.psd1         # Module loader + manifest
+├── BildsyPS.psm1 / BildsyPS.psd1         # Module loader + manifest
 ├── NaturalLanguageMappings.json       # Command translations
 ├── UserSkills.json                    # Your custom intents (JSON)
 ├── UserAliases.ps1                    # Your custom aliases
@@ -330,6 +330,9 @@ plugin-config X   # View plugin configuration
 skills            # List user-defined skills
 new-skill 'Name'  # Create a skill interactively
 reload-skills     # Reload from UserSkills.json
+deploy_staging                          # invoke skill
+deploy_staging main                     # with positional args
+Invoke-UserSkill -Name 'deploy_staging' -Parameters @{ branch = 'main' }
 
 # Agent
 agent "task"      # Run autonomous agent task

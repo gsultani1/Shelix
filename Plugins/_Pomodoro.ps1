@@ -1,15 +1,15 @@
-# ============= _Pomodoro.ps1 — Shelix Pomodoro Timer Plugin =============
+# ============= _Pomodoro.ps1 — BildsyPS Pomodoro Timer Plugin =============
 # A productivity timer based on the Pomodoro Technique.
 # Tracks work sessions and breaks using in-memory state.
 #
-# Enable with: Enable-ShelixPlugin 'Pomodoro'
+# Enable with: Enable-BildsyPSPlugin 'Pomodoro'
 # Configure:   Set-PluginConfig -Plugin Pomodoro -Key work_minutes -Value 30
 
 $PluginInfo = @{
     Version          = '1.0.0'
-    Author           = 'Shelix'
+    Author           = 'BildsyPS'
     Description      = 'Pomodoro technique timer — focus sessions with timed breaks'
-    MinShelixVersion = '0.9.0'
+    MinBildsyPSVersion = '0.9.0'
 }
 
 $PluginCategories = @{

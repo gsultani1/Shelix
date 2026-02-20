@@ -80,7 +80,7 @@ function Invoke-OCR {
     }
 
     $resolvedPath = (Resolve-Path $ImagePath).Path
-    $outputBase = Join-Path $env:TEMP "shelix_ocr_$(Get-Random)"
+    $outputBase = Join-Path $env:TEMP "bildsyps_ocr_$(Get-Random)"
 
     try {
         $tessArgs = @($resolvedPath, $outputBase, '-l', $Language, '--psm', $PSM)
@@ -143,7 +143,7 @@ function ConvertFrom-PDF {
     $pdftotextCheck = Test-PdftotextAvailable
     if ($pdftotextCheck.Available) {
         try {
-            $outputFile = Join-Path $env:TEMP "shelix_pdf_$(Get-Random).txt"
+            $outputFile = Join-Path $env:TEMP "bildsyps_pdf_$(Get-Random).txt"
             $pdfArgs = @('-layout')
             if ($Pages) {
                 $parts = $Pages -split '-'

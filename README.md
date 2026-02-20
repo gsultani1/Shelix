@@ -1,13 +1,17 @@
-# Shelix
+<p align="center">
+  <img src="assets/bildsy-logo.png" alt="BildsyPS Logo" width="200"/>
+</p>
 
-> Your terminal, orchestrated. Shelix is an AI shell environment that understands your context — your files, your git state, your running processes — and acts on your behalf. Chat with Claude, GPT, or local LLMs. Execute commands, manage files, search the web, run autonomous agents, and connect to MCP servers. All from PowerShell, all local-first, nothing phoning home.
+<h1 align="center">BildsyPS</h1>
+
+> Your terminal, orchestrated. BildsyPS is an AI shell environment that understands your context — your files, your git state, your running processes — and acts on your behalf. Chat with Claude, GPT, or local LLMs. Execute commands, manage files, search the web, run autonomous agents, and connect to MCP servers. All from PowerShell, all local-first, nothing phoning home.
 
 ![PowerShell](https://img.shields.io/badge/PowerShell-7.0%2B-blue)
 ![Version](https://img.shields.io/badge/Version-1.3.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![AI](https://img.shields.io/badge/AI-Claude%20%7C%20GPT%20%7C%20Ollama-purple)
 
-**Topics:** `shelix` `ai-assistant` `claude` `chatgpt` `ollama` `llm` `terminal` `mcp` `agent` `automation` `cli` `app-builder` `exe`
+**Topics:** `bildsyps` `ai-assistant` `claude` `chatgpt` `ollama` `llm` `terminal` `mcp` `agent` `automation` `cli` `app-builder` `exe`
 
 ## Features
 
@@ -94,7 +98,7 @@ rebuild my-todo-app "add a dark mode toggle"
 | **python-tk** | Tkinter | PyInstaller | Python 3.8+ |
 | **python-web** | PyWebView + HTML/CSS/JS | PyInstaller | Python 3.8+ + pywebview |
 
-PowerShell is the default lane — no venv, no pip, no PyInstaller. Just a direct `.ps1` → `.exe` compilation. Token budget auto-detects from your model's context window with per-lane caps and floors. Every generated app includes "Built with Shelix" branding.
+PowerShell is the default lane — no venv, no pip, no PyInstaller. Just a direct `.ps1` → `.exe` compilation. Token budget auto-detects from your model's context window with per-lane caps and floors. Every generated app includes "Built with BildsyPS" branding.
 
 ### 🔧 Available Intents
 
@@ -120,7 +124,7 @@ Drop `.ps1` files into `Plugins/` to add new intents without touching core code:
 
 ```powershell
 plugins                        # List active & disabled plugins
-Enable-ShelixPlugin 'Example'  # Activate a plugin
+Enable-BildsyPSPlugin 'Example'  # Activate a plugin
 new-plugin 'MyPlugin'          # Scaffold from template
 test-plugin -All               # Run plugin self-tests
 watch-plugins                  # Auto-reload on file save
@@ -133,13 +137,14 @@ See `Plugins/_Example.ps1` for the full template.
 
 ### 🎯 Custom User Skills
 
-Define your own intents via JSON — no PowerShell required:
+Define your own intents via JSON — no PowerShell required. Skills are auto-created from the example template on first run.
 
 ```json
 {
   "skills": {
     "deploy_staging": {
       "description": "Pull latest and show status",
+      "triggers": ["deploy staging", "push to staging"],
       "parameters": [{"name": "branch", "default": "main"}],
       "confirm": true,
       "steps": [
@@ -153,12 +158,19 @@ Define your own intents via JSON — no PowerShell required:
 ```
 
 ```powershell
+# Skills are directly callable from the prompt
+deploy_staging                          # invoke by name
+deploy_staging main                     # with positional args
+
+# Or programmatically
+Invoke-UserSkill -Name 'deploy_staging' -Parameters @{ branch = 'main' }
+
 skills              # List user skills
 new-skill 'name'    # Create interactively
 reload-skills       # Reload from JSON
 ```
 
-Copy `UserSkills.example.json` → `UserSkills.json` to get started.
+**Trigger phrases** in the `triggers` array register as intent aliases — the AI can invoke your skill by natural language match. `UserSkills.json` is auto-created from the example template on first run.
 
 ### 🔄 Multi-Step Workflows
 
@@ -248,7 +260,7 @@ Change the default chat provider in `ChatConfig.json`:
 ## File Structure
 
 ```
-Shelix/
+BildsyPS/
 ├── Microsoft.PowerShell_profile.ps1  # Main profile (loads modules)
 ├── ChatConfig.json                   # API keys and settings
 ├── ToolPreferences.json              # Tool preferences
@@ -256,8 +268,8 @@ Shelix/
 ├── UserSkills.json                   # Custom user-defined intents (your file)
 ├── UserSkills.example.json           # Template for user skills
 ├── UserAliases.ps1                   # Your custom persistent aliases
-├── Shelix.psm1                       # Module loader
-├── Shelix.psd1                       # Module manifest (186 functions, 73 aliases)
+├── BildsyPS.psm1                       # Module loader
+├── BildsyPS.psd1                       # Module manifest (186 functions, 73 aliases)
 ├── Modules/
 │   ├── ConfigLoader.ps1              # .env and config loading
 │   ├── PlatformUtils.ps1             # Cross-platform helpers
@@ -374,10 +386,10 @@ chat -AutoTrim      # automatically trim context when approaching model limits
 ### PowerShell 7 (Recommended)
 ```powershell
 # Windows
-git clone https://github.com/gsultani1/Shelix.git "$HOME\Documents\PowerShell"
+git clone https://github.com/gsultani1/BildsyPS.git "$HOME\Documents\PowerShell"
 
 # macOS/Linux
-git clone https://github.com/gsultani1/Shelix.git ~/.config/powershell
+git clone https://github.com/gsultani1/BildsyPS.git ~/.config/powershell
 ```
 
 ### Setup
@@ -425,7 +437,7 @@ Register-MCPServer -Name "myserver" `
 
 ## Roadmap
 
-Shelix today is a shell orchestrator — an AI that understands your terminal context and acts on your behalf. The direction is broader: **mission control for your entire computer**.
+BildsyPS today is a shell orchestrator — an AI that understands your terminal context and acts on your behalf. The direction is broader: **mission control for your entire computer**.
 
 See [VISION.md](VISION.md) for the full product direction.
 
@@ -452,6 +464,8 @@ See [VISION.md](VISION.md) for the full product direction.
 | ✅ | **SQLite + FTS5** — full-text search over all conversation history, session persistence |
 | ✅ | **Agent heartbeat** — cron-triggered background tasks via Windows Task Scheduler |
 | ✅ | **App Builder** — describe an app in English → get a compiled .exe (PowerShell, Python-TK, Python-Web) |
+| ✅ | **E2E test suite** — 276 tests across 15 modules, 0 failures; 11 defects fixed; Pester v5 hardened |
+| ✅ | **UserSkills v2** — shell-invocable functions, `Invoke-UserSkill`, trigger phrase registration, auto-created JSON |
 | 🔜 | Browser automation — Selenium WebDriver integration |
 | 🔜 | Remote listener + webhooks — receive commands via Twilio/HTTP |
 | 🔜 | GUI layer — mission control dashboard for your entire computer |

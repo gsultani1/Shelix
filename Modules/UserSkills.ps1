@@ -4,7 +4,7 @@
 #
 # Must be loaded AFTER IntentAliasSystem.ps1 so the registries exist.
 
-$global:UserSkillsPath = "$global:ShelixHome\skills\UserSkills.json"
+$global:UserSkillsPath = "$global:BildsyPSHome\skills\UserSkills.json"
 $global:LoadedUserSkills = [ordered]@{}
 
 function Import-UserSkills {
@@ -18,10 +18,20 @@ function Import-UserSkills {
     param([switch]$Quiet)
 
     if (-not (Test-Path $global:UserSkillsPath)) {
-        if (-not $Quiet) {
-            Write-Host "No UserSkills.json found — skipping user skills." -ForegroundColor DarkGray
+        # Auto-copy example file on first run if available
+        $exampleFile = "$global:BildsyPSModulePath\UserSkills.example.json"
+        if (Test-Path $exampleFile) {
+            Copy-Item $exampleFile $global:UserSkillsPath -Force
+            if (-not $Quiet) {
+                Write-Host "Created UserSkills.json from example template." -ForegroundColor DarkCyan
+            }
         }
-        return
+        else {
+            if (-not $Quiet) {
+                Write-Host "No UserSkills.json found — skipping user skills." -ForegroundColor DarkGray
+            }
+            return
+        }
     }
 
     try {
@@ -63,7 +73,7 @@ function Import-UserSkills {
         }
 
         # Conflict check
-        if ($global:IntentAliases.ContainsKey($skillName)) {
+        if ($global:IntentAliases.Contains($skillName)) {
             $warnings += "$skillName — intent already registered, skipping"
             $skipped++
             continue
@@ -129,6 +139,21 @@ function Import-UserSkills {
             Confirm     = [bool]$skill.confirm
             Triggers    = if ($skill.triggers) { @($skill.triggers) } else { @() }
         }
+
+        # Register trigger phrases as aliases to the same scriptblock
+        if ($skill.triggers) {
+            foreach ($trigger in $skill.triggers) {
+                if (-not $global:IntentAliases.Contains($trigger)) {
+                    $global:IntentAliases[$trigger] = $global:IntentAliases[$skillName]
+                }
+            }
+        }
+
+        # Create a shell-invocable function so the user can type the skill name directly
+        $fnBody = @"
+param() Invoke-IntentAction -Intent '$skillName' -Payload @{ intent = '$skillName' } -Force
+"@
+        Set-Item -Path "function:global:$skillName" -Value ([scriptblock]::Create($fnBody)) -Force
 
         $loaded++
     }
@@ -246,14 +271,69 @@ function New-UserSkillScriptBlock {
     }.GetNewClosure()
 }
 
+function Invoke-UserSkill {
+    <#
+    .SYNOPSIS
+    Execute a user-defined skill by name, with optional parameter substitution.
+    #>
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [hashtable]$Parameters = @{}
+    )
+
+    if (-not $global:LoadedUserSkills.Contains($Name)) {
+        return @{ Success = $false; Output = "Skill '$Name' not found"; Error = $true }
+    }
+
+    # The skill's scriptblock is already registered in IntentAliases
+    $sb = $global:IntentAliases[$Name]
+    if (-not $sb) {
+        return @{ Success = $false; Output = "Skill '$Name' has no registered action"; Error = $true }
+    }
+
+    # Build positional args array matching the declared parameter order
+    $skillMeta = $global:LoadedUserSkills[$Name]
+    $posArgs = @()
+    foreach ($pName in $skillMeta.Parameters) {
+        if ($Parameters.ContainsKey($pName)) {
+            $posArgs += $Parameters[$pName]
+        }
+        else {
+            $posArgs += ''
+        }
+    }
+
+    try {
+        $result = & $sb @posArgs
+        # Normalize: if the scriptblock returned a hashtable with Output, extract it
+        if ($result -is [hashtable] -and $result.ContainsKey('Output')) {
+            return $result
+        }
+        # If it returned raw output (string/array), wrap it
+        $output = if ($result) { ($result | Out-String).Trim() } else { '' }
+        return @{ Success = $true; Output = $output }
+    }
+    catch {
+        return @{ Success = $false; Output = $_.Exception.Message; Error = $true }
+    }
+}
+
 function Unregister-UserSkills {
     <#
     .SYNOPSIS
     Remove all user-skill intents from the global registries.
     #>
     foreach ($skillName in @($global:LoadedUserSkills.Keys)) {
+        # Remove trigger aliases first
+        $skillInfo = $global:LoadedUserSkills[$skillName]
+        if ($skillInfo.Triggers) {
+            foreach ($trigger in $skillInfo.Triggers) {
+                $global:IntentAliases.Remove($trigger)
+            }
+        }
         $global:IntentAliases.Remove($skillName)
         $global:IntentMetadata.Remove($skillName)
+        Remove-Item "function:$skillName" -Force -ErrorAction SilentlyContinue
     }
     $global:LoadedUserSkills = [ordered]@{}
 
@@ -419,16 +499,27 @@ function Remove-UserSkill {
     $data.skills.PSObject.Properties.Remove($Name)
     $data | ConvertTo-Json -Depth 10 | Set-Content -Path $global:UserSkillsPath -Encoding UTF8
 
+    # Remove trigger aliases
+    if ($global:LoadedUserSkills.Contains($Name)) {
+        $skillInfo = $global:LoadedUserSkills[$Name]
+        if ($skillInfo.Triggers) {
+            foreach ($trigger in $skillInfo.Triggers) {
+                $global:IntentAliases.Remove($trigger)
+            }
+        }
+    }
+
     # Remove from registries
-    if ($global:IntentAliases.ContainsKey($Name)) {
+    if ($global:IntentAliases.Contains($Name)) {
         $global:IntentAliases.Remove($Name)
     }
     if ($global:IntentMetadata.ContainsKey($Name)) {
         $global:IntentMetadata.Remove($Name)
     }
-    if ($global:LoadedUserSkills.ContainsKey($Name)) {
+    if ($global:LoadedUserSkills.Contains($Name)) {
         $global:LoadedUserSkills.Remove($Name)
     }
+    Remove-Item "function:$Name" -Force -ErrorAction SilentlyContinue
 
     # Rebuild IntentCategories
     foreach ($catKey in $global:CategoryDefinitions.Keys) {

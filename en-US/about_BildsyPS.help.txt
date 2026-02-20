@@ -1,12 +1,12 @@
 TOPIC
-    about_Shelix
+    about_BildsyPS
 
 SHORT DESCRIPTION
     AI-powered shell orchestrator with 80+ intents, autonomous agent, vision,
     OCR, SQLite RAG, and a plugin system for PowerShell 7+.
 
 LONG DESCRIPTION
-    Shelix transforms your PowerShell terminal into an AI-augmented workspace.
+    BildsyPS transforms your PowerShell terminal into an AI-augmented workspace.
     It connects to local (Ollama, LM Studio) and cloud (Anthropic, OpenAI) LLMs
     and provides:
 
@@ -25,9 +25,9 @@ LONG DESCRIPTION
     - FZF integration for fuzzy finding
 
 GETTING STARTED
-    1. Run Install-Shelix to initialize directories and copy example configs.
-    2. Edit ~/.shelix/config/.env with your API keys.
-    3. Edit ~/.shelix/config/ChatConfig.json with provider settings.
+    1. Run Install-BildsyPS to initialize directories and copy example configs.
+    2. Edit ~/.bildsyps/config/.env with your API keys.
+    3. Edit ~/.bildsyps/config/ChatConfig.json with provider settings.
     4. Start a chat session: chat (or cc)
     5. Type 'tips' for a quick reference of available commands.
 
@@ -62,16 +62,16 @@ AGENT TOOLS
     store, recall, screenshot, ocr, search_history.
 
 PLUGINS
-    Drop .ps1 files into ~/.shelix/plugins/ to extend Shelix. Plugins can
+    Drop .ps1 files into ~/.bildsyps/plugins/ to extend BildsyPS. Plugins can
     register new intents, agent tools, and workflows.
 
-    See: New-ShelixPlugin -Name MyPlugin  to scaffold a template.
-    See: Get-ShelixPlugins  (or: plugins) to list loaded plugins.
+    See: New-BildsyPSPlugin -Name MyPlugin  to scaffold a template.
+    See: Get-BildsyPSPlugins  (or: plugins) to list loaded plugins.
 
 CONFIGURATION
-    User data lives under ~/.shelix/:
+    User data lives under ~/.bildsyps/:
         config/     .env, ChatConfig.json, ToolPreferences.json
-        data/       shelix.db (SQLite), NaturalLanguageMappings.json
+        data/       bildsyps.db (SQLite), NaturalLanguageMappings.json
         logs/       sessions/, heartbeat.log, AIExecutionLog.json
         plugins/    User plugins
         skills/     UserSkills.json
@@ -88,4 +88,4 @@ SEE ALSO
     Invoke-AgentTask
     Register-AgentTool
     Show-ProfileTips
-    Install-Shelix
+    Install-BildsyPS

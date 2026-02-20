@@ -11,7 +11,7 @@ $global:ComputerName = $env:COMPUTERNAME
 # ===== Execution Logging =====
 $global:AIExecutionLog = @()
 $global:MaxExecutionsPerMessage = 3
-$global:ExecutionLogPath = "$global:ShelixHome\logs\AIExecutionLog.json"
+$global:ExecutionLogPath = "$global:BildsyPSHome\logs\AIExecutionLog.json"
 
 # ===== Rate Limiting Configuration =====
 $global:RateLimitWindow = 60  # seconds

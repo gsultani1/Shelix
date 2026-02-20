@@ -5,13 +5,13 @@
 #
 # Must be loaded AFTER IntentAliasSystem.ps1 so the registries exist.
 
-$global:PluginsPath = "$global:ShelixHome\plugins"
-$global:PluginConfigPath = "$global:ShelixHome\plugins\Config"
+$global:PluginsPath = "$global:BildsyPSHome\plugins"
+$global:PluginConfigPath = "$global:BildsyPSHome\plugins\Config"
 $global:BundledPluginsPath = "$PSScriptRoot\..\Plugins"
 $global:LoadedPlugins = [ordered]@{}
 $global:PluginHelpers = @{}
 $global:PluginSettings = @{}
-if (-not $global:ShelixVersion) { $global:ShelixVersion = '0.9.0' }
+if (-not $global:BildsyPSVersion) { $global:BildsyPSVersion = '0.9.0' }
 
 function Resolve-PluginLoadOrder {
     <#
@@ -80,7 +80,7 @@ function Resolve-PluginLoadOrder {
     return @{ Sorted = @($sorted); Warnings = @($warnings) }
 }
 
-function Import-ShelixPlugins {
+function Import-BildsyPSPlugins {
     <#
     .SYNOPSIS
     Load all .ps1 plugin files from the Plugins/ directory and merge their
@@ -105,7 +105,7 @@ function Import-ShelixPlugins {
         [string]$Name
     )
 
-    # Collect plugins from both user dir (~/.shelix/plugins) and bundled dir (module Plugins/)
+    # Collect plugins from both user dir (~/.bildsyps/plugins) and bundled dir (module Plugins/)
     $pluginFiles = @()
     $searchPaths = @($global:PluginsPath, $global:BundledPluginsPath) | Where-Object { $_ -and (Test-Path $_) }
     if ($searchPaths.Count -eq 0) {
@@ -208,16 +208,16 @@ function Import-ShelixPlugins {
 
         # ── Version compatibility check ──
         if ($PluginInfo) {
-            if ($PluginInfo.MinShelixVersion) {
-                if ([version]$global:ShelixVersion -lt [version]$PluginInfo.MinShelixVersion) {
-                    $warnings += "$pluginName — requires Shelix >= $($PluginInfo.MinShelixVersion), current is $global:ShelixVersion, skipping"
+            if ($PluginInfo.MinBildsyPSVersion) {
+                if ([version]$global:BildsyPSVersion -lt [version]$PluginInfo.MinBildsyPSVersion) {
+                    $warnings += "$pluginName — requires BildsyPS >= $($PluginInfo.MinBildsyPSVersion), current is $global:BildsyPSVersion, skipping"
                     $skipped++
                     continue
                 }
             }
-            if ($PluginInfo.MaxShelixVersion) {
-                if ([version]$global:ShelixVersion -gt [version]$PluginInfo.MaxShelixVersion) {
-                    $warnings += "$pluginName — requires Shelix <= $($PluginInfo.MaxShelixVersion), current is $global:ShelixVersion, skipping"
+            if ($PluginInfo.MaxBildsyPSVersion) {
+                if ([version]$global:BildsyPSVersion -gt [version]$PluginInfo.MaxBildsyPSVersion) {
+                    $warnings += "$pluginName — requires BildsyPS <= $($PluginInfo.MaxBildsyPSVersion), current is $global:BildsyPSVersion, skipping"
                     $skipped++
                     continue
                 }
@@ -253,7 +253,7 @@ function Import-ShelixPlugins {
 
         # ── 3. Merge intents ──
         foreach ($intentName in $PluginIntents.Keys) {
-            if ($global:IntentAliases.ContainsKey($intentName)) {
+            if ($global:IntentAliases.Contains($intentName)) {
                 $warnings += "$pluginName — intent '$intentName' already registered, skipping"
             }
             else {
@@ -375,7 +375,7 @@ function Import-ShelixPlugins {
     }
 }
 
-function Unregister-ShelixPlugin {
+function Unregister-BildsyPSPlugin {
     <#
     .SYNOPSIS
     Unload a plugin by removing its intents, metadata, workflows, and categories
@@ -386,7 +386,7 @@ function Unregister-ShelixPlugin {
     #>
     param([Parameter(Mandatory = $true)][string]$Name)
 
-    if (-not $global:LoadedPlugins.ContainsKey($Name)) {
+    if (-not $global:LoadedPlugins.Contains($Name)) {
         Write-Host "Plugin '$Name' is not loaded." -ForegroundColor Yellow
         return
     }
@@ -452,7 +452,7 @@ function Unregister-ShelixPlugin {
     Write-Host "Plugin '$Name' unloaded." -ForegroundColor Green
 }
 
-function Enable-ShelixPlugin {
+function Enable-BildsyPSPlugin {
     <#
     .SYNOPSIS
     Activate a disabled plugin by removing the '_' prefix from its filename,
@@ -476,11 +476,11 @@ function Enable-ShelixPlugin {
     }
 
     Rename-Item $disabledFile $enabledFile
-    Import-ShelixPlugins -Name $Name
+    Import-BildsyPSPlugins -Name $Name
     Write-Host "Plugin '$Name' enabled and loaded." -ForegroundColor Green
 }
 
-function Disable-ShelixPlugin {
+function Disable-BildsyPSPlugin {
     <#
     .SYNOPSIS
     Deactivate a plugin by adding a '_' prefix to its filename and unloading it.
@@ -503,19 +503,19 @@ function Disable-ShelixPlugin {
     }
 
     # Unload first, then rename
-    if ($global:LoadedPlugins.ContainsKey($Name)) {
-        Unregister-ShelixPlugin -Name $Name
+    if ($global:LoadedPlugins.Contains($Name)) {
+        Unregister-BildsyPSPlugin -Name $Name
     }
     Rename-Item $enabledFile $disabledFile
     Write-Host "Plugin '$Name' disabled." -ForegroundColor Green
 }
 
-function Get-ShelixPlugins {
+function Get-BildsyPSPlugins {
     <#
     .SYNOPSIS
     List all plugins — loaded, disabled, and their contributed intents.
     #>
-    Write-Host "`n===== Shelix Plugins (v$global:ShelixVersion) =====" -ForegroundColor Cyan
+    Write-Host "`n===== BildsyPS Plugins (v$global:BildsyPSVersion) =====" -ForegroundColor Cyan
 
     # Show loaded plugins
     if ($global:LoadedPlugins.Count -gt 0) {
@@ -564,7 +564,7 @@ function Get-ShelixPlugins {
         foreach ($f in $disabledFiles) {
             $baseName = $f.BaseName -replace '^_', ''
             Write-Host "  $baseName" -ForegroundColor DarkGray -NoNewline
-            Write-Host "  (enable with: Enable-ShelixPlugin '$baseName')" -ForegroundColor DarkGray
+            Write-Host "  (enable with: Enable-BildsyPSPlugin '$baseName')" -ForegroundColor DarkGray
         }
     }
 
@@ -602,7 +602,7 @@ function Get-PluginIntentsPrompt {
     return ($sections -join "`n`n")
 }
 
-function New-ShelixPlugin {
+function New-BildsyPSPlugin {
     <#
     .SYNOPSIS
     Scaffold a new plugin file from the template.
@@ -629,7 +629,7 @@ function New-ShelixPlugin {
     $categoryKey = $safeName.ToLower()
 
     $template = @"
-# ============= $safeName.ps1 — Shelix Plugin =============
+# ============= $safeName.ps1 — BildsyPS Plugin =============
 
 # Optional: plugin metadata shown by 'plugins' command
 `$PluginInfo = @{
@@ -774,17 +774,17 @@ function Reset-PluginConfig {
     }
 
     # Reload defaults from plugin if it's loaded
-    if ($global:LoadedPlugins.ContainsKey($Plugin)) {
+    if ($global:LoadedPlugins.Contains($Plugin)) {
         # Re-import just this plugin to pick up defaults
         $global:PluginSettings.Remove($Plugin)
-        Import-ShelixPlugins -Name $Plugin -Quiet
+        Import-BildsyPSPlugins -Name $Plugin -Quiet
         Write-Host "Defaults reloaded from plugin." -ForegroundColor DarkGray
     }
 }
 
 # ===== Plugin Self-Test Framework =====
 
-function Test-ShelixPlugin {
+function Test-BildsyPSPlugin {
     <#
     .SYNOPSIS
     Run self-tests defined in a plugin's $PluginTests hashtable.
@@ -814,7 +814,7 @@ function Test-ShelixPlugin {
         }
     }
     else {
-        if (-not $global:LoadedPlugins.ContainsKey($Name)) {
+        if (-not $global:LoadedPlugins.Contains($Name)) {
             Write-Host "Plugin '$Name' is not loaded." -ForegroundColor Red
             return
         }
@@ -873,7 +873,7 @@ function Test-ShelixPlugin {
 
 # ===== Hot-Reload File Watcher =====
 
-function Watch-ShelixPlugins {
+function Watch-BildsyPSPlugins {
     <#
     .SYNOPSIS
     Start a FileSystemWatcher on the Plugins/ directory. When a .ps1 file is
@@ -882,11 +882,11 @@ function Watch-ShelixPlugins {
     .DESCRIPTION
     The watcher runs as a registered event in the current session. It only
     triggers on .ps1 files that are active (no underscore prefix). Use
-    Stop-WatchShelixPlugins to tear it down.
+    Stop-WatchBildsyPSPlugins to tear it down.
     #>
 
     if ($global:_PluginWatcher) {
-        Write-Host "Plugin watcher is already running. Use Stop-WatchShelixPlugins to stop it." -ForegroundColor Yellow
+        Write-Host "Plugin watcher is already running. Use Stop-WatchBildsyPSPlugins to stop it." -ForegroundColor Yellow
         return
     }
 
@@ -919,25 +919,25 @@ function Watch-ShelixPlugins {
         Write-Host "`n[plugin-watch] Detected $changeType on $name.ps1" -ForegroundColor DarkCyan
 
         if ($changeType -eq 'Deleted') {
-            if ($global:LoadedPlugins.ContainsKey($name)) {
-                Unregister-ShelixPlugin -Name $name
+            if ($global:LoadedPlugins.Contains($name)) {
+                Unregister-BildsyPSPlugin -Name $name
                 Write-Host "[plugin-watch] Unloaded $name" -ForegroundColor Yellow
             }
         }
         else {
             # Changed or Created — reload
-            if ($global:LoadedPlugins.ContainsKey($name)) {
-                Unregister-ShelixPlugin -Name $name
+            if ($global:LoadedPlugins.Contains($name)) {
+                Unregister-BildsyPSPlugin -Name $name
             }
-            Import-ShelixPlugins -Name $name
+            Import-BildsyPSPlugins -Name $name
             Write-Host "[plugin-watch] Reloaded $name" -ForegroundColor Green
         }
     }
 
-    Register-ObjectEvent -InputObject $watcher -EventName Changed -Action $action -SourceIdentifier 'ShelixPluginChanged' | Out-Null
-    Register-ObjectEvent -InputObject $watcher -EventName Created -Action $action -SourceIdentifier 'ShelixPluginCreated' | Out-Null
-    Register-ObjectEvent -InputObject $watcher -EventName Deleted -Action $action -SourceIdentifier 'ShelixPluginDeleted' | Out-Null
-    Register-ObjectEvent -InputObject $watcher -EventName Renamed -Action $action -SourceIdentifier 'ShelixPluginRenamed' | Out-Null
+    Register-ObjectEvent -InputObject $watcher -EventName Changed -Action $action -SourceIdentifier 'BildsyPSPluginChanged' | Out-Null
+    Register-ObjectEvent -InputObject $watcher -EventName Created -Action $action -SourceIdentifier 'BildsyPSPluginCreated' | Out-Null
+    Register-ObjectEvent -InputObject $watcher -EventName Deleted -Action $action -SourceIdentifier 'BildsyPSPluginDeleted' | Out-Null
+    Register-ObjectEvent -InputObject $watcher -EventName Renamed -Action $action -SourceIdentifier 'BildsyPSPluginRenamed' | Out-Null
 
     $global:_PluginWatcher = $watcher
     $global:_PluginWatcherLastEvent = $null
@@ -945,13 +945,13 @@ function Watch-ShelixPlugins {
 
     Write-Host "Plugin watcher started on $global:PluginsPath" -ForegroundColor Green
     Write-Host "Edit any .ps1 in Plugins/ and it will auto-reload." -ForegroundColor DarkGray
-    Write-Host "Stop with: Stop-WatchShelixPlugins" -ForegroundColor DarkGray
+    Write-Host "Stop with: Stop-WatchBildsyPSPlugins" -ForegroundColor DarkGray
 }
 
-function Stop-WatchShelixPlugins {
+function Stop-WatchBildsyPSPlugins {
     <#
     .SYNOPSIS
-    Stop the plugin file watcher started by Watch-ShelixPlugins.
+    Stop the plugin file watcher started by Watch-BildsyPSPlugins.
     #>
     if (-not $global:_PluginWatcher) {
         Write-Host "No plugin watcher is running." -ForegroundColor DarkGray
@@ -959,7 +959,7 @@ function Stop-WatchShelixPlugins {
     }
 
     # Unregister all events
-    @('ShelixPluginChanged', 'ShelixPluginCreated', 'ShelixPluginDeleted', 'ShelixPluginRenamed') | ForEach-Object {
+    @('BildsyPSPluginChanged', 'BildsyPSPluginCreated', 'BildsyPSPluginDeleted', 'BildsyPSPluginRenamed') | ForEach-Object {
         Unregister-Event -SourceIdentifier $_ -ErrorAction SilentlyContinue
     }
 
@@ -973,14 +973,14 @@ function Stop-WatchShelixPlugins {
 }
 
 # ===== Tab Completion =====
-Register-ArgumentCompleter -CommandName Unregister-ShelixPlugin -ParameterName Name -ScriptBlock {
+Register-ArgumentCompleter -CommandName Unregister-BildsyPSPlugin -ParameterName Name -ScriptBlock {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
     $global:LoadedPlugins.Keys | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
         [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
     }
 }
 
-Register-ArgumentCompleter -CommandName Enable-ShelixPlugin -ParameterName Name -ScriptBlock {
+Register-ArgumentCompleter -CommandName Enable-BildsyPSPlugin -ParameterName Name -ScriptBlock {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
     Get-ChildItem "$global:PluginsPath\_*.ps1" -ErrorAction SilentlyContinue | ForEach-Object {
         $n = $_.BaseName -replace '^_', ''
@@ -990,14 +990,14 @@ Register-ArgumentCompleter -CommandName Enable-ShelixPlugin -ParameterName Name 
     }
 }
 
-Register-ArgumentCompleter -CommandName Disable-ShelixPlugin -ParameterName Name -ScriptBlock {
+Register-ArgumentCompleter -CommandName Disable-BildsyPSPlugin -ParameterName Name -ScriptBlock {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
     $global:LoadedPlugins.Keys | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
         [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', "Disable plugin $_")
     }
 }
 
-Register-ArgumentCompleter -CommandName Import-ShelixPlugins -ParameterName Name -ScriptBlock {
+Register-ArgumentCompleter -CommandName Import-BildsyPSPlugins -ParameterName Name -ScriptBlock {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
     Get-ChildItem "$global:PluginsPath\*.ps1" -ErrorAction SilentlyContinue |
         Where-Object { $_.Name -notlike '_*' } | ForEach-Object {
@@ -1007,7 +1007,7 @@ Register-ArgumentCompleter -CommandName Import-ShelixPlugins -ParameterName Name
     }
 }
 
-Register-ArgumentCompleter -CommandName Test-ShelixPlugin -ParameterName Name -ScriptBlock {
+Register-ArgumentCompleter -CommandName Test-BildsyPSPlugin -ParameterName Name -ScriptBlock {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
     $global:LoadedPlugins.Keys | Where-Object {
         $_ -like "$wordToComplete*" -and $global:LoadedPlugins[$_].HasTests
@@ -1038,11 +1038,11 @@ Register-ArgumentCompleter -CommandName Reset-PluginConfig -ParameterName Plugin
 }
 
 # ===== Aliases =====
-Set-Alias plugins       Get-ShelixPlugins       -Force
-Set-Alias new-plugin    New-ShelixPlugin        -Force
-Set-Alias test-plugin   Test-ShelixPlugin       -Force
-Set-Alias watch-plugins Watch-ShelixPlugins     -Force
+Set-Alias plugins       Get-BildsyPSPlugins       -Force
+Set-Alias new-plugin    New-BildsyPSPlugin        -Force
+Set-Alias test-plugin   Test-BildsyPSPlugin       -Force
+Set-Alias watch-plugins Watch-BildsyPSPlugins     -Force
 Set-Alias plugin-config Get-PluginConfig        -Force
 
 # Auto-load plugins on module import
-Import-ShelixPlugins -Quiet
+Import-BildsyPSPlugins -Quiet

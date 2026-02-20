@@ -3,7 +3,7 @@
 # Stored in UserAliases.ps1 file
 
 # ===== Configuration =====
-$global:UserAliasesPath = "$global:ShelixHome\aliases\UserAliases.ps1"
+$global:UserAliasesPath = "$global:BildsyPSHome\aliases\UserAliases.ps1"
 
 function Add-PersistentAlias {
     <#
@@ -78,8 +78,8 @@ function Remove-PersistentAlias {
         return
     }
     
-    $lines = Get-Content $global:UserAliasesPath
-    $newLines = $lines | Where-Object { $_ -notmatch "Set-Alias\s+-Name\s+$Name\s+" }
+    $lines = @(Get-Content $global:UserAliasesPath)
+    $newLines = @($lines | Where-Object { $_ -notmatch "Set-Alias\s+-Name\s+$Name\s+" })
     
     if ($lines.Count -eq $newLines.Count) {
         Write-Host "Alias '$Name' not found in persistent aliases." -ForegroundColor Yellow

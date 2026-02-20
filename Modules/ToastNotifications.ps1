@@ -1,5 +1,5 @@
 # ===== ToastNotifications.ps1 =====
-# Windows toast notifications for Shelix events
+# Windows toast notifications for BildsyPS events
 # Gracefully degrades if BurntToast is not installed — never breaks the shell
 
 $global:ShелixToastEnabled = $true   # Set to $false to silence all toasts
@@ -51,7 +51,7 @@ function Send-ShелixToast {
     Play a sound with the notification. Default: $false.
     #>
     param(
-        [string]$Title = 'Shelix',
+        [string]$Title = 'BildsyPS',
         [string]$Message = '',
         [ValidateSet('Success', 'Error', 'Info', 'Warning')]
         [string]$Type = 'Info',
@@ -76,7 +76,7 @@ function Send-ShелixToast {
             try {
                 $btParams = @{
                     Text  = @($fullTitle, $Message)
-                    AppId = 'Shelix'
+                    AppId = 'BildsyPS'
                 }
                 if (-not $Sound) { $btParams.Silent = $true }
                 New-BurntToastNotification @btParams
@@ -88,7 +88,7 @@ function Send-ShелixToast {
 
         'WinRT' {
             try {
-                $appId = 'Shelix'
+                $appId = 'BildsyPS'
                 $template = [Windows.UI.Notifications.ToastTemplateType, Windows.UI.Notifications, ContentType = WindowsRuntime]::ToastText02
                 $toastXml = [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime]::GetTemplateContent($template)
 
@@ -128,7 +128,7 @@ function Send-ErrorToast {
 }
 
 function Send-InfoToast {
-    param([string]$Title = 'Shelix', [string]$Message = '')
+    param([string]$Title = 'BildsyPS', [string]$Message = '')
     Send-ShелixToast -Title $Title -Message $Message -Type Info
 }
 
@@ -144,7 +144,7 @@ function Install-BurntToast {
         Import-Module BurntToast -ErrorAction Stop
         $global:ShелixToastProvider = 'BurntToast'
         Write-Host "BurntToast installed. Toast notifications enabled." -ForegroundColor Green
-        Send-ShелixToast -Title "Shelix" -Message "Toast notifications are now active." -Type Success
+        Send-ShелixToast -Title "BildsyPS" -Message "Toast notifications are now active." -Type Success
     }
     catch {
         Write-Host "Failed to install BurntToast: $($_.Exception.Message)" -ForegroundColor Red

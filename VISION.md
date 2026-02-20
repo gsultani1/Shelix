@@ -1,12 +1,12 @@
-# Shelix Vision
+# BildsyPS Vision
 
 > Shell + Helix. A shell environment with interconnected, spiraling capability.
 
 ---
 
-## What Shelix Is Today
+## What BildsyPS Is Today
 
-Shelix is an AI shell environment for PowerShell. It gives your terminal a brain — one that understands your context, executes commands on your behalf, remembers your conversations, and connects to external tools through MCP.
+BildsyPS is an AI shell environment for PowerShell. It gives your terminal a brain — one that understands your context, executes commands on your behalf, remembers your conversations, and connects to external tools through MCP.
 
 Today it does things like:
 
@@ -27,11 +27,11 @@ Today it does things like:
 
 All of it runs locally. Nothing phones home. The AI can only run commands you've explicitly whitelisted.
 
-As of v1.3.0, the codebase has been fully audited: security hardened, parse errors eliminated, duplicate code removed, and intent ordering made deterministic. The foundation is clean.
+As of v1.3.0, the codebase has been fully audited: security hardened, parse errors eliminated, duplicate code removed, and intent ordering made deterministic. A comprehensive E2E test suite now covers 276 tests across 15 modules with 0 failures — the foundation is clean and verified.
 
 ---
 
-## What Shelix Is Becoming
+## What BildsyPS Is Becoming
 
 The terminal is just the first surface.
 
@@ -43,7 +43,7 @@ The long-term vision is **mission control for your entire computer** — an AI l
 The AI understands your terminal context — current directory, git state, running processes, file structure — and can execute actions through a safety-gated intent system with 80+ built-in intents. Security hardened: calculator sandboxed to `[math]::` only, file reads validated against allowed roots, `RequiresConfirmation` intents always prompt even in agent mode. Secret scanner detects leaked API keys in files and staged git commits.
 
 **2. Extensibility layer** *(✅ complete)*
-Drop-in plugin architecture with dependency resolution, per-plugin configuration, lifecycle hooks, self-tests, and hot-reload. User-defined skills via JSON config for non-programmers. Community contributions without merge conflicts.
+Drop-in plugin architecture with dependency resolution, per-plugin configuration, lifecycle hooks, self-tests, and hot-reload. User-defined skills via JSON config for non-programmers — skills are now directly callable from the shell prompt, support `{param}` substitution, trigger phrase registration, and are auto-created from the example template on first run. Community contributions without merge conflicts.
 
 **3. Context engine** *(✅ complete)*
 Persistent memory across sessions via SQLite with FTS5 full-text search. The AI recalls what you worked on yesterday, what files you've touched, what decisions you made. Conversation history stored locally, searchable across all sessions. Token budget management with intelligent context trimming and eviction summarization.
@@ -55,7 +55,7 @@ Vision model support for screenshots and images — send to Claude, GPT-4o, or l
 Dynamic multi-step task planning via the ReAct (Reason + Act) loop. The agent has 17 built-in tools (calculator, web search, stock quotes, Wikipedia, datetime, JSON parsing, regex, file reading, shell execution, working memory, screenshot, OCR, app building, chat history search), unified tool+intent dispatch, an ASK protocol for mid-task user input, PLAN display, and interactive multi-turn sessions with shared memory. Background agent heartbeat for cron-triggered scheduled tasks.
 
 **6. App Builder** *(✅ complete)*
-Prompt-to-executable pipeline. Describe an app in plain English and get a compiled Windows `.exe`. Three build lanes: PowerShell/WinForms (default — zero external deps beyond ps2exe), Python-TK (Tkinter + PyInstaller), and Python-Web (PyWebView + PyInstaller). Token budget auto-detects from model context window. Generated code is validated for syntax errors, dangerous patterns, and secret leaks before compilation. Diff-based rebuild modifies existing builds without full regeneration. Every app includes "Built with Shelix" branding. All builds tracked in SQLite.
+Prompt-to-executable pipeline. Describe an app in plain English and get a compiled Windows `.exe`. Three build lanes: PowerShell/WinForms (default — zero external deps beyond ps2exe), Python-TK (Tkinter + PyInstaller), and Python-Web (PyWebView + PyInstaller). Token budget auto-detects from model context window. Generated code is validated for syntax errors, dangerous patterns, and secret leaks before compilation. Diff-based rebuild modifies existing builds without full regeneration. Every app includes "Built with BildsyPS" branding. All builds tracked in SQLite.
 
 **7. Mission control GUI** *(next)*
 A dashboard layer over the shell. Not a replacement — an amplifier. The terminal stays the engine; the GUI surfaces context, history, running tasks, and agent state in a way that's faster to scan than a command line.
@@ -68,7 +68,7 @@ A dashboard layer over the shell. Not a replacement — an amplifier. The termin
 
 **Nothing runs unless you tell it to.** The safety system isn't an afterthought — it's structural. Commands are whitelisted. Destructive actions require confirmation. The AI cannot execute anything outside the approved set without explicit user approval.
 
-**Shell as the foundation.** The terminal isn't a legacy interface to be replaced. It's the most powerful general-purpose computer interface ever built. Shelix extends it rather than abstracting it away.
+**Shell as the foundation.** The terminal isn't a legacy interface to be replaced. It's the most powerful general-purpose computer interface ever built. BildsyPS extends it rather than abstracting it away.
 
 **Modular by design.** Every capability is a drop-in module. Adding a new intent, provider, or tool doesn't require touching core code. The plugin architecture makes this explicit — drop a `.ps1` file in `Plugins/` or add a skill to `UserSkills.json` and it's live.
 
@@ -86,7 +86,7 @@ There are more AI agent tools now than there were six months ago. Most of them h
 - **Narrow scope.** Most agent tools are scoped to development — code generation, PR review, terminal commands. They don't touch your calendar, your documents, your clipboard, your browser, your scheduled tasks.
 - **No memory.** Most tools treat every conversation as a fresh start. There's no continuity between sessions, no awareness of what you worked on yesterday.
 
-Shelix is different on all five:
+BildsyPS is different on all five:
 
 **Provider-agnostic.** Claude, GPT, Ollama, LM Studio, or any llm CLI plugin. Swap models mid-session. Run entirely local if you want.
 

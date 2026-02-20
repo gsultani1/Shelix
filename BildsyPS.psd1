@@ -1,5 +1,5 @@
 @{
-    RootModule        = 'Shelix.psm1'
+    RootModule        = 'BildsyPS.psm1'
     ModuleVersion     = '1.3.0'
     GUID              = 'cf4820d1-a29f-4454-b17f-eea35493bf40'
     Author            = 'Georg Sultani'
@@ -89,10 +89,10 @@
         'Show-Code', 'Show-Json', 'Show-Csv', 'Show-Data', 'Show-Diff', 'Show-Markdown',
 
         # Plugins
-        'Import-ShelixPlugins', 'Get-ShelixPlugins', 'New-ShelixPlugin',
-        'Unregister-ShelixPlugin', 'Test-ShelixPlugin',
+        'Import-BildsyPSPlugins', 'Get-BildsyPSPlugins', 'New-BildsyPSPlugin',
+        'Unregister-BildsyPSPlugin', 'Test-BildsyPSPlugin',
         'Get-PluginConfig', 'Set-PluginConfig', 'Reset-PluginConfig',
-        'Watch-ShelixPlugins', 'Stop-WatchShelixPlugins',
+        'Watch-BildsyPSPlugins', 'Stop-WatchBildsyPSPlugins',
 
         # Skills and aliases
         'New-UserSkill', 'Remove-UserSkill', 'Get-UserSkills', 'Import-UserSkills',
@@ -131,7 +131,7 @@
         'Show-ProfileTips', 'Get-ProfileTiming',
 
         # Install helper
-        'Install-Shelix'
+        'Install-BildsyPS'
     )
 
     AliasesToExport = @(
@@ -166,8 +166,8 @@
     PrivateData = @{
         PSData = @{
             Tags         = @('AI', 'LLM', 'Claude', 'GPT', 'Ollama', 'Agent', 'Shell', 'Automation', 'Chat', 'Vision', 'OCR', 'SQLite', 'RAG')
-            ProjectUri   = 'https://github.com/gsultani/shelix'
-            LicenseUri   = 'https://github.com/gsultani/shelix/blob/main/LICENSE'
+            ProjectUri   = 'https://github.com/gsultani/bildsyps'
+            LicenseUri   = 'https://github.com/gsultani/bildsyps/blob/main/LICENSE'
             ReleaseNotes = 'v1.3.0: SQLite RAG with FTS5, secret scanner, agent heartbeat, OCR integration, module packaging'
         }
     }

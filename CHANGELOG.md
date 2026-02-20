@@ -59,13 +59,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - Per-plugin config: `$PluginConfig` defaults + `Plugins/Config/*.json` overrides
   - `Get-PluginConfig`, `Set-PluginConfig`, `Reset-PluginConfig`
   - Lifecycle hooks: `$PluginHooks` with `OnLoad`/`OnUnload` scriptblocks
-  - Self-test framework: `$PluginTests` + `Test-ShelixPlugin`
+  - Self-test framework: `$PluginTests` + `Test-BildsyPSPlugin`
   - Helper function sharing: `$PluginFunctions` → `$global:PluginHelpers`
-  - Version compatibility: `MinShelixVersion`/`MaxShelixVersion` checks
-  - Hot-reload file watcher: `Watch-ShelixPlugins` / `Stop-WatchShelixPlugins`
+  - Version compatibility: `MinBildsyPSVersion`/`MaxBildsyPSVersion` checks
+  - Hot-reload file watcher: `Watch-BildsyPSPlugins` / `Stop-WatchBildsyPSPlugins`
   - Aliases: `test-plugin`, `watch-plugins`, `plugin-config`
 - Example plugins: `_Example.ps1` (updated), `_Pomodoro.ps1`, `_QuickNotes.ps1`
-- `$global:ShelixVersion` set to `'1.0.0'` in profile
+- `$global:BildsyPSVersion` set to `'1.0.0'` in profile
 
 ### Changed
 - `IntentAliasSystem.ps1` — Added `AgentTools.ps1` and `AgentLoop.ps1` to load order

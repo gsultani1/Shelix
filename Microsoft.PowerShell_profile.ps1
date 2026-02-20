@@ -3,7 +3,7 @@
 # Profile load timing
 $global:ProfileLoadStart = Get-Date
 $global:ProfileTimings = @{}
-$global:ShelixVersion = '1.2.0'
+$global:BildsyPSVersion = '1.3.0'
 
 # Safe Mode - report errors but continue loading
 trap {
@@ -22,22 +22,22 @@ Set-PSReadLineOption -HistorySearchCursorMovesToEnd
 # Suppress startup noise
 if ($Host.UI.RawUI.WindowTitle) { Clear-Host }
 
-# ===== Shelix Home (user data, separate from module install path) =====
-$global:ShelixHome = "$env:USERPROFILE\.shelix"
-$global:ShelixModulePath = $PSScriptRoot
+# ===== BildsyPS Home (user data, separate from module install path) =====
+$global:BildsyPSHome = "$env:USERPROFILE\.bildsyps"
+$global:BildsyPSModulePath = $PSScriptRoot
 
-function Initialize-ShelixHome {
-    # Create the ~/.shelix directory tree on first run
+function Initialize-BildsyPSHome {
+    # Create the ~/.bildsyps directory tree on first run
     $dirs = @(
-        $global:ShelixHome
-        "$global:ShelixHome\config"
-        "$global:ShelixHome\data"
-        "$global:ShelixHome\logs"
-        "$global:ShelixHome\logs\sessions"
-        "$global:ShelixHome\plugins"
-        "$global:ShelixHome\plugins\Config"
-        "$global:ShelixHome\skills"
-        "$global:ShelixHome\aliases"
+        $global:BildsyPSHome
+        "$global:BildsyPSHome\config"
+        "$global:BildsyPSHome\data"
+        "$global:BildsyPSHome\logs"
+        "$global:BildsyPSHome\logs\sessions"
+        "$global:BildsyPSHome\plugins"
+        "$global:BildsyPSHome\plugins\Config"
+        "$global:BildsyPSHome\skills"
+        "$global:BildsyPSHome\aliases"
     )
     foreach ($d in $dirs) {
         if (-not (Test-Path $d)) {
@@ -49,57 +49,57 @@ function Initialize-ShelixHome {
     $migrated = @()
     $oldRoot = $PSScriptRoot
 
-    # Config/.env -> ~/.shelix/config/.env
+    # Config/.env -> ~/.bildsyps/config/.env
     $oldEnv = "$oldRoot\Config\.env"
-    $newEnv = "$global:ShelixHome\config\.env"
+    $newEnv = "$global:BildsyPSHome\config\.env"
     if ((Test-Path $oldEnv) -and -not (Test-Path $newEnv)) {
         Copy-Item $oldEnv $newEnv -Force
         $migrated += ".env"
     }
 
-    # ChatConfig.json -> ~/.shelix/config/ChatConfig.json
+    # ChatConfig.json -> ~/.bildsyps/config/ChatConfig.json
     $oldChat = "$oldRoot\ChatConfig.json"
-    $newChat = "$global:ShelixHome\config\ChatConfig.json"
+    $newChat = "$global:BildsyPSHome\config\ChatConfig.json"
     if ((Test-Path $oldChat) -and -not (Test-Path $newChat)) {
         Copy-Item $oldChat $newChat -Force
         $migrated += "ChatConfig.json"
     }
 
-    # ToolPreferences.json -> ~/.shelix/config/ToolPreferences.json
+    # ToolPreferences.json -> ~/.bildsyps/config/ToolPreferences.json
     $oldTP = "$oldRoot\ToolPreferences.json"
-    $newTP = "$global:ShelixHome\config\ToolPreferences.json"
+    $newTP = "$global:BildsyPSHome\config\ToolPreferences.json"
     if ((Test-Path $oldTP) -and -not (Test-Path $newTP)) {
         Copy-Item $oldTP $newTP -Force
         $migrated += "ToolPreferences.json"
     }
 
-    # UserSkills.json -> ~/.shelix/skills/UserSkills.json
+    # UserSkills.json -> ~/.bildsyps/skills/UserSkills.json
     $oldSkills = "$oldRoot\UserSkills.json"
-    $newSkills = "$global:ShelixHome\skills\UserSkills.json"
+    $newSkills = "$global:BildsyPSHome\skills\UserSkills.json"
     if ((Test-Path $oldSkills) -and -not (Test-Path $newSkills)) {
         Copy-Item $oldSkills $newSkills -Force
         $migrated += "UserSkills.json"
     }
 
-    # UserAliases.ps1 -> ~/.shelix/aliases/UserAliases.ps1
+    # UserAliases.ps1 -> ~/.bildsyps/aliases/UserAliases.ps1
     $oldAliases = "$oldRoot\UserAliases.ps1"
-    $newAliases = "$global:ShelixHome\aliases\UserAliases.ps1"
+    $newAliases = "$global:BildsyPSHome\aliases\UserAliases.ps1"
     if ((Test-Path $oldAliases) -and -not (Test-Path $newAliases)) {
         Copy-Item $oldAliases $newAliases -Force
         $migrated += "UserAliases.ps1"
     }
 
-    # NaturalLanguageMappings.json -> ~/.shelix/data/NaturalLanguageMappings.json
+    # NaturalLanguageMappings.json -> ~/.bildsyps/data/NaturalLanguageMappings.json
     $oldNL = "$oldRoot\NaturalLanguageMappings.json"
-    $newNL = "$global:ShelixHome\data\NaturalLanguageMappings.json"
+    $newNL = "$global:BildsyPSHome\data\NaturalLanguageMappings.json"
     if ((Test-Path $oldNL) -and -not (Test-Path $newNL)) {
         Copy-Item $oldNL $newNL -Force
         $migrated += "NaturalLanguageMappings.json"
     }
 
-    # ~/Documents/ChatLogs/ -> ~/.shelix/logs/sessions/
+    # ~/Documents/ChatLogs/ -> ~/.bildsyps/logs/sessions/
     $oldLogs = "$env:USERPROFILE\Documents\ChatLogs"
-    $newLogs = "$global:ShelixHome\logs\sessions"
+    $newLogs = "$global:BildsyPSHome\logs\sessions"
     if ((Test-Path $oldLogs) -and (Get-ChildItem $oldLogs -Filter "*.json" -ErrorAction SilentlyContinue).Count -gt 0) {
         $existingNew = (Get-ChildItem $newLogs -Filter "*.json" -ErrorAction SilentlyContinue).Count
         if ($existingNew -eq 0) {
@@ -108,21 +108,21 @@ function Initialize-ShelixHome {
         }
     }
 
-    # ~/Documents/ChatLogs/AIExecutionLog.json -> ~/.shelix/logs/AIExecutionLog.json
+    # ~/Documents/ChatLogs/AIExecutionLog.json -> ~/.bildsyps/logs/AIExecutionLog.json
     $oldExecLog = "$env:USERPROFILE\Documents\ChatLogs\AIExecutionLog.json"
-    $newExecLog = "$global:ShelixHome\logs\AIExecutionLog.json"
+    $newExecLog = "$global:BildsyPSHome\logs\AIExecutionLog.json"
     if ((Test-Path $oldExecLog) -and -not (Test-Path $newExecLog)) {
         Copy-Item $oldExecLog $newExecLog -Force
         $migrated += "AIExecutionLog.json"
     }
 
-    # Plugins/ -> ~/.shelix/plugins/ (user plugin files only, skip bundled examples)
+    # Plugins/ -> ~/.bildsyps/plugins/ (user plugin files only, skip bundled examples)
     $oldPlugins = "$oldRoot\Plugins"
     if (Test-Path $oldPlugins) {
         $userPlugins = Get-ChildItem "$oldPlugins\*.ps1" -ErrorAction SilentlyContinue |
             Where-Object { $_.Name -notlike '_Example*' -and $_.Name -notlike '_Pomodoro*' -and $_.Name -notlike '_QuickNotes*' }
         foreach ($p in $userPlugins) {
-            $dest = Join-Path "$global:ShelixHome\plugins" $p.Name
+            $dest = Join-Path "$global:BildsyPSHome\plugins" $p.Name
             if (-not (Test-Path $dest)) {
                 Copy-Item $p.FullName $dest -Force
                 $migrated += "Plugin: $($p.Name)"
@@ -132,7 +132,7 @@ function Initialize-ShelixHome {
         $oldPConfig = "$oldPlugins\Config"
         if (Test-Path $oldPConfig) {
             Get-ChildItem "$oldPConfig\*.json" -ErrorAction SilentlyContinue | ForEach-Object {
-                $dest = Join-Path "$global:ShelixHome\plugins\Config" $_.Name
+                $dest = Join-Path "$global:BildsyPSHome\plugins\Config" $_.Name
                 if (-not (Test-Path $dest)) {
                     Copy-Item $_.FullName $dest -Force
                 }
@@ -141,7 +141,7 @@ function Initialize-ShelixHome {
     }
 
     if ($migrated.Count -gt 0) {
-        Write-Host "`n[Shelix] Migrated $($migrated.Count) item(s) to $global:ShelixHome" -ForegroundColor Cyan
+        Write-Host "`n[BildsyPS] Migrated $($migrated.Count) item(s) to $global:BildsyPSHome" -ForegroundColor Cyan
         foreach ($m in $migrated) {
             Write-Host "  - $m" -ForegroundColor DarkCyan
         }
@@ -149,7 +149,7 @@ function Initialize-ShelixHome {
     }
 }
 
-Initialize-ShelixHome
+Initialize-BildsyPSHome
 
 # ===== Module Loading =====
 $global:ModulesPath = "$PSScriptRoot\Modules"
@@ -221,7 +221,7 @@ function Update-IntentAliases {
     $global:LoadedUserSkills = [ordered]@{}
     Import-UserSkills -Quiet
     $global:LoadedPlugins = [ordered]@{}
-    Import-ShelixPlugins -Quiet
+    Import-BildsyPSPlugins -Quiet
     Write-Host "Intent aliases reloaded (skills + plugins re-merged)." -ForegroundColor Green
 }
 Set-Alias reload-intents Update-IntentAliases -Force
@@ -238,14 +238,14 @@ function Update-ChatProviders {
 }
 Set-Alias reload-providers Update-ChatProviders -Force
 
-function Update-ShelixPlugins {
+function Update-BildsyPSPlugins {
     # Unregister all current plugin contributions, then re-load from disk
     foreach ($pName in @($global:LoadedPlugins.Keys)) {
-        Unregister-ShelixPlugin -Name $pName
+        Unregister-BildsyPSPlugin -Name $pName
     }
-    Import-ShelixPlugins
+    Import-BildsyPSPlugins
 }
-Set-Alias reload-plugins Update-ShelixPlugins -Force
+Set-Alias reload-plugins Update-BildsyPSPlugins -Force
 
 function Update-AllModules {
     . "$global:ModulesPath\IntentAliasSystem.ps1" -ErrorAction SilentlyContinue
@@ -257,7 +257,7 @@ function Update-AllModules {
     }
     # Re-merge plugins after core reload
     $global:LoadedPlugins = [ordered]@{}
-    Import-ShelixPlugins
+    Import-BildsyPSPlugins
     Write-Host "All modules reloaded." -ForegroundColor Green
 }
 Set-Alias reload-all Update-AllModules -Force

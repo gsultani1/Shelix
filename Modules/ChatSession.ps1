@@ -4,7 +4,7 @@
 # ===== Chat Session State =====
 $global:ChatSessionHistory = @()
 $global:ChatSessionName = $null       # Current session name (null = unnamed)
-$global:ChatLogsPath = "$global:ShelixHome\logs\sessions"
+$global:ChatLogsPath = "$global:BildsyPSHome\logs\sessions"
 $global:ChatSessionIndex = @{}        # In-memory index: name -> metadata
 
 # ===== Chat Session Functions =====

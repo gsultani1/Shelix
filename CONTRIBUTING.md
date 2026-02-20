@@ -1,4 +1,4 @@
-# Contributing to Shelix
+# Contributing to BildsyPS
 
 Thank you for your interest in contributing! This document provides guidelines for contributing to the project.
 
@@ -130,7 +130,7 @@ Before submitting a PR:
 2. Define `$PluginIntents` — a hashtable mapping intent names to scriptblocks (required)
 3. Define `$PluginMetadata` — category, description, parameters (recommended)
 4. Optionally define any of the following:
-   - `$PluginInfo` — version, author, description, `Dependencies`, `MinShelixVersion`, `MaxShelixVersion`
+   - `$PluginInfo` — version, author, description, `Dependencies`, `MinBildsyPSVersion`, `MaxBildsyPSVersion`
    - `$PluginCategories` — new intent category definitions
    - `$PluginWorkflows` — multi-step workflow chains
    - `$PluginConfig` — per-plugin settings with defaults, persisted to `Plugins/Config/<name>.json`
@@ -138,7 +138,7 @@ Before submitting a PR:
    - `$PluginHooks` — `OnLoad`/`OnUnload` lifecycle callbacks
    - `$PluginTests` — self-test scriptblocks, run with `test-plugin -Name 'Name'`
 5. Run `reload-plugins` to load — plugin intents appear in `intent-help`, AI chat, and tab-completion
-6. Use `Enable-ShelixPlugin` / `Disable-ShelixPlugin` to toggle without deleting files
+6. Use `Enable-BildsyPSPlugin` / `Disable-BildsyPSPlugin` to toggle without deleting files
 7. Use `watch-plugins` during development for automatic hot-reload on file save
 8. See `Plugins/_Example.ps1` for the full template with all conventions
 

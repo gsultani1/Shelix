@@ -96,7 +96,7 @@ function Capture-Screenshot {
             $bitmap = Resize-ImageBitmap -Bitmap $bitmap -MaxEdge $global:VisionMaxEdge
         }
 
-        $tempPath = Join-Path $env:TEMP "shelix_screenshot_$(Get-Date -Format 'yyyyMMdd_HHmmss').png"
+        $tempPath = Join-Path $env:TEMP "bildsyps_screenshot_$(Get-Date -Format 'yyyyMMdd_HHmmss').png"
         $bitmap.Save($tempPath, [System.Drawing.Imaging.ImageFormat]::Png)
         $bitmap.Dispose()
 
@@ -140,7 +140,7 @@ function Get-ClipboardImage {
             $bitmap = Resize-ImageBitmap -Bitmap $bitmap -MaxEdge $global:VisionMaxEdge
         }
 
-        $tempPath = Join-Path $env:TEMP "shelix_clipboard_$(Get-Date -Format 'yyyyMMdd_HHmmss').png"
+        $tempPath = Join-Path $env:TEMP "bildsyps_clipboard_$(Get-Date -Format 'yyyyMMdd_HHmmss').png"
         $bitmap.Save($tempPath, [System.Drawing.Imaging.ImageFormat]::Png)
         $bitmap.Dispose()
 
@@ -229,7 +229,7 @@ function ConvertTo-ImageBase64 {
             $longest = [math]::Max($bitmap.Width, $bitmap.Height)
             if ($longest -gt $global:VisionMaxEdge) {
                 $bitmap = Resize-ImageBitmap -Bitmap $bitmap -MaxEdge $global:VisionMaxEdge
-                $resizedPath = Join-Path $env:TEMP "shelix_resized_$(Get-Date -Format 'yyyyMMdd_HHmmss')$ext"
+                $resizedPath = Join-Path $env:TEMP "bildsyps_resized_$(Get-Date -Format 'yyyyMMdd_HHmmss')$ext"
                 $bitmap.Save($resizedPath)
                 $bitmap.Dispose()
                 $bytes = [System.IO.File]::ReadAllBytes($resizedPath)

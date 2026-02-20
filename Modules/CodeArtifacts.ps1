@@ -396,7 +396,7 @@ function Invoke-Artifact {
     if (-not $execPath -or -not (Test-Path $execPath)) {
         # Save to temp file
         $ext = $runner.Ext
-        $tempFile = Join-Path $env:TEMP "shelix_artifact_$(Get-Date -Format 'HHmmss')$ext"
+        $tempFile = Join-Path $env:TEMP "bildsyps_artifact_$(Get-Date -Format 'HHmmss')$ext"
         try {
             $block.Code | Set-Content -Path $tempFile -Encoding UTF8 -NoNewline
             $execPath = $tempFile

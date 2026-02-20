@@ -163,14 +163,14 @@ Describe 'AgentHeartbeat — Admin' -Tag 'Admin' {
         It 'Register-AgentHeartbeat creates a scheduled task' {
             $result = Register-AgentHeartbeat -IntervalMinutes 60
             $result.Success | Should -BeTrue
-            $task = Get-ScheduledTask -TaskName 'Heartbeat' -TaskPath '\Shelix\' -ErrorAction SilentlyContinue
+            $task = Get-ScheduledTask -TaskName 'Heartbeat' -TaskPath '\BildsyPS\' -ErrorAction SilentlyContinue
             $task | Should -Not -BeNullOrEmpty
         }
 
         It 'Unregister-AgentHeartbeat removes the scheduled task' {
             $result = Unregister-AgentHeartbeat
             $result.Success | Should -BeTrue
-            $task = Get-ScheduledTask -TaskName 'Heartbeat' -TaskPath '\Shelix\' -ErrorAction SilentlyContinue
+            $task = Get-ScheduledTask -TaskName 'Heartbeat' -TaskPath '\BildsyPS\' -ErrorAction SilentlyContinue
             $task | Should -BeNullOrEmpty
         }
     }

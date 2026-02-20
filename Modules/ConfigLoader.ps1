@@ -2,8 +2,8 @@
 # Loads API keys and configuration from Config/.env file
 # Like Python's dotenv but for PowerShell
 
-$global:ConfigPath = "$global:ShelixHome\config"
-$global:EnvFilePath = "$global:ShelixHome\config\.env"
+$global:ConfigPath = "$global:BildsyPSHome\config"
+$global:EnvFilePath = "$global:BildsyPSHome\config\.env"
 
 function Import-EnvFile {
     <#
@@ -102,7 +102,7 @@ function Set-ConfigValue {
     $found = $false
     
     if (Test-Path $envPath) {
-        $lines = Get-Content $envPath
+        $lines = @(Get-Content $envPath)
         for ($i = 0; $i -lt $lines.Count; $i++) {
             if ($lines[$i] -match "^$Key=") {
                 $lines[$i] = "$Key=$Value"

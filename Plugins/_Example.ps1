@@ -1,4 +1,4 @@
-# ============= _Example.ps1 — Sample Shelix Plugin =============
+# ============= _Example.ps1 — Sample BildsyPS Plugin =============
 # Drop .ps1 files into the Plugins/ folder to register new intents
 # without modifying core code.
 #
@@ -15,13 +15,13 @@
 #
 # The plugin loader merges these into the global registries automatically.
 # Rename this file (remove the leading underscore) to activate it.
-# Or run:  Enable-ShelixPlugin 'Example'
+# Or run:  Enable-BildsyPSPlugin 'Example'
 #
 # ── Quick reference ──
 #   plugins                      — list active & disabled plugins
 #   new-plugin 'Name'            — scaffold a new plugin from template
-#   Enable-ShelixPlugin 'Name'   — activate a _Name.ps1 file
-#   Disable-ShelixPlugin 'Name'  — deactivate and unload
+#   Enable-BildsyPSPlugin 'Name'   — activate a _Name.ps1 file
+#   Disable-BildsyPSPlugin 'Name'  — deactivate and unload
 #   reload-plugins               — reload all active plugins
 #   Get-IntentInfo 'intent_name' — inspect any intent (shows source: plugin)
 #   test-plugin -Name 'Example'  — run plugin self-tests
@@ -40,11 +40,11 @@
 # ── Plugin metadata (shown by 'plugins' command) ──
 $PluginInfo = @{
     Version          = '2.0.0'
-    Author           = 'Shelix'
+    Author           = 'BildsyPS'
     Description      = 'Demo plugin — showcases every plugin convention'
     # Dependencies   = @('OtherPlugin')        # declare plugin dependencies
-    # MinShelixVersion = '0.9.0'               # minimum Shelix version required
-    # MaxShelixVersion = '99.0.0'              # maximum Shelix version supported
+    # MinBildsyPSVersion = '0.9.0'               # minimum BildsyPS version required
+    # MaxBildsyPSVersion = '99.0.0'              # maximum BildsyPS version supported
 }
 
 # ── New categories (optional — you can also reuse existing ones) ──
@@ -150,7 +150,7 @@ $PluginHooks = @{
     }
 }
 
-# ── Self-tests (optional — run with: Test-ShelixPlugin -Name 'Example') ──
+# ── Self-tests (optional — run with: Test-BildsyPSPlugin -Name 'Example') ──
 $PluginTests = @{
     'hello_world returns success' = {
         $r = & $global:IntentAliases['hello_world'] 'Test'

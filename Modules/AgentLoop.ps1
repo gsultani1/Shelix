@@ -31,7 +31,7 @@ function Get-AgentSystemPrompt {
     if (-not $global:AgentPromptCache -or $global:AgentPromptCacheHash -ne $currentHash) {
         $static = [System.Text.StringBuilder]::new()
 
-        [void]$static.AppendLine("You are an autonomous task agent inside a PowerShell environment called Shelix.")
+        [void]$static.AppendLine("You are an autonomous task agent inside a PowerShell environment called BildsyPS.")
         [void]$static.AppendLine("Break the user's request into steps. Execute one step at a time using the tools and intents below.")
         [void]$static.AppendLine("")
 

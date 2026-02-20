@@ -289,6 +289,7 @@ function Convert-JsonIntent {
         $executionSummary += "--- End Summary ---"
         
         # Add to chat history so AI can see execution results
+        if (-not $global:ChatSessionHistory) { $global:ChatSessionHistory = @() }
         $global:ChatSessionHistory += @{ role = "system"; content = $executionSummary }
     }
     
