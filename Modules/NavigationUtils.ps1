@@ -128,7 +128,7 @@ function gcob {
 }
 function gd { git diff @args }
 function gds { git diff --staged @args }
-function gst { git stash @args }
+function gsta { git stash @args }
 function gstp { git stash pop }
 function gf { git fetch @args }
 function gm { 
