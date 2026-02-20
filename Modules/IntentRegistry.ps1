@@ -422,6 +422,13 @@ $global:IntentMetadata = @{
         )
     }
     'list_workflows'            = @{ Category = 'workflow'; Description = 'List available workflows'; Parameters = @() }
+    'agent_task'                = @{
+        Category    = 'workflow'
+        Description = 'Run an autonomous agent to complete a multi-step task'
+        Parameters  = @(
+            @{ Name = 'task'; Required = $true; Description = 'Natural language task description' }
+        )
+    }
     
     # File content operations
     'append_to_file'            = @{

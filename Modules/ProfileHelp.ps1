@@ -254,6 +254,12 @@ WORKFLOWS:
 {"intent":"research_topic","topic":"PowerShell automation"}
 {"intent":"daily_standup"}
 
+AGENT (autonomous multi-step tasks — the agent plans and executes steps dynamically):
+{"intent":"agent_task","task":"list files in Documents and find the largest one"}
+{"intent":"agent_task","task":"check git status, commit any changes, and push"}
+The agent has built-in tools: calculator, web_search, fetch_url, wikipedia, stock_quote, datetime, json_parse, regex_match, read_file, shell, store, recall.
+In chat, users can type: /agent <task>, /tools, /steps, /memory, /plan
+
 EXAMPLE:
 User: "create a csv called inventory" -> {"intent":"create_csv","name":"inventory"}
 User: "what time is it" -> (just answer, no intent needed)

@@ -210,7 +210,9 @@ Shelix/
 │   ├── IntentActions.ps1            # Core intent scriptblocks (docs, web, git, etc.)
 │   ├── IntentActionsSystem.ps1      # System/filesystem/workflow scriptblocks
 │   ├── WorkflowEngine.ps1           # Multi-step workflow engine
-│   └── IntentRouter.ps1             # Intent router, help, tab completion
+│   ├── IntentRouter.ps1             # Intent router, help, tab completion
+│   ├── AgentTools.ps1              # Agent tool registry (calculator, stock, web, etc.)
+│   └── AgentLoop.ps1               # Autonomous agent engine (ReAct + tools + memory)
 ├── Plugins/
 │   ├── _Example.ps1                  # Reference plugin template
 │   ├── _Pomodoro.ps1                 # Pomodoro timer plugin
@@ -234,6 +236,12 @@ While in chat mode:
 - `budget` - Show token usage breakdown by role
 - `folder` - Inject current directory context
 - `folder <path>` - Inject a specific directory
+- `agent <task>` or `/agent <task>` - Run autonomous agent to complete a multi-step task
+- `/agent` - Enter interactive agent mode (follow-up tasks with shared memory)
+- `/tools` - List all registered agent tools
+- `/steps` - Show steps from last agent run
+- `/memory` - Show agent working memory
+- `/plan` - Show agent's last announced plan
 - `switch` - Change AI provider
 - `model <name>` - Change model
 

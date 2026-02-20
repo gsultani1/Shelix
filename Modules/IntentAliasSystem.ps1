@@ -9,9 +9,13 @@
 #   IntentActionsSystem.ps1  — System/filesystem/composite/workflow intent scriptblocks
 #   WorkflowEngine.ps1       — Multi-step workflow definitions and execution
 #   IntentRouter.ps1         — Invoke-IntentAction, help functions, tab completion, aliases
+#   AgentTools.ps1           — Agent tool registry (calculator, web, stock, memory, etc.)
+#   AgentLoop.ps1            — LLM-driven autonomous task decomposition (ReAct pattern)
 
 . "$PSScriptRoot\IntentRegistry.ps1"
 . "$PSScriptRoot\IntentActions.ps1"
 . "$PSScriptRoot\IntentActionsSystem.ps1"
 . "$PSScriptRoot\WorkflowEngine.ps1"
 . "$PSScriptRoot\IntentRouter.ps1"
+. "$PSScriptRoot\AgentTools.ps1"
+. "$PSScriptRoot\AgentLoop.ps1"

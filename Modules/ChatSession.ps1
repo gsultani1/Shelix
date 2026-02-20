@@ -269,6 +269,74 @@ function Start-ChatSession {
                 Show-FolderContext -IncludeGitStatus
                 continue
             }
+            '^(agent|/agent)\s+(.+)$' {
+                $agentTask = $Matches[2]
+                if (Get-Command Invoke-AgentTask -ErrorAction SilentlyContinue) {
+                    $agentResult = Invoke-AgentTask -Task $agentTask -Provider $Provider -Model $Model -AutoConfirm
+                    if ($agentResult) {
+                        $global:ChatSessionHistory += @{ role = "user"; content = "[Agent task: $agentTask]" }
+                        $global:ChatSessionHistory += @{ role = "assistant"; content = $agentResult.Summary }
+                    }
+                }
+                else {
+                    Write-Host "Agent module not loaded." -ForegroundColor Red
+                }
+                continue
+            }
+            '^(/agent)$' {
+                if (Get-Command Invoke-AgentTask -ErrorAction SilentlyContinue) {
+                    Write-Host "Enter task for interactive agent (or 'cancel'):" -ForegroundColor Magenta
+                    Write-Host -NoNewline "  Task> " -ForegroundColor Yellow
+                    $agentTask = Read-Host
+                    if ($agentTask -and $agentTask -notin @('cancel', '')) {
+                        $agentResult = Invoke-AgentTask -Task $agentTask -Provider $Provider -Model $Model -AutoConfirm -Interactive
+                        if ($agentResult) {
+                            $global:ChatSessionHistory += @{ role = "user"; content = "[Interactive agent session: $agentTask]" }
+                            $global:ChatSessionHistory += @{ role = "assistant"; content = $agentResult.Summary }
+                        }
+                    }
+                }
+                else {
+                    Write-Host "Agent module not loaded." -ForegroundColor Red
+                }
+                continue
+            }
+            '^/tools$' {
+                if (Get-Command Get-AgentTools -ErrorAction SilentlyContinue) {
+                    Get-AgentTools
+                }
+                else {
+                    Write-Host "Agent tools not loaded." -ForegroundColor Red
+                }
+                continue
+            }
+            '^/steps$' {
+                if (Get-Command Show-AgentSteps -ErrorAction SilentlyContinue) {
+                    Show-AgentSteps
+                }
+                else {
+                    Write-Host "Agent module not loaded." -ForegroundColor Red
+                }
+                continue
+            }
+            '^/memory$' {
+                if (Get-Command Show-AgentMemory -ErrorAction SilentlyContinue) {
+                    Show-AgentMemory
+                }
+                else {
+                    Write-Host "Agent module not loaded." -ForegroundColor Red
+                }
+                continue
+            }
+            '^/plan$' {
+                if (Get-Command Show-AgentPlan -ErrorAction SilentlyContinue) {
+                    Show-AgentPlan
+                }
+                else {
+                    Write-Host "Agent module not loaded." -ForegroundColor Red
+                }
+                continue
+            }
             '^\s*$' { continue }
         }
 

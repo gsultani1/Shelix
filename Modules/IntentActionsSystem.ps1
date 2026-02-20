@@ -940,6 +940,21 @@ try {
         }
     }
     
+    # ===== Agent =====
+    "agent_task"                = {
+        param($task)
+        if (-not $task) {
+            return @{ Success = $false; Output = "Error: task parameter required"; Error = $true }
+        }
+        if (Get-Command Invoke-AgentTask -ErrorAction SilentlyContinue) {
+            $result = Invoke-AgentTask -Task $task -AutoConfirm
+            return @{ Success = $result.Success; Output = $result.Summary }
+        }
+        else {
+            return @{ Success = $false; Output = "Agent module not loaded"; Error = $true }
+        }
+    }
+    
 }
 
-Write-Verbose "IntentActionsSystem loaded: apps, workflows, system, filesystem intents added"
+Write-Verbose "IntentActionsSystem loaded: apps, workflows, system, filesystem, agent intents added"
