@@ -205,7 +205,12 @@ Shelix/
 │   ├── PluginLoader.ps1              # Plugin system (deps, config, hooks, tests)
 │   ├── ChatSession.ps1               # LLM chat loop + session persistence
 │   ├── ChatProviders.ps1             # AI provider implementations
-│   └── IntentAliasSystem.ps1         # Intent routing system
+│   ├── IntentAliasSystem.ps1         # Intent system orchestrator (loads below)
+│   ├── IntentRegistry.ps1           # Intent metadata + category definitions
+│   ├── IntentActions.ps1            # Core intent scriptblocks (docs, web, git, etc.)
+│   ├── IntentActionsSystem.ps1      # System/filesystem/workflow scriptblocks
+│   ├── WorkflowEngine.ps1           # Multi-step workflow engine
+│   └── IntentRouter.ps1             # Intent router, help, tab completion
 ├── Plugins/
 │   ├── _Example.ps1                  # Reference plugin template
 │   ├── _Pomodoro.ps1                 # Pomodoro timer plugin
