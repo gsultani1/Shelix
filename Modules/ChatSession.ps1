@@ -1147,6 +1147,37 @@ function Start-ChatAnthropic { Start-ChatSession -Provider anthropic -IncludeSaf
 function Start-ChatLocal { Start-ChatSession -Provider lmstudio -IncludeSafeCommands -Stream -AutoTrim }
 function Start-ChatLLM { Start-ChatSession -Provider llm -IncludeSafeCommands -AutoTrim }
 
+# ===== Tab Completion =====
+$_chatSessionNameCompleter = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+    $names = @()
+    if ($global:ChatDbReady -and (Get-Command Get-ChatSessionsFromDb -ErrorAction SilentlyContinue)) {
+        $names = @(Get-ChatSessionsFromDb -Limit 50 | ForEach-Object { $_.Name })
+    }
+    if ($names.Count -eq 0) {
+        $idx = Read-ChatIndex
+        $names = @($idx.Keys)
+    }
+    $names | Where-Object { $_ -like "$wordToComplete*" } | Sort-Object | ForEach-Object {
+        [System.Management.Automation.CompletionResult]::new("'$_'", $_, 'ParameterValue', "Session: $_")
+    }
+}
+
+Register-ArgumentCompleter -CommandName Resume-Chat        -ParameterName Name -ScriptBlock $_chatSessionNameCompleter
+Register-ArgumentCompleter -CommandName Remove-ChatSession -ParameterName Name -ScriptBlock $_chatSessionNameCompleter
+Register-ArgumentCompleter -CommandName Export-ChatSession -ParameterName Name -ScriptBlock $_chatSessionNameCompleter
+
+$_chatProviderCompleter2 = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+    $global:ChatProviders.Keys | Where-Object { $_ -like "$wordToComplete*" } | Sort-Object | ForEach-Object {
+        $desc = $global:ChatProviders[$_].Name
+        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $desc)
+    }
+}
+
+Register-ArgumentCompleter -CommandName Start-ChatSession -ParameterName Provider -ScriptBlock $_chatProviderCompleter2
+Register-ArgumentCompleter -CommandName chat              -ParameterName Provider -ScriptBlock $_chatProviderCompleter2
+
 # ===== Aliases =====
 Set-Alias cc chat -Force
 Set-Alias chat-ollama Start-ChatOllama -Force

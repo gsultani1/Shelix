@@ -131,7 +131,7 @@ function gds { git diff --staged @args }
 function gsta { git stash @args }
 function gstp { git stash pop }
 function gf { git fetch @args }
-function gm { 
+function gmerge { 
     param([Parameter(Mandatory=$true)][string]$Branch)
     git merge $Branch 
 }
@@ -257,6 +257,22 @@ function cd {
         Set-Location $Path
     }
 }
+
+# ===== Tab Completion =====
+$_gitBranchCompleter = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+    $branches = git branch --list 2>$null
+    if ($branches) {
+        $branches | ForEach-Object { ($_ -replace '^\*?\s+', '').Trim() } |
+            Where-Object { $_ -like "$wordToComplete*" } | Sort-Object | ForEach-Object {
+            [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', "Branch: $_")
+        }
+    }
+}
+
+Register-ArgumentCompleter -CommandName gco -ParameterName Branch -ScriptBlock $_gitBranchCompleter
+Register-ArgumentCompleter -CommandName gmerge -ParameterName Branch -ScriptBlock $_gitBranchCompleter
+Register-ArgumentCompleter -CommandName grb -ParameterName Branch -ScriptBlock $_gitBranchCompleter
 
 # ===== Aliases =====
 Set-Alias dirs Get-DirectoryHistory -Force

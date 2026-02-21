@@ -783,6 +783,19 @@ function Install-LLMPlugin {
     llm install $Plugin
 }
 
+# ===== Tab Completion =====
+$_chatProviderCompleter = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+    $global:ChatProviders.Keys | Where-Object { $_ -like "$wordToComplete*" } | Sort-Object | ForEach-Object {
+        $desc = $global:ChatProviders[$_].Name
+        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $desc)
+    }
+}
+
+Register-ArgumentCompleter -CommandName Set-DefaultChatProvider -ParameterName Provider -ScriptBlock $_chatProviderCompleter
+Register-ArgumentCompleter -CommandName Get-ChatModels          -ParameterName Provider -ScriptBlock $_chatProviderCompleter
+Register-ArgumentCompleter -CommandName Test-ChatProvider       -ParameterName Provider -ScriptBlock $_chatProviderCompleter
+
 # ===== Aliases =====
 Set-Alias providers Show-ChatProviders -Force
 Set-Alias chat-test Test-ChatProvider -Force

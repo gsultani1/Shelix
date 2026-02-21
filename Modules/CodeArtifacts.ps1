@@ -605,6 +605,17 @@ function Register-ArtifactsFromResponse {
     }
 }
 
+# ===== Tab Completion =====
+Register-ArgumentCompleter -CommandName Remove-Artifact -ParameterName Name -ScriptBlock {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+    if (Test-Path $global:ArtifactsPath) {
+        Get-ChildItem $global:ArtifactsPath -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -like "$wordToComplete*" } | Sort-Object Name | ForEach-Object {
+            [System.Management.Automation.CompletionResult]::new($_.Name, $_.Name, 'ParameterValue', "Artifact: $($_.Name)")
+        }
+    }
+}
+
 # ===== Aliases =====
 Set-Alias artifacts Get-Artifacts -Force
 

@@ -408,6 +408,19 @@ function Get-HeartbeatStatus {
     }
 }
 
+# ===== Tab Completion =====
+$_agentTaskIdCompleter = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+    @(Get-AgentTaskList) | Where-Object { $_.id -like "$wordToComplete*" } | ForEach-Object {
+        $desc = "$($_.id) ($($_.schedule)): $($_.task)"
+        [System.Management.Automation.CompletionResult]::new($_.id, $_.id, 'ParameterValue', $desc)
+    }
+}
+
+Register-ArgumentCompleter -CommandName Remove-AgentTask  -ParameterName Id -ScriptBlock $_agentTaskIdCompleter
+Register-ArgumentCompleter -CommandName Enable-AgentTask  -ParameterName Id -ScriptBlock $_agentTaskIdCompleter
+Register-ArgumentCompleter -CommandName Disable-AgentTask -ParameterName Id -ScriptBlock $_agentTaskIdCompleter
+
 # ===== Aliases =====
 Set-Alias heartbeat Get-HeartbeatStatus -Force
 Set-Alias heartbeat-tasks Show-AgentTaskList -Force

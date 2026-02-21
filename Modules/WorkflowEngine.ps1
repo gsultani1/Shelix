@@ -142,5 +142,14 @@ function Get-Workflows {
     Write-Host ""
 }
 
+# ===== Tab Completion =====
+Register-ArgumentCompleter -CommandName Invoke-Workflow -ParameterName Name -ScriptBlock {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+    $global:Workflows.Keys | Where-Object { $_ -like "$wordToComplete*" } | Sort-Object | ForEach-Object {
+        $desc = $global:Workflows[$_].Description
+        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $desc)
+    }
+}
+
 Set-Alias workflow Invoke-Workflow -Force
 Set-Alias workflows Get-Workflows -Force

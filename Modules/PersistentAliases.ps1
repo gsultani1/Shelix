@@ -136,6 +136,21 @@ function Update-UserAliases {
     }
 }
 
+# ===== Tab Completion =====
+Register-ArgumentCompleter -CommandName Remove-PersistentAlias -ParameterName Name -ScriptBlock {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+    if (Test-Path $global:UserAliasesPath) {
+        $content = @(Get-Content $global:UserAliasesPath -ErrorAction SilentlyContinue)
+        $content | ForEach-Object {
+            if ($_ -match '^\s*Set-Alias\s+(\S+)') {
+                $Matches[1]
+            }
+        } | Where-Object { $_ -like "$wordToComplete*" } | Sort-Object | ForEach-Object {
+            [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', "Alias: $_")
+        }
+    }
+}
+
 # ===== Aliases =====
 Set-Alias add-alias Add-PersistentAlias -Force
 Set-Alias remove-alias Remove-PersistentAlias -Force

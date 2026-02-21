@@ -559,12 +559,15 @@ function Get-UserSkillsPrompt {
 }
 
 # ===== Tab Completion =====
-Register-ArgumentCompleter -CommandName Remove-UserSkill -ParameterName Name -ScriptBlock {
+$_userSkillNameCompleter = {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
     $global:LoadedUserSkills.Keys | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
-        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', "Remove skill $_")
+        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', "Skill: $_")
     }
 }
+
+Register-ArgumentCompleter -CommandName Remove-UserSkill  -ParameterName Name -ScriptBlock $_userSkillNameCompleter
+Register-ArgumentCompleter -CommandName Invoke-UserSkill  -ParameterName Name -ScriptBlock $_userSkillNameCompleter
 
 # ===== Aliases =====
 Set-Alias skills     Get-UserSkills    -Force

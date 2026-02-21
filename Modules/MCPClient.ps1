@@ -502,6 +502,26 @@ try {
     } -SupportEvent -ErrorAction SilentlyContinue
 } catch { }
 
+# ===== Tab Completion =====
+$_mcpRegisteredServerCompleter = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+    $global:MCPServers.Keys | Where-Object { $_ -like "$wordToComplete*" } | Sort-Object | ForEach-Object {
+        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', "MCP server: $_")
+    }
+}
+
+$_mcpConnectedServerCompleter = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+    $global:MCPConnections.Keys | Where-Object { $_ -like "$wordToComplete*" } | Sort-Object | ForEach-Object {
+        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', "Connected: $_")
+    }
+}
+
+Register-ArgumentCompleter -CommandName Connect-MCPServer    -ParameterName Name       -ScriptBlock $_mcpRegisteredServerCompleter
+Register-ArgumentCompleter -CommandName Disconnect-MCPServer -ParameterName Name       -ScriptBlock $_mcpConnectedServerCompleter
+Register-ArgumentCompleter -CommandName Get-MCPTools         -ParameterName Name       -ScriptBlock $_mcpConnectedServerCompleter
+Register-ArgumentCompleter -CommandName Invoke-MCPTool       -ParameterName ServerName -ScriptBlock $_mcpConnectedServerCompleter
+
 # ===== Aliases =====
 Set-Alias mcp-servers Get-MCPServers -Force
 Set-Alias mcp-connect Connect-MCPServer -Force

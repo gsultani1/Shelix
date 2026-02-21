@@ -1255,6 +1255,27 @@ function Update-AppBuild {
     }
 }
 
+# ===== Tab Completion =====
+$_appBuildNameCompleter = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+    if (Test-Path $global:AppBuilderPath) {
+        Get-ChildItem $global:AppBuilderPath -Directory -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -like "$wordToComplete*" } | Sort-Object Name | ForEach-Object {
+            [System.Management.Automation.CompletionResult]::new($_.Name, $_.Name, 'ParameterValue', "Build: $($_.Name)")
+        }
+    }
+}
+
+Register-ArgumentCompleter -CommandName Remove-AppBuild -ParameterName Name -ScriptBlock $_appBuildNameCompleter
+Register-ArgumentCompleter -CommandName Update-AppBuild -ParameterName Name -ScriptBlock $_appBuildNameCompleter
+
+Register-ArgumentCompleter -CommandName New-AppBuild -ParameterName Framework -ScriptBlock {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+    @('powershell', 'python-tk', 'python-web') | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
+        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', "Framework: $_")
+    }
+}
+
 # ===== Aliases =====
 Set-Alias builds Get-AppBuilds -Force
 Set-Alias rebuild Update-AppBuild -Force
