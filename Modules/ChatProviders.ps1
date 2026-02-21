@@ -9,6 +9,8 @@
 # These are INPUT context limits, not response limits.
 $global:ModelContextLimits = @{
     # Anthropic
+    'claude-sonnet-4-6'          = 200000
+    'claude-opus-4-6'            = 200000
     'claude-sonnet-4-5-20250929' = 200000
     'claude-3-5-sonnet-20241022' = 200000
     'claude-3-5-haiku-20241022'  = 200000
@@ -39,7 +41,7 @@ $global:ChatProviders = @{
     'anthropic' = @{
         Name           = 'Anthropic'
         Endpoint       = 'https://api.anthropic.com/v1/messages'
-        DefaultModel   = 'claude-sonnet-4-5-20250929'
+        DefaultModel   = 'claude-sonnet-4-6'
         ApiKeyRequired = $true
         ApiKeyEnvVar   = 'ANTHROPIC_API_KEY'
         Format         = 'anthropic'  # Anthropic Messages API
@@ -100,6 +102,25 @@ function Import-ChatConfig {
                 $d = $global:ChatConfig.defaults
                 if ($d.provider -and $global:ChatProviders.Contains($d.provider)) {
                     $global:DefaultChatProvider = $d.provider
+                }
+            }
+
+            # Apply provider overrides from ChatConfig.json
+            # Override DefaultModel and Endpoint from providers.* entries
+            # so ChatConfig.json is the single source of truth.
+            if ($global:ChatConfig.providers) {
+                foreach ($providerName in $global:ChatConfig.providers.PSObject.Properties.Name) {
+                    $providerOverride = $global:ChatConfig.providers.$providerName
+                    if ($global:ChatProviders.ContainsKey($providerName)) {
+                        if ($providerOverride.defaultModel) {
+                            $global:ChatProviders[$providerName].DefaultModel = $providerOverride.defaultModel
+                            Write-Verbose "ChatConfig override: $providerName DefaultModel → $($providerOverride.defaultModel)"
+                        }
+                        if ($providerOverride.endpoint) {
+                            $global:ChatProviders[$providerName].Endpoint = $providerOverride.endpoint
+                            Write-Verbose "ChatConfig override: $providerName Endpoint → $($providerOverride.endpoint)"
+                        }
+                    }
                 }
             }
 

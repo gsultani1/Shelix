@@ -197,11 +197,14 @@ function Get-BuildMaxTokens {
 
     # Known max OUTPUT token limits per model (not context window)
     $outputLimits = @{
-        'claude-sonnet-4-6'          = 8192
+        'claude-sonnet-4-6'          = 64000
+        'claude-opus-4-6'            = 128000
+        'claude-sonnet-4-5-20250929' = 8192
         'claude-sonnet-4-5'          = 8192
         'claude-3-5-sonnet'          = 8192
         'claude-3-opus'              = 4096
         'claude-3-haiku'             = 4096
+        'claude-haiku-4-5-20251001'  = 8192
         'gpt-4o'                     = 16384
         'gpt-4o-mini'                = 16384
         'gpt-4-turbo'                = 4096
@@ -338,9 +341,19 @@ function Invoke-CodeGeneration {
         Set-Content -Path $logFile -Value $logContent -Encoding UTF8
         Write-Host "[AppBuilder] Raw response saved to: $logFile" -ForegroundColor DarkGray
 
-        # Warn if response was truncated
+        # Fail early on truncated code — prevents misleading syntax errors downstream
         if ($response.StopReason -eq 'max_tokens' -or $response.StopReason -eq 'length') {
-            Write-Host "[AppBuilder] Warning: Response truncated at $MaxTokens tokens. Code may be incomplete." -ForegroundColor Yellow
+            $logsDir = Join-Path $global:AppBuilderPath '_logs'
+            if (-not (Test-Path $logsDir)) { New-Item -ItemType Directory -Path $logsDir -Force | Out-Null }
+            $truncLogPath = Join-Path $logsDir "truncated_$(Get-Date -Format 'yyyyMMdd_HHmmss').txt"
+            $content | Set-Content -Path $truncLogPath -Encoding UTF8
+
+            return @{
+                Success      = $false
+                ErrorMessage = "Code generation was truncated (hit max_tokens). The model ran out of output budget before completing the code. Raw response saved to: $truncLogPath. Consider using a model with a higher output limit or simplifying the prompt."
+                LogPath      = $truncLogPath
+                StopReason   = "max_tokens"
+            }
         }
 
         # Parse code blocks using CodeArtifacts
