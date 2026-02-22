@@ -491,12 +491,15 @@ function Test-GeneratedCode {
             }
         }
 
-        # Secret scan
+        # Secret scan — exclude 'Generic Secret Assign' for generated code because
+        # apps with API integration naturally contain $ApiKey/$Password/$Token
+        # variables with placeholder values. Specific-format patterns (Anthropic,
+        # AWS, GitHub, etc.) still catch real leaked keys.
         if (Get-Command Invoke-SecretScan -ErrorAction SilentlyContinue) {
             $tempScan = Join-Path $env:TEMP "bildsyps_secretscan_$(Get-Random)$ext"
             try {
                 $code | Set-Content $tempScan -Encoding UTF8
-                $findings = Invoke-SecretScan -Paths @($tempScan)
+                $findings = Invoke-SecretScan -Paths @($tempScan) -ExcludePatterns @('Generic Secret Assign')
                 foreach ($f in $findings) {
                     $errors += "[$fileName] Secret detected (line $($f.Line)): $($f.Pattern) -- $($f.Masked)"
                 }

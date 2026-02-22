@@ -88,6 +88,30 @@ Describe 'SecretScanner — Offline' {
         }
     }
 
+    Context 'Invoke-SecretScan -ExcludePatterns' {
+        It 'Excludes a named pattern from results' {
+            $f = "$global:BildsyPSHome\config\test-exclude.txt"
+            Set-Content -Path $f -Value 'password=SuperSecretPass1234'
+            $result = Invoke-SecretScan -Paths @($f) -ExcludePatterns @('Generic Secret Assign')
+            @($result).Count | Should -Be 0
+        }
+
+        It 'Still detects non-excluded patterns' {
+            $f = "$global:BildsyPSHome\config\test-exclude2.txt"
+            Set-Content -Path $f -Value 'KEY=sk-ant-api03-AAAAAAAAAAAAAAAAAAAAAA'
+            $result = Invoke-SecretScan -Paths @($f) -ExcludePatterns @('Generic Secret Assign')
+            @($result).Count | Should -BeGreaterThan 0
+            $result[0].Pattern | Should -Be 'Anthropic API Key'
+        }
+
+        It 'Supports excluding multiple patterns' {
+            $f = "$global:BildsyPSHome\config\test-exclude3.txt"
+            Set-Content -Path $f -Value "password=SuperSecretPass1234`nKEY=sk-ant-api03-AAAAAAAAAAAAAAAAAAAAAA"
+            $result = Invoke-SecretScan -Paths @($f) -ExcludePatterns @('Generic Secret Assign', 'Anthropic API Key')
+            @($result).Count | Should -Be 0
+        }
+    }
+
     Context 'Show-SecretScanReport' {
         It 'Produces no output for empty findings' {
             { Show-SecretScanReport -Findings @() -GitignoreWarnings @() -Quiet } | Should -Not -Throw

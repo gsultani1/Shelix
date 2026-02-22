@@ -19,10 +19,16 @@ function Invoke-SecretScan {
     <#
     .SYNOPSIS
     Scan a list of file paths against all secret patterns. Returns array of findings.
+    .PARAMETER Paths
+    File paths to scan.
+    .PARAMETER ExcludePatterns
+    Array of pattern names to skip (e.g. 'Generic Secret Assign').
     #>
     param(
         [Parameter(Mandatory)]
-        [string[]]$Paths
+        [string[]]$Paths,
+
+        [string[]]$ExcludePatterns = @()
     )
 
     $findings = @()
@@ -38,6 +44,7 @@ function Invoke-SecretScan {
             # Skip comment-only lines
             if ("$line".Trim() -match '^(#|//|;)') { continue }
             foreach ($pat in $global:SecretPatterns) {
+                if ($ExcludePatterns -contains $pat.Name) { continue }
                 if ($line -match $pat.Pattern) {
                     $matched = $Matches[0]
                     # Mask the middle of the secret for display
