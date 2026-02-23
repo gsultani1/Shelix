@@ -98,13 +98,21 @@ Be specific and detailed. The specification will be handed to a code generator.
 '@
 
 $script:BuilderPowerShellPrompt = @'
-You are a PowerShell application code generator. Given a specification, produce a complete, runnable PowerShell script that creates a Windows GUI application using Windows Forms (System.Windows.Forms).
+You are a PowerShell application code generator. Given a specification, produce a complete, runnable PowerShell application using Windows Forms (System.Windows.Forms).
 
 RULES:
-1. Output a SINGLE .ps1 file. Use fenced code block with filename: ```powershell app.ps1
+1. Output MULTIPLE .ps1 files, each in its own fenced code block with the filepath after the
+   language tag. Structure the app into logical files:
+   ```powershell source/data.ps1      — data models, load/save functions, business logic
+   ```powershell source/ui.ps1        — form creation, controls, layout, theming
+   ```powershell source/events.ps1    — event handlers, user interaction logic
+   ```powershell app.ps1              — entry point: dot-sources the above, initializes, runs the form
+   For simple apps (fewer than 5 features), a single app.ps1 is acceptable.
 2. Use only assemblies available in PowerShell 7+: System.Windows.Forms, System.Drawing, PresentationFramework (WPF)
 3. Do NOT use any external modules. No Install-Module calls. No NuGet packages.
-4. All code must be in a single file. No dot-sourcing other scripts.
+4. The entry point (app.ps1) dot-sources the other files using: . "$PSScriptRoot\source\data.ps1"
+   At build time, all files are merged into one for compilation. Keep each file self-contained
+   with no circular dependencies. Order: data.ps1 first, then ui.ps1, then events.ps1, then app.ps1.
 5. Use proper error handling with try/catch blocks.
 {THEME_RULE}
 6b. Use structured layout controls: TableLayoutPanel for grid alignment, SplitContainer for
@@ -120,7 +128,8 @@ RULES:
 10b. Do NOT use PowerShell 7+ only operators: ?? (null-coalescing), ??= (null-coalescing
     assignment), or ?. / ?[] (null-conditional). These break ps2exe which targets Windows
     PowerShell 5.1. Use if ($null -ne $x) { $x } else { $default } instead.
-11. Start with: Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+11. The FIRST file that contains UI code must start with:
+    Add-Type -AssemblyName System.Windows.Forms, System.Drawing
 12. NEVER hardcode or generate placeholder API keys, tokens, passwords, or secrets in the code.
     If the app needs API credentials, create a Settings dialog where the user can enter their own
     key at runtime. Persist settings to the app's JSON config file (see rule 8). Mask the key
@@ -141,7 +150,7 @@ RULES:
 17. NEVER use array += in a loop. It copies the entire array every iteration and is O(n²).
     Use [System.Collections.ArrayList]::new() with .Add(), or [System.Collections.Generic.List[string]]::new().
 
-Output ONLY the code block. No explanations before or after.
+Output ONLY the code blocks. No explanations before or after.
 '@
 
 $script:BuilderTkinterPrompt = @'
@@ -417,11 +426,7 @@ function Get-BuildMaxTokens {
         }
     }
 
-    # Cap at 32768 for code generation — comprehensive apps need ~20-25K tokens.
-    # Requesting 64K+ causes multi-minute responses that drop connections.
-    # Users can bypass this cap with -MaxTokens if they really need more.
-    $buildCap = 32768
-    return [math]::Min($limit, $buildCap)
+    return $limit
 }
 
 # ===== Prompt Refinement =====
@@ -717,28 +722,14 @@ function Invoke-CodeGeneration {
         $blocks = Get-CodeBlocks -Text $content
 
         foreach ($block in $blocks) {
-            # Try to extract filename from the code block context
-            $fileName = $null
-
-            # Check for filename in the fence line (```python app.py)
-            $lines = $content -split "`n"
-            for ($i = 0; $i -lt $lines.Count; $i++) {
-                if ($lines[$i] -match "^``````\w+\s+(.+\.\w+)" -and $i -lt $lines.Count - 1) {
-                    $candidateName = $Matches[1].Trim()
-                    # Check if the next lines match this block's code
-                    $blockFirstLine = ($block.Code -split "`n")[0].Trim()
-                    if ($i + 1 -lt $lines.Count -and $lines[$i + 1].Trim() -eq $blockFirstLine) {
-                        $fileName = $candidateName
-                        break
-                    }
-                }
-            }
+            # Use filename from fence line if available (e.g., ```powershell app.ps1)
+            $fileName = $block.FileName
 
             if (-not $fileName) {
-                # Infer filename from language
+                # Fallback: infer filename from language tag
                 $fileName = switch ($block.Language) {
-                    'powershell' { if ($Framework -eq 'powershell-module') { if ($files.Keys -match '\.psm1$') { 'module.psd1' } else { 'module.psm1' } } else { 'app.ps1' } }
-                    'ps1'        { 'app.ps1' }
+                    'powershell' { if ($Framework -eq 'powershell-module') { if ($files.Keys -match '\.psm1$') { 'module.psd1' } else { 'module.psm1' } } else { if ($files.ContainsKey('app.ps1')) { "source/file_$($block.Index).ps1" } else { 'app.ps1' } } }
+                    'ps1'        { if ($files.ContainsKey('app.ps1')) { "source/file_$($block.Index).ps1" } else { 'app.ps1' } }
                     'psd1'       { 'module.psd1' }
                     'python'     { if ($files.ContainsKey('app.py')) { "module_$($block.Index).py" } else { 'app.py' } }
                     'py'         { if ($files.ContainsKey('app.py')) { "module_$($block.Index).py" } else { 'app.py' } }
@@ -746,9 +737,10 @@ function Invoke-CodeGeneration {
                     'css'        { 'web/style.css' }
                     'javascript' { 'web/script.js' }
                     'js'         { 'web/script.js' }
-                    'rust'       { if ($files.ContainsKey('src-tauri/src/main.rs')) { 'src-tauri/build.rs' } else { 'src-tauri/src/main.rs' } }
-                    'rs'         { if ($files.ContainsKey('src-tauri/src/main.rs')) { 'src-tauri/build.rs' } else { 'src-tauri/src/main.rs' } }
+                    'rust'       { if (-not $files.ContainsKey('src-tauri/src/main.rs')) { 'src-tauri/src/main.rs' } elseif (-not $files.ContainsKey('src-tauri/build.rs')) { 'src-tauri/build.rs' } else { "src-tauri/src/file_$($block.Index).rs" } }
+                    'rs'         { if (-not $files.ContainsKey('src-tauri/src/main.rs')) { 'src-tauri/src/main.rs' } elseif (-not $files.ContainsKey('src-tauri/build.rs')) { 'src-tauri/build.rs' } else { "src-tauri/src/file_$($block.Index).rs" } }
                     'toml'       { 'src-tauri/Cargo.toml' }
+                    'json'       { if ($Framework -eq 'tauri') { 'src-tauri/tauri.conf.json' } else { "file_$($block.Index).json" } }
                     'text'       { 'requirements.txt' }
                     default      { "file_$($block.Index).txt" }
                 }
@@ -907,10 +899,8 @@ function Test-GeneratedCode {
             }
         }
         elseif ($ext -eq '.rs') {
-            if (Get-Command cargo -ErrorAction SilentlyContinue) {
-                if (-not $code -or $code.Trim().Length -lt 10) {
-                    $errors.Add("[$fileName] Rust file appears empty or trivially small")
-                }
+            if (-not $code -or $code.Trim().Length -lt 10) {
+                $errors.Add("[$fileName] Rust file appears empty or trivially small")
             }
         }
 
@@ -976,6 +966,58 @@ function Test-GeneratedCode {
                 }
             }
             finally { Remove-Item $tempScan -Force -ErrorAction SilentlyContinue }
+        }
+    }
+
+    # Tauri Rust validation: lightweight manifest + structure checks
+    if ($Framework -eq 'tauri') {
+        $tomlFile = $Files.Keys | Where-Object { $_ -match 'Cargo\.toml$' } | Select-Object -First 1
+        $rsFiles  = @($Files.Keys | Where-Object { $_ -match '\.rs$' })
+
+        if ($tomlFile) {
+            $tomlContent = $Files[$tomlFile]
+            # Check required TOML sections
+            if ($tomlContent -notmatch '\[package\]') {
+                $errors.Add("[Tauri] Cargo.toml missing [package] section")
+            }
+            if ($tomlContent -notmatch '\[dependencies\]') {
+                $errors.Add("[Tauri] Cargo.toml missing [dependencies] section")
+            }
+            if ($tomlContent -notmatch 'tauri\s*=') {
+                $errors.Add("[Tauri] Cargo.toml missing tauri dependency")
+            }
+            # Check that main.rs exists in generated files
+            $hasMain = $rsFiles | Where-Object { $_ -match 'main\.rs$' }
+            if (-not $hasMain) {
+                $errors.Add("[Tauri] Missing main.rs — required for Tauri binary")
+            }
+            # If [lib] section declared, check lib.rs exists
+            if ($tomlContent -match '\[lib\]') {
+                $hasLib = $rsFiles | Where-Object { $_ -match 'lib\.rs$' }
+                if (-not $hasLib) {
+                    $errors.Add("[Tauri] Cargo.toml declares [lib] but no lib.rs was generated")
+                }
+            }
+            # Validate build.rs exists if build-dependencies are declared
+            if ($tomlContent -match '\[build-dependencies\]') {
+                $hasBuildRs = $rsFiles | Where-Object { $_ -match 'build\.rs$' }
+                if (-not $hasBuildRs) {
+                    $errors.Add("[Tauri] Cargo.toml has [build-dependencies] but no build.rs was generated")
+                }
+            }
+        }
+        else {
+            $errors.Add("[Tauri] Missing Cargo.toml")
+        }
+
+        # Basic Rust syntax: check balanced braces in each .rs file
+        foreach ($rsFile in $rsFiles) {
+            $rsCode = $Files[$rsFile]
+            $openBraces  = ([regex]::Matches($rsCode, '\{')).Count
+            $closeBraces = ([regex]::Matches($rsCode, '\}')).Count
+            if ($openBraces -ne $closeBraces) {
+                $errors.Add("[$rsFile] Rust syntax: unbalanced braces (open=$openBraces, close=$closeBraces)")
+            }
         }
     }
 
@@ -1065,12 +1107,18 @@ function Invoke-BuildFixLoop {
         [string]$Provider,
         [string]$Model,
         [string]$Theme = 'system',
-        [int]$MaxRetries = 2
+        [int]$MaxRetries = 3
     )
 
     for ($retry = 1; $retry -le $MaxRetries; $retry++) {
         $errorBlock = ($Errors | ForEach-Object { "- $_" }) -join "`n"
-        $fixSpec = "PREVIOUS ATTEMPT FAILED with these errors:`n$errorBlock`n`nFix ALL of the above errors. Original specification:`n$Spec"
+        if ($retry -le 1) {
+            $fixSpec = "PREVIOUS ATTEMPT FAILED with these errors:`n$errorBlock`n`nFix ALL of the above errors. Original specification:`n$Spec"
+        }
+        else {
+            # On later retries, use focused context to avoid prompt bloat
+            $fixSpec = "ATTEMPT $retry FIX — the following errors STILL remain:`n$errorBlock`n`nFix ONLY these remaining errors. Keep all working code intact. Original app name and framework from spec:`n$($Spec -split "`n" | Select-Object -First 10 | Out-String)"
+        }
 
         Write-Host "[AppBuilder] Fix attempt $retry/$MaxRetries..." -ForegroundColor Yellow
 
@@ -1237,6 +1285,71 @@ function Get-SafeBuildName {
 
 # ===== Build Functions =====
 
+function Merge-PowerShellSources {
+    <#
+    .SYNOPSIS
+    Merge multiple .ps1 source files into a single script for ps2exe compilation.
+    Strips dot-source lines and orders files so dependencies come before dependents.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$SourceDir,
+        [string]$OutputFile
+    )
+
+    if (-not $OutputFile) {
+        $OutputFile = Join-Path $SourceDir '_merged.ps1'
+    }
+
+    $appFile = Join-Path $SourceDir 'app.ps1'
+    if (-not (Test-Path $appFile)) {
+        return @{ Success = $false; Output = "Entry point not found: $appFile"; MergedPath = $null }
+    }
+
+    # Collect all .ps1 files
+    $allFiles = Get-ChildItem $SourceDir -Filter '*.ps1' -Recurse -File | Where-Object { $_.Name -ne '_merged.ps1' }
+
+    if ($allFiles.Count -le 1) {
+        # Single file — no merge needed, just return app.ps1
+        return @{ Success = $true; Output = "Single file, no merge needed"; MergedPath = $appFile }
+    }
+
+    # Separate entry point from source files
+    $sourceFiles = $allFiles | Where-Object { $_.FullName -ne (Resolve-Path $appFile).Path } | Sort-Object FullName
+
+    # Dot-source pattern: . "$PSScriptRoot\..." or . ".\..." or . .\...
+    $dotSourcePattern = '^\s*\.\s+[''"]?\$?(\$PSScriptRoot\\|\.\\|\./).*[''"]?\s*$'
+
+    $merged = [System.Text.StringBuilder]::new()
+    $null = $merged.AppendLine("# Merged by BildsyPS build pipeline — $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')")
+    $null = $merged.AppendLine("")
+
+    # Source files first (dependencies before dependents)
+    foreach ($f in $sourceFiles) {
+        $null = $merged.AppendLine("# ===== $($f.Name) =====")
+        $content = Get-Content $f.FullName -Raw -Encoding UTF8
+        # Strip dot-source lines from source files too (in case they cross-reference)
+        $lines = $content -split "`n"
+        $filtered = $lines | Where-Object { $_ -notmatch $dotSourcePattern }
+        $null = $merged.AppendLine(($filtered -join "`n"))
+        $null = $merged.AppendLine("")
+    }
+
+    # Entry point last, with dot-source lines stripped
+    $null = $merged.AppendLine("# ===== app.ps1 (entry point) =====")
+    $appContent = Get-Content $appFile -Raw -Encoding UTF8
+    $appLines = $appContent -split "`n"
+    $appFiltered = $appLines | Where-Object { $_ -notmatch $dotSourcePattern }
+    $null = $merged.AppendLine(($appFiltered -join "`n"))
+
+    $mergedContent = $merged.ToString()
+    Set-Content -Path $OutputFile -Value $mergedContent -Encoding UTF8 -NoNewline
+
+    $fileCount = $sourceFiles.Count + 1
+    Write-Host "[AppBuilder] Merged $fileCount source files into _merged.ps1" -ForegroundColor Cyan
+    return @{ Success = $true; Output = "Merged $fileCount files"; MergedPath = $OutputFile }
+}
+
 function Build-PowerShellExecutable {
     <#
     .SYNOPSIS
@@ -1261,7 +1374,12 @@ function Build-PowerShellExecutable {
         Import-Module ps2exe -ErrorAction Stop
     }
 
-    $inputFile = Join-Path $SourceDir 'app.ps1'
+    # Merge multi-file sources into a single script for ps2exe
+    $mergeResult = Merge-PowerShellSources -SourceDir $SourceDir
+    if (-not $mergeResult.Success) {
+        return @{ Success = $false; Output = "Source merge failed: $($mergeResult.Output)" }
+    }
+    $inputFile = $mergeResult.MergedPath
     $outputFile = Join-Path $OutputDir "$AppName.exe"
 
     if (-not (Test-Path $inputFile)) {
@@ -2134,8 +2252,19 @@ function New-AppBuild {
         $generationSpec += "`n`nIMPLEMENTATION PLAN:`n$($planResult.Plan)"
     }
 
-    # Step 3: Code generation
+    # Step 2c: Complexity gate — estimate token need vs budget
     $codeMaxTokens = Get-BuildMaxTokens -Framework $framework -Model $resolvedModel -Override $MaxTokens
+    $featureLines = @($generationSpec -split "`n" | Where-Object { $_ -match '^\s*-\s+' })
+    $featureCount = $featureLines.Count
+    # Heuristic: base 4000 tokens + ~1500 per feature for PowerShell, ~2000 for Tauri
+    $tokensPerFeature = if ($framework -eq 'tauri') { 2000 } else { 1500 }
+    $estimatedTokens = 4000 + ($featureCount * $tokensPerFeature)
+    if ($estimatedTokens -gt ($codeMaxTokens * 0.8)) {
+        Write-Host "[AppBuilder] WARNING: Estimated complexity (~$featureCount features, ~$estimatedTokens tokens) may exceed output budget ($codeMaxTokens tokens)." -ForegroundColor Yellow
+        Write-Host "[AppBuilder] Consider simplifying the prompt or using a model with higher output limits." -ForegroundColor Yellow
+    }
+
+    # Step 3: Code generation
     $codeResult = Invoke-CodeGeneration -Spec $generationSpec -Framework $framework `
         -MaxTokens $codeMaxTokens -Provider $Provider -Model $Model -Theme $Theme
     if (-not $codeResult.Success) {
@@ -2208,6 +2337,53 @@ function New-AppBuild {
         'powershell-module' { Build-PowerShellModule -SourceDir $sourceDir -AppName $Name -OutputDir $outputDir }
         'tauri'             { Build-TauriExecutable -SourceDir $sourceDir -AppName $Name -OutputDir $outputDir -IconPath $IconPath }
         default             { Build-PythonExecutable -SourceDir $sourceDir -AppName $Name -Framework $framework -OutputDir $outputDir -IconPath $IconPath }
+    }
+
+    # Step 6b: Runtime smoke test for PowerShell builds
+    if ($buildResult.Success -and $framework -eq 'powershell') {
+        $smokeScript = Join-Path $sourceDir '_merged.ps1'
+        if (-not (Test-Path $smokeScript)) { $smokeScript = Join-Path $sourceDir 'app.ps1' }
+        if (Test-Path $smokeScript) {
+            Write-Host "[AppBuilder] Running smoke test..." -ForegroundColor Cyan
+            try {
+                $smokeJob = Start-Job -ScriptBlock {
+                    param($scriptPath)
+                    Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+                    try {
+                        . $scriptPath
+                    }
+                    catch {
+                        throw "SMOKE_FAIL: $($_.Exception.Message)"
+                    }
+                } -ArgumentList $smokeScript
+                $null = $smokeJob | Wait-Job -Timeout 10
+                if ($smokeJob.State -eq 'Failed') {
+                    $smokeErr = $smokeJob | Receive-Job -ErrorAction SilentlyContinue 2>&1 | Out-String
+                    Write-Host "[AppBuilder] Smoke test FAILED: $smokeErr" -ForegroundColor Yellow
+                    # Non-fatal: report but don't block the build
+                    Write-Host "[AppBuilder] Build completed but runtime errors detected. The app may crash on launch." -ForegroundColor Yellow
+                }
+                elseif ($smokeJob.State -eq 'Running') {
+                    # Still running after 10s = likely the form loaded successfully
+                    Write-Host "[AppBuilder] Smoke test passed (form loaded)" -ForegroundColor Green
+                }
+                else {
+                    # Completed quickly — check for errors in output
+                    $smokeOutput = $smokeJob | Receive-Job -ErrorAction SilentlyContinue 2>&1 | Out-String
+                    if ($smokeOutput -match 'SMOKE_FAIL') {
+                        Write-Host "[AppBuilder] Smoke test detected runtime error: $smokeOutput" -ForegroundColor Yellow
+                    }
+                    else {
+                        Write-Host "[AppBuilder] Smoke test passed" -ForegroundColor Green
+                    }
+                }
+                $smokeJob | Stop-Job -ErrorAction SilentlyContinue
+                $smokeJob | Remove-Job -Force -ErrorAction SilentlyContinue
+            }
+            catch {
+                Write-Host "[AppBuilder] Smoke test skipped (non-fatal): $($_.Exception.Message)" -ForegroundColor DarkGray
+            }
+        }
     }
 
     $totalElapsed = [math]::Round(((Get-Date) - $totalStart).TotalSeconds, 1)

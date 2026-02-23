@@ -86,9 +86,10 @@ function Get-CodeBlocks {
 
     for ($i = 0; $i -lt $lines.Count; $i++) {
         $line = $lines[$i]
-        if ($line -match '^```(\w*)' -and -not $inBlock) {
+        if ($line -match '^```(\w*)\s*(.*)' -and -not $inBlock) {
             $inBlock = $true
             $currentLang = $Matches[1].ToLower()
+            $currentFileName = if ($Matches[2].Trim()) { $Matches[2].Trim() } else { $null }
             $currentCode = @()
         }
         elseif ($line -match '^```' -and $inBlock) {
@@ -99,6 +100,7 @@ function Get-CodeBlocks {
                 $blocks += [PSCustomObject]@{
                     Index     = $idx
                     Language  = if ($currentLang) { $currentLang } else { 'text' }
+                    FileName  = $currentFileName
                     Code      = $code
                     LineCount = $currentCode.Count
                     Saved     = $false
@@ -120,6 +122,7 @@ function Get-CodeBlocks {
             $blocks += [PSCustomObject]@{
                 Index     = $idx
                 Language  = if ($currentLang) { $currentLang } else { 'text' }
+                FileName  = $currentFileName
                 Code      = $code
                 LineCount = $currentCode.Count
                 Saved     = $false

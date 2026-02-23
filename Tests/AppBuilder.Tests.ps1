@@ -76,14 +76,14 @@ Describe 'AppBuilder — Offline' {
                 Should -Be 16384
         }
 
-        It 'Returns 32768 (capped) for claude-sonnet-4-6' {
+        It 'Returns full 64000 for claude-sonnet-4-6 (uncapped)' {
             Get-BuildMaxTokens -Framework 'powershell' -Model 'claude-sonnet-4-6' |
-                Should -Be 32768
+                Should -Be 64000
         }
 
-        It 'Returns 32768 (capped) for claude-opus-4-6' {
+        It 'Returns full 128000 for claude-opus-4-6 (uncapped)' {
             Get-BuildMaxTokens -Framework 'powershell' -Model 'claude-opus-4-6' |
-                Should -Be 32768
+                Should -Be 128000
         }
 
         It 'Returns default 8192 for unknown models' {
@@ -249,20 +249,57 @@ $form.Text = Get-Greeting -Name 'World'
         }
 
         Context 'Tauri — Rust Validation' {
+
+            BeforeAll {
+                $script:MinimalCargoToml = "[package]`nname = `"test-app`"`nversion = `"0.1.0`"`nedition = `"2021`"`n`n[build-dependencies]`ntauri-build = { version = `"2`", features = [] }`n`n[dependencies]`ntauri = { version = `"2`", features = [] }`nserde = { version = `"1`", features = [`"derive`"] }`nserde_json = `"1`""
+                $script:MinimalBuildRs = 'fn main() { tauri_build::build() }'
+            }
+
             It 'Accepts valid Rust code' {
-                $files = New-FileMap @{ 'src-tauri/src/main.rs' = 'fn main() { tauri::Builder::default().run(tauri::generate_context!()).expect("error"); }' }
+                $files = New-FileMap @{
+                    'src-tauri/Cargo.toml'  = $script:MinimalCargoToml
+                    'src-tauri/src/main.rs' = 'fn main() { tauri::Builder::default().run(tauri::generate_context!()).expect("error"); }'
+                    'src-tauri/build.rs'    = $script:MinimalBuildRs
+                }
                 $result = Test-GeneratedCode -Files $files -Framework 'tauri'
                 $result.Success | Should -BeTrue
             }
 
-            It 'Flags trivially small Rust file' {
-                $files = New-FileMap @{ 'src-tauri/src/main.rs' = 'fn m()' }
+            It 'Flags missing Cargo.toml' {
+                $files = New-FileMap @{ 'src-tauri/src/main.rs' = 'fn main() {}' }
                 $result = Test-GeneratedCode -Files $files -Framework 'tauri'
-                # Only flags if cargo is available; otherwise passes
-                if (Get-Command cargo -ErrorAction SilentlyContinue) {
-                    $result.Success | Should -BeFalse
-                    ($result.Errors -join "`n") | Should -Match 'trivially small'
+                $result.Success | Should -BeFalse
+                ($result.Errors -join "`n") | Should -Match 'Missing Cargo\.toml'
+            }
+
+            It 'Flags missing main.rs' {
+                $files = New-FileMap @{ 'src-tauri/Cargo.toml' = $script:MinimalCargoToml; 'src-tauri/build.rs' = $script:MinimalBuildRs }
+                $result = Test-GeneratedCode -Files $files -Framework 'tauri'
+                $result.Success | Should -BeFalse
+                ($result.Errors -join "`n") | Should -Match 'Missing main\.rs'
+            }
+
+            It 'Flags [lib] without lib.rs' {
+                $tomlWithLib = $script:MinimalCargoToml + "`n[lib]`nname = `"mylib`"`ncrate-type = [`"lib`"]"
+                $files = New-FileMap @{
+                    'src-tauri/Cargo.toml'  = $tomlWithLib
+                    'src-tauri/src/main.rs' = 'fn main() {}'
+                    'src-tauri/build.rs'    = $script:MinimalBuildRs
                 }
+                $result = Test-GeneratedCode -Files $files -Framework 'tauri'
+                $result.Success | Should -BeFalse
+                ($result.Errors -join "`n") | Should -Match 'lib\.rs'
+            }
+
+            It 'Flags unbalanced braces in Rust' {
+                $files = New-FileMap @{
+                    'src-tauri/Cargo.toml'  = $script:MinimalCargoToml
+                    'src-tauri/src/main.rs' = 'fn main() { if true {'
+                    'src-tauri/build.rs'    = $script:MinimalBuildRs
+                }
+                $result = Test-GeneratedCode -Files $files -Framework 'tauri'
+                $result.Success | Should -BeFalse
+                ($result.Errors -join "`n") | Should -Match 'unbalanced braces'
             }
         }
 
@@ -657,7 +694,12 @@ Describe 'AppBuilder — Pipeline v2' {
         }
 
         It 'Passes valid self-contained Tauri HTML' {
-            $files = @{ 'web/index.html' = '<!DOCTYPE html><html><head><title>App</title></head><body><h1>Hello</h1></body></html>' }
+            $toml = "[package]`nname = `"t`"`nversion = `"0.1.0`"`nedition = `"2021`"`n[dependencies]`ntauri = `"2`""
+            $files = @{
+                'web/index.html'        = '<!DOCTYPE html><html><head><title>App</title></head><body><h1>Hello</h1></body></html>'
+                'src-tauri/Cargo.toml'  = $toml
+                'src-tauri/src/main.rs' = 'fn main() {}'
+            }
             $result = Test-GeneratedCode -Files $files -Framework 'tauri'
             $result.Success | Should -BeTrue
         }
@@ -701,7 +743,12 @@ Describe 'AppBuilder — Pipeline v2' {
         }
 
         It 'Passes clean Tauri JS' {
-            $files = @{ 'web/script.js' = 'document.getElementById("app").textContent = "Hello";' }
+            $toml = "[package]`nname = `"t`"`nversion = `"0.1.0`"`nedition = `"2021`"`n[dependencies]`ntauri = `"2`""
+            $files = @{
+                'web/script.js'         = 'document.getElementById("app").textContent = "Hello";'
+                'src-tauri/Cargo.toml'  = $toml
+                'src-tauri/src/main.rs' = 'fn main() {}'
+            }
             $result = Test-GeneratedCode -Files $files -Framework 'tauri'
             $result.Success | Should -BeTrue
         }
@@ -966,6 +1013,229 @@ function Set-Greeting {
             $files = @{ 'MyModule.psm1' = $code }
             $count = Repair-GeneratedCode -Files $files -Framework 'powershell-module'
             $count | Should -BeGreaterThan 0
+        }
+    }
+}
+
+Describe 'AppBuilder — Pipeline Fixes' {
+
+    # ── TOKEN CAP REMOVAL ─────────────────────────────────────
+    Context 'Token Cap Removal (Get-BuildMaxTokens)' {
+
+        It 'Returns full 64000 for claude-sonnet-4-6 (no cap)' {
+            Get-BuildMaxTokens -Framework 'powershell' -Model 'claude-sonnet-4-6' |
+                Should -Be 64000
+        }
+
+        It 'Returns full 128000 for claude-opus-4-6 (no cap)' {
+            Get-BuildMaxTokens -Framework 'tauri' -Model 'claude-opus-4-6' |
+                Should -Be 128000
+        }
+
+        It 'Returns full 16384 for gpt-4o (no cap)' {
+            Get-BuildMaxTokens -Framework 'powershell' -Model 'gpt-4o' |
+                Should -Be 16384
+        }
+
+        It 'Override still works' {
+            Get-BuildMaxTokens -Framework 'powershell' -Model 'gpt-4o' -Override 50000 |
+                Should -Be 50000
+        }
+    }
+
+    # ── GET-CODEBLOCKS FILENAME EXTRACTION ────────────────────
+    Context 'Get-CodeBlocks Filename Extraction' {
+
+        It 'Extracts filename from fence line' {
+            $fence = '``' + '`'
+            $text = "${fence}powershell app.ps1`nWrite-Host 'hello'`n${fence}"
+            $blocks = Get-CodeBlocks -Text $text
+            $blocks.Count | Should -Be 1
+            $blocks[0].FileName | Should -Be 'app.ps1'
+            $blocks[0].Language | Should -Be 'powershell'
+        }
+
+        It 'Extracts path with subdirectory from fence line' {
+            $fence = '``' + '`'
+            $text = "${fence}rust src-tauri/src/main.rs`nfn main() {}`n${fence}"
+            $blocks = Get-CodeBlocks -Text $text
+            $blocks[0].FileName | Should -Be 'src-tauri/src/main.rs'
+        }
+
+        It 'Returns null FileName when no filename in fence' {
+            $fence = '``' + '`'
+            $text = "${fence}powershell`nWrite-Host 'hello'`n${fence}"
+            $blocks = Get-CodeBlocks -Text $text
+            $blocks[0].FileName | Should -BeNullOrEmpty
+            $blocks[0].Language | Should -Be 'powershell'
+        }
+
+        It 'Handles multiple blocks with different filenames' {
+            $fence = '``' + '`'
+            $text = @(
+                "${fence}powershell source/data.ps1"
+                'function Get-Data { return @() }'
+                $fence
+                ''
+                "${fence}powershell source/ui.ps1"
+                'function New-MainForm { }'
+                $fence
+                ''
+                "${fence}powershell app.ps1"
+                '. .\source\data.ps1'
+                '. .\source\ui.ps1'
+                $fence
+            ) -join "`n"
+            $blocks = Get-CodeBlocks -Text $text
+            $blocks.Count | Should -Be 3
+            $blocks[0].FileName | Should -Be 'source/data.ps1'
+            $blocks[1].FileName | Should -Be 'source/ui.ps1'
+            $blocks[2].FileName | Should -Be 'app.ps1'
+        }
+
+        It 'Preserves backward compatibility — Language still works' {
+            $fence = '``' + '`'
+            $text = "${fence}python`nprint('hello')`n${fence}"
+            $blocks = Get-CodeBlocks -Text $text
+            $blocks[0].Language | Should -Be 'python'
+            $blocks[0].Code | Should -Be "print('hello')"
+        }
+    }
+
+    # ── MERGE-POWERSHELLSOURCES ───────────────────────────────
+    Context 'Merge-PowerShellSources' {
+
+        BeforeAll {
+            $script:MergeTmpDir = Join-Path $env:TEMP "bildsyps_merge_test_$(Get-Random)"
+            $script:MergeSrcDir = Join-Path $script:MergeTmpDir 'source'
+            New-Item -ItemType Directory -Path (Join-Path $script:MergeSrcDir 'source') -Force | Out-Null
+        }
+
+        It 'Returns app.ps1 directly for single-file projects' {
+            $appFile = Join-Path $script:MergeSrcDir 'app.ps1'
+            Set-Content $appFile -Value 'Write-Host "hello"' -Encoding UTF8
+            $result = Merge-PowerShellSources -SourceDir $script:MergeSrcDir
+            $result.Success | Should -BeTrue
+            $result.MergedPath | Should -Be $appFile
+        }
+
+        It 'Merges multiple files and strips dot-source lines' {
+            $srcSubDir = Join-Path $script:MergeSrcDir 'source'
+            Set-Content (Join-Path $srcSubDir 'data.ps1') -Value 'function Get-Data { return @() }' -Encoding UTF8
+            Set-Content (Join-Path $srcSubDir 'ui.ps1') -Value 'function New-Form { return $null }' -Encoding UTF8
+            $appContent = @'
+. "$PSScriptRoot\source\data.ps1"
+. "$PSScriptRoot\source\ui.ps1"
+$form = New-Form
+'@
+            Set-Content (Join-Path $script:MergeSrcDir 'app.ps1') -Value $appContent -Encoding UTF8
+
+            $result = Merge-PowerShellSources -SourceDir $script:MergeSrcDir
+            $result.Success | Should -BeTrue
+            $result.MergedPath | Should -Match '_merged\.ps1$'
+
+            $merged = Get-Content $result.MergedPath -Raw
+            $merged | Should -Match 'function Get-Data'
+            $merged | Should -Match 'function New-Form'
+            $merged | Should -Match '\$form = New-Form'
+            $merged | Should -Not -Match '\.\s+"\$PSScriptRoot'
+        }
+
+        It 'Returns failure when app.ps1 is missing' {
+            $emptyDir = Join-Path $env:TEMP "bildsyps_merge_empty_$(Get-Random)"
+            New-Item -ItemType Directory -Path $emptyDir -Force | Out-Null
+            $result = Merge-PowerShellSources -SourceDir $emptyDir
+            $result.Success | Should -BeFalse
+            Remove-Item $emptyDir -Recurse -Force -ErrorAction SilentlyContinue
+        }
+
+        AfterAll {
+            Remove-Item $script:MergeTmpDir -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    # ── MULTI-FILE CODE GENERATION MAPPING ────────────────────
+    Context 'Multi-File Code Generation Mapping' {
+
+        It 'Maps Tauri files correctly using fence filenames' {
+            Mock Invoke-ChatCompletion {
+                $code = @"
+Here is the code:
+
+``````toml src-tauri/Cargo.toml
+[package]
+name = "test-app"
+``````
+
+``````rust src-tauri/src/main.rs
+fn main() { tauri::Builder::default().run(tauri::generate_context!()).expect("error"); }
+``````
+
+``````rust src-tauri/build.rs
+fn main() { tauri_build::build() }
+``````
+
+``````html web/index.html
+<!DOCTYPE html><html><head><title>App</title></head><body><h1>Hello</h1></body></html>
+``````
+"@
+                return @{
+                    Content    = $code
+                    Model      = 'claude-sonnet-4-6'
+                    StopReason = 'stop'
+                    Usage      = @{ prompt_tokens = 100; completion_tokens = 200; total_tokens = 300 }
+                }
+            }
+
+            $result = Invoke-CodeGeneration -Spec 'APP_NAME: test-app' -Framework 'tauri' -MaxTokens 64000
+            $result.Success | Should -BeTrue
+            $result.Files.Keys | Should -Contain 'src-tauri/Cargo.toml'
+            $result.Files.Keys | Should -Contain 'src-tauri/src/main.rs'
+            $result.Files.Keys | Should -Contain 'src-tauri/build.rs'
+            $result.Files.Keys | Should -Contain 'web/index.html'
+        }
+
+        It 'Maps multi-file PowerShell correctly using fence filenames' {
+            Mock Invoke-ChatCompletion {
+                $code = @"
+``````powershell source/data.ps1
+function Get-Data { return @() }
+``````
+
+``````powershell source/ui.ps1
+Add-Type -AssemblyName System.Windows.Forms
+function New-MainForm { return New-Object System.Windows.Forms.Form }
+``````
+
+``````powershell app.ps1
+. "`$PSScriptRoot\source\data.ps1"
+. "`$PSScriptRoot\source\ui.ps1"
+`$form = New-MainForm
+[System.Windows.Forms.Application]::Run(`$form)
+``````
+"@
+                return @{
+                    Content    = $code
+                    Model      = 'claude-sonnet-4-6'
+                    StopReason = 'stop'
+                    Usage      = @{ prompt_tokens = 100; completion_tokens = 200; total_tokens = 300 }
+                }
+            }
+
+            $result = Invoke-CodeGeneration -Spec 'APP_NAME: test-app' -Framework 'powershell' -MaxTokens 64000
+            $result.Success | Should -BeTrue
+            $result.Files.Keys | Should -Contain 'source/data.ps1'
+            $result.Files.Keys | Should -Contain 'source/ui.ps1'
+            $result.Files.Keys | Should -Contain 'app.ps1'
+        }
+    }
+
+    # ── FIX LOOP RETRIES ─────────────────────────────────────
+    Context 'Fix Loop MaxRetries Default' {
+
+        It 'Invoke-BuildFixLoop accepts MaxRetries parameter' {
+            $params = (Get-Command Invoke-BuildFixLoop).Parameters
+            $params.ContainsKey('MaxRetries') | Should -BeTrue
         }
     }
 }

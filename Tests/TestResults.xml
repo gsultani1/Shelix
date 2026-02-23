@@ -1,742 +1,338 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
-<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="279" errors="0" failures="0" not-run="18" inconclusive="0" ignored="0" skipped="3" invalid="0" date="2026-02-20" time="14:29:12">
-  <environment cwd="C:\Users\georg\Documents\PowerShell" os-version="10.0.26200" platform="Microsoft Windows 11 Home|C:\windows|\Device\Harddisk0\Partition3" user-domain="_" clr-version="9.0.10" machine-name="_" user="georg" nunit-version="2.5.8.0" />
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="151" errors="0" failures="0" not-run="11" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2026-02-22" time="23:02:04">
+  <environment nunit-version="2.5.8.0" cwd="C:\Users\georg\Documents\PowerShell" clr-version="9.0.10" platform="Microsoft Windows 11 Home|C:\windows|\Device\Harddisk0\Partition3" os-version="10.0.26200" user="georg" user-domain="_" machine-name="_" />
   <culture-info current-culture="en-US" current-uiculture="en-US" />
-  <test-suite type="TestFixture" name="Pester" executed="True" result="Ignored" success="True" time="23.1068" asserts="0" description="Pester">
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Success" success="True" time="8.6381" asserts="0" description="Pester">
     <results>
-      <test-suite type="TestFixture" name="C:\Users\georg\Documents\PowerShell\Tests\AgentHeartbeat.Tests.ps1" executed="True" result="Success" success="True" time="4.7363" asserts="0" description="C:\Users\georg\Documents\PowerShell\Tests\AgentHeartbeat.Tests.ps1">
+      <test-suite type="TestFixture" name="C:\Users\georg\Documents\PowerShell\Tests\AppBuilder.Tests.ps1" executed="True" result="Success" success="True" time="8.6381" asserts="0" description="C:\Users\georg\Documents\PowerShell\Tests\AppBuilder.Tests.ps1">
         <results>
-          <test-suite type="TestFixture" name="AgentHeartbeat — Offline" executed="True" result="Success" success="True" time="0.9425" asserts="0" description="AgentHeartbeat — Offline">
+          <test-suite type="TestFixture" name="AppBuilder — Offline" executed="True" result="Success" success="True" time="2.8681" asserts="0" description="AppBuilder — Offline">
             <results>
-              <test-suite type="TestFixture" name="AgentHeartbeat — Offline.Task CRUD" executed="True" result="Success" success="True" time="0.7522" asserts="0" description="AgentHeartbeat — Offline.Task CRUD">
+              <test-suite type="TestFixture" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework)" executed="True" result="Success" success="True" time="0.6471" asserts="0" description="AppBuilder — Offline.Framework Routing (Get-BuildFramework)">
                 <results>
-                  <test-case description="Get-AgentTaskList returns empty array when no file exists" name="AgentHeartbeat — Offline.Task CRUD.Get-AgentTaskList returns empty array when no file exists" time="0.4282" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Add-AgentTask creates a task entry" name="AgentHeartbeat — Offline.Task CRUD.Add-AgentTask creates a task entry" time="0.0543" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Rejects duplicate task ID" name="AgentHeartbeat — Offline.Task CRUD.Rejects duplicate task ID" time="0.0158" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Add-AgentTask adds a second task" name="AgentHeartbeat — Offline.Task CRUD.Add-AgentTask adds a second task" time="0.0205" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Disable-AgentTask sets enabled to false" name="AgentHeartbeat — Offline.Task CRUD.Disable-AgentTask sets enabled to false" time="0.0268" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Enable-AgentTask sets enabled back to true" name="AgentHeartbeat — Offline.Task CRUD.Enable-AgentTask sets enabled back to true" time="0.0266" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Remove-AgentTask removes by ID" name="AgentHeartbeat — Offline.Task CRUD.Remove-AgentTask removes by ID" time="0.0509" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Show-AgentTaskList does not throw" name="AgentHeartbeat — Offline.Task CRUD.Show-AgentTaskList does not throw" time="0.0295" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="AgentHeartbeat — Offline.Test-TaskDue Schedule Logic" executed="True" result="Success" success="True" time="0.9138" asserts="0" description="AgentHeartbeat — Offline.Test-TaskDue Schedule Logic">
-                <results>
-                  <test-case description="Daily task with null lastRun is due" name="AgentHeartbeat — Offline.Test-TaskDue Schedule Logic.Daily task with null lastRun is due" time="0.0148" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Daily task run today is not due" name="AgentHeartbeat — Offline.Test-TaskDue Schedule Logic.Daily task run today is not due" time="0.0304" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Daily task run yesterday with past target time is due" name="AgentHeartbeat — Offline.Test-TaskDue Schedule Logic.Daily task run yesterday with past target time is due" time="0.0165" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Interval task 30m with lastRun 45m ago is due" name="AgentHeartbeat — Offline.Test-TaskDue Schedule Logic.Interval task 30m with lastRun 45m ago is due" time="0.0208" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Interval task 30m with lastRun 10m ago is not due" name="AgentHeartbeat — Offline.Test-TaskDue Schedule Logic.Interval task 30m with lastRun 10m ago is not due" time="0.0227" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Interval task with null lastRun is due" name="AgentHeartbeat — Offline.Test-TaskDue Schedule Logic.Interval task with null lastRun is due" time="0.0104" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Weekly task on wrong day is not due (after first run)" name="AgentHeartbeat — Offline.Test-TaskDue Schedule Logic.Weekly task on wrong day is not due (after first run)" time="0.0302" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Disabled task is never due" name="AgentHeartbeat — Offline.Test-TaskDue Schedule Logic.Disabled task is never due" time="0.0096" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-            </results>
-          </test-suite>
-        </results>
-      </test-suite>
-      <test-suite type="TestFixture" name="C:\Users\georg\Documents\PowerShell\Tests\AgentLoop.Tests.ps1" executed="True" result="Success" success="True" time="0.8416" asserts="0" description="C:\Users\georg\Documents\PowerShell\Tests\AgentLoop.Tests.ps1">
-        <results>
-          <test-suite type="TestFixture" name="AgentLoop — Offline" executed="True" result="Success" success="True" time="0.4681" asserts="0" description="AgentLoop — Offline">
-            <results>
-              <test-suite type="TestFixture" name="AgentLoop — Offline.System Prompt Assembly" executed="True" result="Success" success="True" time="0.1625" asserts="0" description="AgentLoop — Offline.System Prompt Assembly">
-                <results>
-                  <test-case description="Get-AgentSystemPrompt returns a non-empty string" name="AgentLoop — Offline.System Prompt Assembly.Get-AgentSystemPrompt returns a non-empty string" time="0.0494" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Prompt contains TOOLS section" name="AgentLoop — Offline.System Prompt Assembly.Prompt contains TOOLS section" time="0.0113" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Prompt contains INTENTS section" name="AgentLoop — Offline.System Prompt Assembly.Prompt contains INTENTS section" time="0.0166" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Prompt contains RESPONSE FORMAT section" name="AgentLoop — Offline.System Prompt Assembly.Prompt contains RESPONSE FORMAT section" time="0.0114" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Prompt lists all registered tools" name="AgentLoop — Offline.System Prompt Assembly.Prompt lists all registered tools" time="0.0186" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Working memory appears in prompt when populated" name="AgentLoop — Offline.System Prompt Assembly.Working memory appears in prompt when populated" time="0.0207" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Empty memory shows placeholder text" name="AgentLoop — Offline.System Prompt Assembly.Empty memory shows placeholder text" time="0.0174" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="AgentLoop — Offline.Agent Tool Registry" executed="True" result="Success" success="True" time="0.3417" asserts="0" description="AgentLoop — Offline.Agent Tool Registry">
-                <results>
-                  <test-case description="AgentTools registry is populated" name="AgentLoop — Offline.Agent Tool Registry.AgentTools registry is populated" time="0.0121" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Calculator tool is registered" name="AgentLoop — Offline.Agent Tool Registry.Calculator tool is registered" time="0.0099" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Store and recall tools exist for working memory" name="AgentLoop — Offline.Agent Tool Registry.Store and recall tools exist for working memory" time="0.0095" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Invoke-AgentTool runs calculator correctly" name="AgentLoop — Offline.Agent Tool Registry.Invoke-AgentTool runs calculator correctly" time="0.0443" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Invoke-AgentTool runs datetime tool" name="AgentLoop — Offline.Agent Tool Registry.Invoke-AgentTool runs datetime tool" time="0.0536" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Invoke-AgentTool store/recall round-trips" name="AgentLoop — Offline.Agent Tool Registry.Invoke-AgentTool store/recall round-trips" time="0.0358" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Invoke-AgentTool rejects unknown tool" name="AgentLoop — Offline.Agent Tool Registry.Invoke-AgentTool rejects unknown tool" time="0.0098" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="AgentLoop — Offline.Agent Configuration" executed="True" result="Success" success="True" time="0.364" asserts="0" description="AgentLoop — Offline.Agent Configuration">
-                <results>
-                  <test-case description="AgentMaxSteps is a positive integer" name="AgentLoop — Offline.Agent Configuration.AgentMaxSteps is a positive integer" time="0.0088" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="AgentMaxTokenBudget is set" name="AgentLoop — Offline.Agent Configuration.AgentMaxTokenBudget is set" time="0.0091" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="AgentLoop — Offline.Format-AgentObservation" executed="True" result="Success" success="True" time="0.4093" asserts="0" description="AgentLoop — Offline.Format-AgentObservation">
-                <results>
-                  <test-case description="Produces OBSERVATION format" name="AgentLoop — Offline.Format-AgentObservation.Produces OBSERVATION format" time="0.0408" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="AgentLoop — Offline.Inspection Functions" executed="True" result="Success" success="True" time="0.464" asserts="0" description="AgentLoop — Offline.Inspection Functions">
-                <results>
-                  <test-case description="Show-AgentSteps does not throw with no prior run" name="AgentLoop — Offline.Inspection Functions.Show-AgentSteps does not throw with no prior run" time="0.0197" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Show-AgentMemory does not throw with empty memory" name="AgentLoop — Offline.Inspection Functions.Show-AgentMemory does not throw with empty memory" time="0.0161" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Show-AgentPlan does not throw with no plan" name="AgentLoop — Offline.Inspection Functions.Show-AgentPlan does not throw with no plan" time="0.0136" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-            </results>
-          </test-suite>
-        </results>
-      </test-suite>
-      <test-suite type="TestFixture" name="C:\Users\georg\Documents\PowerShell\Tests\AppBuilder.Tests.ps1" executed="True" result="Ignored" success="True" time="4.6986" asserts="0" description="C:\Users\georg\Documents\PowerShell\Tests\AppBuilder.Tests.ps1">
-        <results>
-          <test-suite type="TestFixture" name="AppBuilder — Offline" executed="True" result="Ignored" success="True" time="3.68" asserts="0" description="AppBuilder — Offline">
-            <results>
-              <test-suite type="TestFixture" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework)" executed="True" result="Success" success="True" time="0.1673" asserts="0" description="AppBuilder — Offline.Framework Routing (Get-BuildFramework)">
-                <results>
-                  <test-case description="Invalid -Framework falls through to keyword detection" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Invalid -Framework falls through to keyword detection" time="0.01" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Empty prompt is rejected by Mandatory parameter" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Empty prompt is rejected by Mandatory parameter" time="0.0236" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Prompt with no framework-specific keywords defaults to powershell" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Prompt with no framework-specific keywords defaults to powershell" time="0.0085" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Is case-insensitive for keyword matching" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Is case-insensitive for keyword matching" time="0.0133" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Handles competing keywords by selecting the dominant framework" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Handles competing keywords by selecting the dominant framework" time="0.0195" asserts="0" success="True" result="Success" executed="True" />
-                  <test-suite type="ParameterizedTest" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;&lt;prompt&gt;&quot; to &lt;expected&gt;" executed="True" result="Success" success="True" time="0.0737" asserts="0" description="Routes &quot;&lt;prompt&gt;&quot; to &lt;expected&gt;">
+                  <test-case description="Invalid -Framework falls through to keyword detection" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Invalid -Framework falls through to keyword detection" time="0.0135" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Empty prompt is rejected by Mandatory parameter" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Empty prompt is rejected by Mandatory parameter" time="0.0363" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Prompt with no framework-specific keywords defaults to powershell" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Prompt with no framework-specific keywords defaults to powershell" time="0.0111" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Is case-insensitive for keyword matching" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Is case-insensitive for keyword matching" time="0.0094" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Handles competing keywords by selecting the dominant framework" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Handles competing keywords by selecting the dominant framework" time="0.0098" asserts="0" success="True" result="Success" executed="True" />
+                  <test-suite type="ParameterizedTest" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;&lt;prompt&gt;&quot; to &lt;expected&gt;" executed="True" result="Success" success="True" time="0.4511" asserts="0" description="Routes &quot;&lt;prompt&gt;&quot; to &lt;expected&gt;">
                     <results>
-                      <test-case description="Routes &quot;a calculator&quot; to powershell" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a calculator&quot; to powershell" time="0.0279" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Routes &quot;a simple notepad app&quot; to powershell" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a simple notepad app&quot; to powershell" time="0.0047" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Routes &quot;a file renamer tool&quot; to powershell" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a file renamer tool&quot; to powershell" time="0.0024" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Routes &quot;a stopwatch with start and stop&quot; to powershell" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a stopwatch with start and stop&quot; to powershell" time="0.0028" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Routes &quot;a tkinter GUI for file management&quot; to python-tk" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a tkinter GUI for file management&quot; to python-tk" time="0.0048" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Routes &quot;a python app that shows a timer&quot; to python-tk" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a python app that shows a timer&quot; to python-tk" time="0.0185" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Routes &quot;a python GUI sprite editor&quot; to python-tk" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a python GUI sprite editor&quot; to python-tk" time="0.0032" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Routes &quot;a dashboard with charts and drag drop&quot; to python-web" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a dashboard with charts and drag drop&quot; to python-web" time="0.0035" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Routes &quot;a web app with REST API and login&quot; to python-web" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a web app with REST API and login&quot; to python-web" time="0.0024" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Routes &quot;a web app with login and database&quot; to python-web" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a web app with login and database&quot; to python-web" time="0.0034" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Routes &quot;a calculator&quot; to powershell" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a calculator&quot; to powershell" time="0.393" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Routes &quot;a simple notepad app&quot; to powershell" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a simple notepad app&quot; to powershell" time="0.0042" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Routes &quot;a file renamer tool&quot; to powershell" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a file renamer tool&quot; to powershell" time="0.0027" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Routes &quot;a stopwatch with start and stop&quot; to powershell" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a stopwatch with start and stop&quot; to powershell" time="0.0027" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Routes &quot;a tkinter GUI for file management&quot; to python-tk" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a tkinter GUI for file management&quot; to python-tk" time="0.003" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Routes &quot;a python app that shows a timer&quot; to python-tk" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a python app that shows a timer&quot; to python-tk" time="0.015" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Routes &quot;a python GUI sprite editor&quot; to python-tk" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a python GUI sprite editor&quot; to python-tk" time="0.0026" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Routes &quot;a dashboard with charts and drag drop&quot; to python-web" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a dashboard with charts and drag drop&quot; to python-web" time="0.0036" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Routes &quot;a web app with REST API and login&quot; to python-web" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a web app with REST API and login&quot; to python-web" time="0.0045" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Routes &quot;a web app with login and database&quot; to python-web" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a web app with login and database&quot; to python-web" time="0.0033" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Routes &quot;a tauri app for note taking&quot; to tauri" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a tauri app for note taking&quot; to tauri" time="0.0032" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Routes &quot;a rust GUI file manager&quot; to tauri" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a rust GUI file manager&quot; to tauri" time="0.005" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Routes &quot;a native web desktop app with rust&quot; to tauri" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Routes &quot;a native web desktop app with rust&quot; to tauri" time="0.0084" asserts="0" success="True" result="Success" executed="True" />
                     </results>
                   </test-suite>
-                  <test-suite type="ParameterizedTest" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Explicit -Framework override wins regardless of keywords" executed="True" result="Success" success="True" time="0.0141" asserts="0" description="Explicit -Framework override wins regardless of keywords">
+                  <test-suite type="ParameterizedTest" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Explicit -Framework override wins regardless of keywords" executed="True" result="Success" success="True" time="0.0212" asserts="0" description="Explicit -Framework override wins regardless of keywords">
                     <results>
-                      <test-case description="Explicit -Framework override wins regardless of keywords" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Explicit -Framework override wins regardless of keywords(&quot;python-tk&quot;,&quot;a dashboard with charts&quot;,&quot;python-tk&quot;)" time="0.0085" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Explicit -Framework override wins regardless of keywords" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Explicit -Framework override wins regardless of keywords(&quot;powershell&quot;,&quot;a python calculator&quot;,&quot;powershell&quot;)" time="0.0026" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Explicit -Framework override wins regardless of keywords" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Explicit -Framework override wins regardless of keywords(&quot;python-web&quot;,&quot;a tkinter app&quot;,&quot;python-web&quot;)" time="0.003" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Explicit -Framework override wins regardless of keywords" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Explicit -Framework override wins regardless of keywords(&quot;a dashboard with charts&quot;,&quot;python-tk&quot;,&quot;python-tk&quot;)" time="0.0097" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Explicit -Framework override wins regardless of keywords" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Explicit -Framework override wins regardless of keywords(&quot;a python calculator&quot;,&quot;powershell&quot;,&quot;powershell&quot;)" time="0.004" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Explicit -Framework override wins regardless of keywords" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Explicit -Framework override wins regardless of keywords(&quot;a tkinter app&quot;,&quot;python-web&quot;,&quot;python-web&quot;)" time="0.003" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Explicit -Framework override wins regardless of keywords" name="AppBuilder — Offline.Framework Routing (Get-BuildFramework).Explicit -Framework override wins regardless of keywords(&quot;a simple calculator&quot;,&quot;tauri&quot;,&quot;tauri&quot;)" time="0.0044" asserts="0" success="True" result="Success" executed="True" />
                     </results>
                   </test-suite>
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens)" executed="True" result="Success" success="True" time="0.26" asserts="0" description="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens)">
+              <test-suite type="TestFixture" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens)" executed="True" result="Success" success="True" time="0.7424" asserts="0" description="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens)">
                 <results>
-                  <test-case description="PowerShell lane caps at 16000" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens).PowerShell lane caps at 16000" time="0.0217" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="PowerShell lane floors at 4096" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens).PowerShell lane floors at 4096" time="0.0104" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Python-web lane floors at 8192" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens).Python-web lane floors at 8192" time="0.008" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Python-tk lane returns a positive value" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens).Python-tk lane returns a positive value" time="0.0099" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Override returns the exact value requested" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens).Override returns the exact value requested" time="0.0083" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Zero override falls back to auto-detection" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens).Zero override falls back to auto-detection" time="0.0095" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Negative override falls back to auto-detection" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens).Negative override falls back to auto-detection" time="0.01" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Unknown model still returns a usable budget" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens).Unknown model still returns a usable budget" time="0.0102" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns known output limit for gpt-4o" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens).Returns known output limit for gpt-4o" time="0.0157" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns full 64000 for claude-sonnet-4-6 (uncapped)" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens).Returns full 64000 for claude-sonnet-4-6 (uncapped)" time="0.0087" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns full 128000 for claude-opus-4-6 (uncapped)" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens).Returns full 128000 for claude-opus-4-6 (uncapped)" time="0.0095" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns default 8192 for unknown models" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens).Returns default 8192 for unknown models" time="0.0097" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Fuzzy matches model names containing known keys" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens).Fuzzy matches model names containing known keys" time="0.0111" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Override returns the exact value requested" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens).Override returns the exact value requested" time="0.0078" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Zero override falls back to model lookup" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens).Zero override falls back to model lookup" time="0.0123" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Negative override falls back to model lookup" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens).Negative override falls back to model lookup" time="0.0071" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Unknown model returns safe default" name="AppBuilder — Offline.Token Budget (Get-BuildMaxTokens).Unknown model returns safe default" time="0.0088" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode)" executed="True" result="Success" success="True" time="3.0996" asserts="0" description="AppBuilder — Offline.Code Validation (Test-GeneratedCode)">
+              <test-suite type="TestFixture" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode)" executed="True" result="Success" success="True" time="1.9612" asserts="0" description="AppBuilder — Offline.Code Validation (Test-GeneratedCode)">
                 <results>
-                  <test-suite type="TestFixture" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Valid Code" executed="True" result="Success" success="True" time="0.0843" asserts="0" description="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Valid Code">
+                  <test-suite type="TestFixture" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Valid Code" executed="True" result="Success" success="True" time="0.1121" asserts="0" description="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Valid Code">
                     <results>
-                      <test-case description="Accepts syntactically correct PowerShell" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Valid Code.Accepts syntactically correct PowerShell" time="0.0536" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Accepts multi-line PowerShell with functions" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Valid Code.Accepts multi-line PowerShell with functions" time="0.0265" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Accepts syntactically correct PowerShell" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Valid Code.Accepts syntactically correct PowerShell" time="0.071" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Accepts multi-line PowerShell with functions" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Valid Code.Accepts multi-line PowerShell with functions" time="0.0367" asserts="0" success="True" result="Success" executed="True" />
                     </results>
                   </test-suite>
-                  <test-suite type="TestFixture" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Syntax Errors" executed="True" result="Success" success="True" time="0.1532" asserts="0" description="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Syntax Errors">
+                  <test-suite type="TestFixture" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Syntax Errors" executed="True" result="Success" success="True" time="0.1797" asserts="0" description="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Syntax Errors">
                     <results>
-                      <test-case description="Catches unclosed braces" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Syntax Errors.Catches unclosed braces" time="0.0327" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Catches unclosed strings" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Syntax Errors.Catches unclosed strings" time="0.0302" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Catches unclosed braces" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Syntax Errors.Catches unclosed braces" time="0.0371" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Catches unclosed strings" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Syntax Errors.Catches unclosed strings" time="0.0272" asserts="0" success="True" result="Success" executed="True" />
                     </results>
                   </test-suite>
-                  <test-suite type="TestFixture" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Dangerous Patterns" executed="True" result="Success" success="True" time="2.1221" asserts="0" description="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Dangerous Patterns">
+                  <test-suite type="TestFixture" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Dangerous Patterns" executed="True" result="Success" success="True" time="0.2568" asserts="0" description="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Dangerous Patterns">
                     <results>
-                      <test-suite type="ParameterizedTest" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Dangerous Patterns.Flags &quot;&lt;pattern&gt;&quot; as dangerous" executed="True" result="Success" success="True" time="1.9646" asserts="0" description="Flags &quot;&lt;pattern&gt;&quot; as dangerous">
+                      <test-suite type="ParameterizedTest" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Dangerous Patterns.Flags &quot;&lt;pattern&gt;&quot; as dangerous" executed="True" result="Success" success="True" time="0.0737" asserts="0" description="Flags &quot;&lt;pattern&gt;&quot; as dangerous">
                         <results>
-                          <test-case description="Flags &quot;Invoke-Expression&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Dangerous Patterns.Flags &quot;Invoke-Expression&quot; as dangerous" time="0.0288" asserts="0" success="True" result="Success" executed="True" />
-                          <test-case description="Flags &quot;iex&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Dangerous Patterns.Flags &quot;iex&quot; as dangerous" time="1.9004" asserts="0" success="True" result="Success" executed="True" />
-                          <test-case description="Flags &quot;Remove-Item.*-Recurse&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Dangerous Patterns.Flags &quot;Remove-Item.*-Recurse&quot; as dangerous" time="0.0151" asserts="0" success="True" result="Success" executed="True" />
-                          <test-case description="Flags &quot;Start-Process.*-Verb.*RunAs&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Dangerous Patterns.Flags &quot;Start-Process.*-Verb.*RunAs&quot; as dangerous" time="0.0204" asserts="0" success="True" result="Success" executed="True" />
+                          <test-case description="Flags &quot;Invoke-Expression&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Dangerous Patterns.Flags &quot;Invoke-Expression&quot; as dangerous" time="0.027" asserts="0" success="True" result="Success" executed="True" />
+                          <test-case description="Flags &quot;iex&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Dangerous Patterns.Flags &quot;iex&quot; as dangerous" time="0.0124" asserts="0" success="True" result="Success" executed="True" />
+                          <test-case description="Flags &quot;Remove-Item.*-Recurse&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Dangerous Patterns.Flags &quot;Remove-Item.*-Recurse&quot; as dangerous" time="0.0123" asserts="0" success="True" result="Success" executed="True" />
+                          <test-case description="Flags &quot;Start-Process.*-Verb.*RunAs&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — Dangerous Patterns.Flags &quot;Start-Process.*-Verb.*RunAs&quot; as dangerous" time="0.0221" asserts="0" success="True" result="Success" executed="True" />
                         </results>
                       </test-suite>
                     </results>
                   </test-suite>
-                  <test-suite type="TestFixture" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Python — Dangerous Patterns" executed="True" result="Success" success="True" time="2.7119" asserts="0" description="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Python — Dangerous Patterns">
+                  <test-suite type="TestFixture" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Python — Dangerous Patterns" executed="True" result="Success" success="True" time="0.7461" asserts="0" description="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Python — Dangerous Patterns">
                     <results>
-                      <test-suite type="ParameterizedTest" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Python — Dangerous Patterns.Flags &quot;&lt;pattern&gt;&quot; as dangerous" executed="True" result="Success" success="True" time="0.5863" asserts="0" description="Flags &quot;&lt;pattern&gt;&quot; as dangerous">
+                      <test-suite type="ParameterizedTest" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Python — Dangerous Patterns.Flags &quot;&lt;pattern&gt;&quot; as dangerous" executed="True" result="Success" success="True" time="0.486" asserts="0" description="Flags &quot;&lt;pattern&gt;&quot; as dangerous">
                         <results>
-                          <test-case description="Flags &quot;eval&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Python — Dangerous Patterns.Flags &quot;eval&quot; as dangerous" time="0.1191" asserts="0" success="True" result="Success" executed="True" />
-                          <test-case description="Flags &quot;exec&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Python — Dangerous Patterns.Flags &quot;exec&quot; as dangerous" time="0.1075" asserts="0" success="True" result="Success" executed="True" />
-                          <test-case description="Flags &quot;os\.system&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Python — Dangerous Patterns.Flags &quot;os\.system&quot; as dangerous" time="0.0895" asserts="0" success="True" result="Success" executed="True" />
-                          <test-case description="Flags &quot;subprocess&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Python — Dangerous Patterns.Flags &quot;subprocess&quot; as dangerous" time="0.0798" asserts="0" success="True" result="Success" executed="True" />
-                          <test-case description="Flags &quot;os\.popen&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Python — Dangerous Patterns.Flags &quot;os\.popen&quot; as dangerous" time="0.0918" asserts="0" success="True" result="Success" executed="True" />
-                          <test-case description="Flags &quot;__import__&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Python — Dangerous Patterns.Flags &quot;__import__&quot; as dangerous" time="0.0986" asserts="0" success="True" result="Success" executed="True" />
+                          <test-case description="Flags &quot;eval&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Python — Dangerous Patterns.Flags &quot;eval&quot; as dangerous" time="0.0967" asserts="0" success="True" result="Success" executed="True" />
+                          <test-case description="Flags &quot;exec&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Python — Dangerous Patterns.Flags &quot;exec&quot; as dangerous" time="0.082" asserts="0" success="True" result="Success" executed="True" />
+                          <test-case description="Flags &quot;os\.system&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Python — Dangerous Patterns.Flags &quot;os\.system&quot; as dangerous" time="0.0757" asserts="0" success="True" result="Success" executed="True" />
+                          <test-case description="Flags &quot;subprocess&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Python — Dangerous Patterns.Flags &quot;subprocess&quot; as dangerous" time="0.0733" asserts="0" success="True" result="Success" executed="True" />
+                          <test-case description="Flags &quot;os\.popen&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Python — Dangerous Patterns.Flags &quot;os\.popen&quot; as dangerous" time="0.0803" asserts="0" success="True" result="Success" executed="True" />
+                          <test-case description="Flags &quot;__import__&quot; as dangerous" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Python — Dangerous Patterns.Flags &quot;__import__&quot; as dangerous" time="0.0782" asserts="0" success="True" result="Success" executed="True" />
                         </results>
                       </test-suite>
                     </results>
                   </test-suite>
-                  <test-suite type="TestFixture" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Multi-File Validation" executed="True" result="Success" success="True" time="2.7832" asserts="0" description="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Multi-File Validation">
+                  <test-suite type="TestFixture" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Multi-File Validation" executed="True" result="Success" success="True" time="0.824" asserts="0" description="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Multi-File Validation">
                     <results>
-                      <test-case description="Fails if any file in a multi-file set has errors" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Multi-File Validation.Fails if any file in a multi-file set has errors" time="0.0391" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Passes when all files in a multi-file set are clean" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Multi-File Validation.Passes when all files in a multi-file set are clean" time="0.029" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Fails if any file in a multi-file set has errors" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Multi-File Validation.Fails if any file in a multi-file set has errors" time="0.0286" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Passes when all files in a multi-file set are clean" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Multi-File Validation.Passes when all files in a multi-file set are clean" time="0.0283" asserts="0" success="True" result="Success" executed="True" />
                     </results>
                   </test-suite>
-                  <test-suite type="TestFixture" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Edge Cases" executed="True" result="Success" success="True" time="2.8369" asserts="0" description="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Edge Cases">
+                  <test-suite type="TestFixture" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — PS7+ Operator Compatibility" executed="True" result="Success" success="True" time="1.0041" asserts="0" description="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — PS7+ Operator Compatibility">
                     <results>
-                      <test-case description="Handles empty code gracefully" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Edge Cases.Handles empty code gracefully" time="0.0178" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Handles whitespace-only code gracefully" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Edge Cases.Handles whitespace-only code gracefully" time="0.0202" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Handles an empty file map gracefully" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Edge Cases.Handles an empty file map gracefully" time="0.0116" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Flags ?? null-coalescing operator" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — PS7+ Operator Compatibility.Flags ?? null-coalescing operator" time="0.0213" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Flags ?. null-conditional operator" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — PS7+ Operator Compatibility.Flags ?. null-conditional operator" time="0.0189" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Flags ?[] null-conditional index operator" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — PS7+ Operator Compatibility.Flags ?[] null-conditional index operator" time="0.0161" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Does NOT flag ?? in Python code" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — PS7+ Operator Compatibility.Does NOT flag ?? in Python code" time="0.0825" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Does NOT flag ? in ternary or help contexts" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — PS7+ Operator Compatibility.Does NOT flag ? in ternary or help contexts" time="0.0192" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Accepts PS 5.1 compatible null-check pattern" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).PowerShell — PS7+ Operator Compatibility.Accepts PS 5.1 compatible null-check pattern" time="0.0183" asserts="0" success="True" result="Success" executed="True" />
                     </results>
                   </test-suite>
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding)" executed="True" result="Success" success="True" time="3.2487" asserts="0" description="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding)">
-                <results>
-                  <test-suite type="TestFixture" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).PowerShell Branding" executed="True" result="Success" success="True" time="0.0397" asserts="0" description="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).PowerShell Branding">
+                  <test-suite type="TestFixture" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Tauri — Rust Validation" executed="True" result="Success" success="True" time="1.1651" asserts="0" description="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Tauri — Rust Validation">
                     <results>
-                      <test-case description="Injects branding into a PowerShell file that lacks it" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).PowerShell Branding.Injects branding into a PowerShell file that lacks it" time="0.0232" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Does not double-inject when branding already exists" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).PowerShell Branding.Does not double-inject when branding already exists" time="0.0121" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Accepts valid Rust code" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Tauri — Rust Validation.Accepts valid Rust code" time="0.0514" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Flags missing Cargo.toml" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Tauri — Rust Validation.Flags missing Cargo.toml" time="0.0136" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Flags missing main.rs" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Tauri — Rust Validation.Flags missing main.rs" time="0.0245" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Flags [lib] without lib.rs" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Tauri — Rust Validation.Flags [lib] without lib.rs" time="0.0313" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Flags unbalanced braces in Rust" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Tauri — Rust Validation.Flags unbalanced braces in Rust" time="0.0271" asserts="0" success="True" result="Success" executed="True" />
                     </results>
                   </test-suite>
-                  <test-suite type="TestFixture" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Python-Web Branding" executed="True" result="Success" success="True" time="0.0634" asserts="0" description="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Python-Web Branding">
+                  <test-suite type="TestFixture" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Edge Cases" executed="True" result="Success" success="True" time="1.2165" asserts="0" description="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Edge Cases">
                     <results>
-                      <test-case description="Injects footer into HTML file" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Python-Web Branding.Injects footer into HTML file" time="0.0103" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Injects into HTML but not into Python server file" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Python-Web Branding.Injects into HTML but not into Python server file" time="0.0104" asserts="0" success="True" result="Success" executed="True" />
-                    </results>
-                  </test-suite>
-                  <test-suite type="TestFixture" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Python-Tk Branding" executed="True" result="Success" success="True" time="0.077" asserts="0" description="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Python-Tk Branding">
-                    <results>
-                      <test-case description="Injects about function into tkinter code" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Python-Tk Branding.Injects about function into tkinter code" time="0.0109" asserts="0" success="True" result="Success" executed="True" />
-                    </results>
-                  </test-suite>
-                  <test-suite type="TestFixture" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).NoBranding Flag" executed="True" result="Success" success="True" time="0.1203" asserts="0" description="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).NoBranding Flag">
-                    <results>
-                      <test-case description="Skips injection entirely for PowerShell" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).NoBranding Flag.Skips injection entirely for PowerShell" time="0.0135" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Skips injection entirely for python-web" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).NoBranding Flag.Skips injection entirely for python-web" time="0.0143" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Skips injection entirely for python-tk" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).NoBranding Flag.Skips injection entirely for python-tk" time="0.0115" asserts="0" success="True" result="Success" executed="True" />
-                    </results>
-                  </test-suite>
-                  <test-suite type="TestFixture" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Edge Cases" executed="True" result="Success" success="True" time="0.1456" asserts="0" description="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Edge Cases">
-                    <results>
-                      <test-case description="Returns files unchanged when file map is empty" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Edge Cases.Returns files unchanged when file map is empty" time="0.0092" asserts="0" success="True" result="Success" executed="True" />
-                      <test-case description="Preserves all original files in the returned map" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Edge Cases.Preserves all original files in the returned map" time="0.0116" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Handles empty code gracefully" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Edge Cases.Handles empty code gracefully" time="0.0188" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Handles whitespace-only code gracefully" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Edge Cases.Handles whitespace-only code gracefully" time="0.0174" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Handles an empty file map gracefully" name="AppBuilder — Offline.Code Validation (Test-GeneratedCode).Edge Cases.Handles an empty file map gracefully" time="0.0111" asserts="0" success="True" result="Success" executed="True" />
                     </results>
                   </test-suite>
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="AppBuilder — Offline.Build Tracking (SQLite)" executed="True" result="Success" success="True" time="3.4772" asserts="0" description="AppBuilder — Offline.Build Tracking (SQLite)">
+              <test-suite type="TestFixture" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding)" executed="True" result="Success" success="True" time="2.1181" asserts="0" description="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding)">
                 <results>
-                  <test-case description="Initialize-BuildsTable creates the table" name="AppBuilder — Offline.Build Tracking (SQLite).Initialize-BuildsTable creates the table" time="0.0224" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Save-BuildRecord persists all fields correctly" name="AppBuilder — Offline.Build Tracking (SQLite).Save-BuildRecord persists all fields correctly" time="0.0477" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Save-BuildRecord appends multiple records with the same name" name="AppBuilder — Offline.Build Tracking (SQLite).Save-BuildRecord appends multiple records with the same name" time="0.0277" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Get-AppBuilds returns saved records" name="AppBuilder — Offline.Build Tracking (SQLite).Get-AppBuilds returns saved records" time="0.0478" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Remove-AppBuild clears the record from the database" name="AppBuilder — Offline.Build Tracking (SQLite).Remove-AppBuild clears the record from the database" time="0.0233" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Remove-AppBuild does not throw for a nonexistent record" name="AppBuilder — Offline.Build Tracking (SQLite).Remove-AppBuild does not throw for a nonexistent record" time="0.013" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Save-BuildRecord with failed status persists correctly" name="AppBuilder — Offline.Build Tracking (SQLite).Save-BuildRecord with failed status persists correctly" time="0.0202" asserts="0" success="True" result="Success" executed="True" />
+                  <test-suite type="TestFixture" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).PowerShell Branding" executed="True" result="Success" success="True" time="0.0284" asserts="0" description="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).PowerShell Branding">
+                    <results>
+                      <test-case description="Injects branding into a PowerShell file that lacks it" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).PowerShell Branding.Injects branding into a PowerShell file that lacks it" time="0.0155" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Does not double-inject when branding already exists" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).PowerShell Branding.Does not double-inject when branding already exists" time="0.0101" asserts="0" success="True" result="Success" executed="True" />
+                    </results>
+                  </test-suite>
+                  <test-suite type="TestFixture" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Python-Web Branding" executed="True" result="Success" success="True" time="0.0496" asserts="0" description="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Python-Web Branding">
+                    <results>
+                      <test-case description="Injects footer into HTML file" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Python-Web Branding.Injects footer into HTML file" time="0.0101" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Injects into HTML but not into Python server file" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Python-Web Branding.Injects into HTML but not into Python server file" time="0.0081" asserts="0" success="True" result="Success" executed="True" />
+                    </results>
+                  </test-suite>
+                  <test-suite type="TestFixture" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Python-Tk Branding" executed="True" result="Success" success="True" time="0.0675" asserts="0" description="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Python-Tk Branding">
+                    <results>
+                      <test-case description="Injects about function into tkinter code" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Python-Tk Branding.Injects about function into tkinter code" time="0.0149" asserts="0" success="True" result="Success" executed="True" />
+                    </results>
+                  </test-suite>
+                  <test-suite type="TestFixture" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Tauri Branding" executed="True" result="Success" success="True" time="0.101" asserts="0" description="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Tauri Branding">
+                    <results>
+                      <test-case description="Injects footer into Tauri HTML file" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Tauri Branding.Injects footer into Tauri HTML file" time="0.0092" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Does not double-inject when branding already exists" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Tauri Branding.Does not double-inject when branding already exists" time="0.0081" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="NoBranding flag skips injection for tauri" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Tauri Branding.NoBranding flag skips injection for tauri" time="0.0127" asserts="0" success="True" result="Success" executed="True" />
+                    </results>
+                  </test-suite>
+                  <test-suite type="TestFixture" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).NoBranding Flag" executed="True" result="Success" success="True" time="0.1323" asserts="0" description="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).NoBranding Flag">
+                    <results>
+                      <test-case description="Skips injection entirely for PowerShell" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).NoBranding Flag.Skips injection entirely for PowerShell" time="0.0109" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Skips injection entirely for python-web" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).NoBranding Flag.Skips injection entirely for python-web" time="0.0096" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Skips injection entirely for python-tk" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).NoBranding Flag.Skips injection entirely for python-tk" time="0.0078" asserts="0" success="True" result="Success" executed="True" />
+                    </results>
+                  </test-suite>
+                  <test-suite type="TestFixture" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Edge Cases" executed="True" result="Success" success="True" time="0.1544" asserts="0" description="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Edge Cases">
+                    <results>
+                      <test-case description="Returns files unchanged when file map is empty" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Edge Cases.Returns files unchanged when file map is empty" time="0.0089" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Preserves all original files in the returned map" name="AppBuilder — Offline.Branding Injection (Invoke-BildsyPSBranding).Edge Cases.Preserves all original files in the returned map" time="0.01" asserts="0" success="True" result="Success" executed="True" />
+                    </results>
+                  </test-suite>
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="AppBuilder — Offline.Build Name Sanitization" executed="True" result="Ignored" success="True" time="3.6775" asserts="0" description="AppBuilder — Offline.Build Name Sanitization">
+              <test-suite type="TestFixture" name="AppBuilder — Offline.Build Tracking (SQLite)" executed="True" result="Success" success="True" time="2.3088" asserts="0" description="AppBuilder — Offline.Build Tracking (SQLite)">
                 <results>
-                  <test-case description="Strips invalid filesystem characters from build names" name="AppBuilder — Offline.Build Name Sanitization.Strips invalid filesystem characters from build names" time="0.1017" asserts="0" success="False" result="Ignored" executed="False" />
-                  <test-case description="Trims leading and trailing whitespace" name="AppBuilder — Offline.Build Name Sanitization.Trims leading and trailing whitespace" time="0.0591" asserts="0" success="False" result="Ignored" executed="False" />
-                  <test-case description="Handles empty name without throwing" name="AppBuilder — Offline.Build Name Sanitization.Handles empty name without throwing" time="0.0365" asserts="0" success="False" result="Ignored" executed="False" />
+                  <test-case description="Initialize-BuildsTable creates the table" name="AppBuilder — Offline.Build Tracking (SQLite).Initialize-BuildsTable creates the table" time="0.01" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Save-BuildRecord persists all fields correctly" name="AppBuilder — Offline.Build Tracking (SQLite).Save-BuildRecord persists all fields correctly" time="0.0399" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Save-BuildRecord appends multiple records with the same name" name="AppBuilder — Offline.Build Tracking (SQLite).Save-BuildRecord appends multiple records with the same name" time="0.0307" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-AppBuilds returns saved records" name="AppBuilder — Offline.Build Tracking (SQLite).Get-AppBuilds returns saved records" time="0.0426" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Remove-AppBuild clears the record from the database" name="AppBuilder — Offline.Build Tracking (SQLite).Remove-AppBuild clears the record from the database" time="0.02" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Remove-AppBuild does not throw for a nonexistent record" name="AppBuilder — Offline.Build Tracking (SQLite).Remove-AppBuild does not throw for a nonexistent record" time="0.0095" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Save-BuildRecord with failed status persists correctly" name="AppBuilder — Offline.Build Tracking (SQLite).Save-BuildRecord with failed status persists correctly" time="0.0166" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
-            </results>
-          </test-suite>
-        </results>
-      </test-suite>
-      <test-suite type="TestFixture" name="C:\Users\georg\Documents\PowerShell\Tests\ChatStorage.Tests.ps1" executed="True" result="Success" success="True" time="0.778" asserts="0" description="C:\Users\georg\Documents\PowerShell\Tests\ChatStorage.Tests.ps1">
-        <results>
-          <test-suite type="TestFixture" name="ChatStorage — Offline" executed="True" result="Success" success="True" time="0.3335" asserts="0" description="ChatStorage — Offline">
-            <results>
-              <test-suite type="TestFixture" name="ChatStorage — Offline.Database Initialization" executed="True" result="Success" success="True" time="0.0697" asserts="0" description="ChatStorage — Offline.Database Initialization">
+              <test-suite type="TestFixture" name="AppBuilder — Offline.Build Failure Handling" executed="True" result="Success" success="True" time="2.3455" asserts="0" description="AppBuilder — Offline.Build Failure Handling">
                 <results>
-                  <test-case description="Initialize-ChatDatabase returns true" name="ChatStorage — Offline.Database Initialization.Initialize-ChatDatabase returns true" time="0.0106" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Sessions table exists" name="ChatStorage — Offline.Database Initialization.Sessions table exists" time="0.0151" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Messages table exists" name="ChatStorage — Offline.Database Initialization.Messages table exists" time="0.016" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="FTS5 virtual table exists" name="ChatStorage — Offline.Database Initialization.FTS5 virtual table exists" time="0.0112" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="FTS triggers exist" name="ChatStorage — Offline.Database Initialization.FTS triggers exist" time="0.0135" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns failure result for an empty prompt without throwing" name="AppBuilder — Offline.Build Failure Handling.Returns failure result for an empty prompt without throwing" time="0.0203" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns failure result for a whitespace-only prompt without throwing" name="AppBuilder — Offline.Build Failure Handling.Returns failure result for a whitespace-only prompt without throwing" time="0.0082" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="ChatStorage — Offline.CRUD Operations" executed="True" result="Success" success="True" time="0.1644" asserts="0" description="ChatStorage — Offline.CRUD Operations">
+              <test-suite type="TestFixture" name="AppBuilder — Offline.Truncation Guard (Invoke-CodeGeneration)" executed="True" result="Success" success="True" time="2.8083" asserts="0" description="AppBuilder — Offline.Truncation Guard (Invoke-CodeGeneration)">
                 <results>
-                  <test-case description="Save-ChatToDb creates a session and returns an ID" name="ChatStorage — Offline.CRUD Operations.Save-ChatToDb creates a session and returns an ID" time="0.0283" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Get-ChatSessionsFromDb lists the saved session" name="ChatStorage — Offline.CRUD Operations.Get-ChatSessionsFromDb lists the saved session" time="0.0224" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Resume-ChatFromDb returns messages in order" name="ChatStorage — Offline.CRUD Operations.Resume-ChatFromDb returns messages in order" time="0.0161" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Rename-ChatSessionInDb renames the session" name="ChatStorage — Offline.CRUD Operations.Rename-ChatSessionInDb renames the session" time="0.0124" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Remove-ChatSessionFromDb deletes the session" name="ChatStorage — Offline.CRUD Operations.Remove-ChatSessionFromDb deletes the session" time="0.011" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns failure with StopReason when response is truncated (max_tokens)" name="AppBuilder — Offline.Truncation Guard (Invoke-CodeGeneration).Returns failure with StopReason when response is truncated (max_tokens)" time="0.3882" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns failure with StopReason when response has length stop reason" name="AppBuilder — Offline.Truncation Guard (Invoke-CodeGeneration).Returns failure with StopReason when response has length stop reason" time="0.0267" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Proceeds normally when StopReason is stop (not truncated)" name="AppBuilder — Offline.Truncation Guard (Invoke-CodeGeneration).Proceeds normally when StopReason is stop (not truncated)" time="0.0445" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="ChatStorage — Offline.Cross-Session FTS5 Search" executed="True" result="Success" success="True" time="0.294" asserts="0" description="ChatStorage — Offline.Cross-Session FTS5 Search">
+              <test-suite type="TestFixture" name="AppBuilder — Offline.Build Name Sanitization" executed="True" result="Success" success="True" time="2.838" asserts="0" description="AppBuilder — Offline.Build Name Sanitization">
                 <results>
-                  <test-case description="FTS5 search for &quot;quantum&quot; returns results from both sessions" name="ChatStorage — Offline.Cross-Session FTS5 Search.FTS5 search for &quot;quantum&quot; returns results from both sessions" time="0.0197" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="FTS5 results include expected fields" name="ChatStorage — Offline.Cross-Session FTS5 Search.FTS5 results include expected fields" time="0.0158" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="FTS5 search for &quot;weather&quot; returns only the weather session" name="ChatStorage — Offline.Cross-Session FTS5 Search.FTS5 search for &quot;weather&quot; returns only the weather session" time="0.0303" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="FTS5 search respects Limit parameter" name="ChatStorage — Offline.Cross-Session FTS5 Search.FTS5 search respects Limit parameter" time="0.0167" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Deleting a session removes its messages from FTS" name="ChatStorage — Offline.Cross-Session FTS5 Search.Deleting a session removes its messages from FTS" time="0.0215" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="ChatStorage — Offline.Export" executed="True" result="Success" success="True" time="0.3288" asserts="0" description="ChatStorage — Offline.Export">
-                <results>
-                  <test-case description="Export-ChatSessionFromDb writes a markdown file" name="ChatStorage — Offline.Export.Export-ChatSessionFromDb writes a markdown file" time="0.0291" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-            </results>
-          </test-suite>
-        </results>
-      </test-suite>
-      <test-suite type="TestFixture" name="C:\Users\georg\Documents\PowerShell\Tests\CodeArtifacts.Tests.ps1" executed="True" result="Success" success="True" time="1.0399" asserts="0" description="C:\Users\georg\Documents\PowerShell\Tests\CodeArtifacts.Tests.ps1">
-        <results>
-          <test-suite type="TestFixture" name="CodeArtifacts — Offline" executed="True" result="Success" success="True" time="0.66" asserts="0" description="CodeArtifacts — Offline">
-            <results>
-              <test-suite type="TestFixture" name="CodeArtifacts — Offline.Get-CodeBlocks" executed="True" result="Success" success="True" time="0.1108" asserts="0" description="CodeArtifacts — Offline.Get-CodeBlocks">
-                <results>
-                  <test-case description="Extracts a single fenced code block" name="CodeArtifacts — Offline.Get-CodeBlocks.Extracts a single fenced code block" time="0.0221" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Extracts multiple code blocks" name="CodeArtifacts — Offline.Get-CodeBlocks.Extracts multiple code blocks" time="0.018" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Returns empty for text with no code blocks" name="CodeArtifacts — Offline.Get-CodeBlocks.Returns empty for text with no code blocks" time="0.0252" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Defaults language to text when not specified" name="CodeArtifacts — Offline.Get-CodeBlocks.Defaults language to text when not specified" time="0.0103" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Tracks blocks in SessionArtifacts with -Track" name="CodeArtifacts — Offline.Get-CodeBlocks.Tracks blocks in SessionArtifacts with -Track" time="0.012" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Sets correct Index and LineCount" name="CodeArtifacts — Offline.Get-CodeBlocks.Sets correct Index and LineCount" time="0.0115" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Ignores empty code blocks" name="CodeArtifacts — Offline.Get-CodeBlocks.Ignores empty code blocks" time="0.0085" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="CodeArtifacts — Offline.Save-Artifact" executed="True" result="Success" success="True" time="0.1681" asserts="0" description="CodeArtifacts — Offline.Save-Artifact">
-                <results>
-                  <test-case description="Saves code to a file by direct -Code parameter" name="CodeArtifacts — Offline.Save-Artifact.Saves code to a file by direct -Code parameter" time="0.0292" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Saves artifact by index from SessionArtifacts" name="CodeArtifacts — Offline.Save-Artifact.Saves artifact by index from SessionArtifacts" time="0.015" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="CodeArtifacts — Offline.Invoke-Artifact" executed="True" result="Success" success="True" time="0.5895" asserts="0" description="CodeArtifacts — Offline.Invoke-Artifact">
-                <results>
-                  <test-case description="Executes PowerShell code and returns result" name="CodeArtifacts — Offline.Invoke-Artifact.Executes PowerShell code and returns result" time="0.3939" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Returns error for unsupported language" name="CodeArtifacts — Offline.Invoke-Artifact.Returns error for unsupported language" time="0.0128" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Returns error for invalid index" name="CodeArtifacts — Offline.Invoke-Artifact.Returns error for invalid index" time="0.012" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="CodeArtifacts — Offline.ArtifactRunners registry" executed="True" result="Success" success="True" time="0.62" asserts="0" description="CodeArtifacts — Offline.ArtifactRunners registry">
-                <results>
-                  <test-case description="Has entries for common languages" name="CodeArtifacts — Offline.ArtifactRunners registry.Has entries for common languages" time="0.0113" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Each runner has Ext and Safe properties" name="CodeArtifacts — Offline.ArtifactRunners registry.Each runner has Ext and Safe properties" time="0.0145" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="CodeArtifacts — Offline.Show-SessionArtifacts" executed="True" result="Success" success="True" time="0.6578" asserts="0" description="CodeArtifacts — Offline.Show-SessionArtifacts">
-                <results>
-                  <test-case description="Does not throw with empty artifacts" name="CodeArtifacts — Offline.Show-SessionArtifacts.Does not throw with empty artifacts" time="0.0146" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Does not throw with populated artifacts" name="CodeArtifacts — Offline.Show-SessionArtifacts.Does not throw with populated artifacts" time="0.0204" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Strips invalid filesystem characters from build names" name="AppBuilder — Offline.Build Name Sanitization.Strips invalid filesystem characters from build names" time="0.0102" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Trims leading and trailing whitespace" name="AppBuilder — Offline.Build Name Sanitization.Trims leading and trailing whitespace" time="0.006" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Handles empty name without throwing" name="AppBuilder — Offline.Build Name Sanitization.Handles empty name without throwing" time="0.0095" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
             </results>
           </test-suite>
-        </results>
-      </test-suite>
-      <test-suite type="TestFixture" name="C:\Users\georg\Documents\PowerShell\Tests\ConfigLoader.Tests.ps1" executed="True" result="Success" success="True" time="0.778" asserts="0" description="C:\Users\georg\Documents\PowerShell\Tests\ConfigLoader.Tests.ps1">
-        <results>
-          <test-suite type="TestFixture" name="ConfigLoader — Offline" executed="True" result="Success" success="True" time="0.445" asserts="0" description="ConfigLoader — Offline">
+          <test-suite type="TestFixture" name="AppBuilder — Pipeline v2" executed="True" result="Success" success="True" time="3.6858" asserts="0" description="AppBuilder — Pipeline v2">
             <results>
-              <test-suite type="TestFixture" name="ConfigLoader — Offline.Import-EnvFile" executed="True" result="Success" success="True" time="0.2037" asserts="0" description="ConfigLoader — Offline.Import-EnvFile">
+              <test-suite type="TestFixture" name="AppBuilder — Pipeline v2.Framework Routing — powershell-module" executed="True" result="Success" success="True" time="0.0531" asserts="0" description="AppBuilder — Pipeline v2.Framework Routing — powershell-module">
                 <results>
-                  <test-case description="Returns empty hashtable when file does not exist" name="ConfigLoader — Offline.Import-EnvFile.Returns empty hashtable when file does not exist" time="0.0303" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Parses KEY=VALUE pairs" name="ConfigLoader — Offline.Import-EnvFile.Parses KEY=VALUE pairs" time="0.0357" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Strips double quotes from values" name="ConfigLoader — Offline.Import-EnvFile.Strips double quotes from values" time="0.0251" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Strips single quotes from values" name="ConfigLoader — Offline.Import-EnvFile.Strips single quotes from values" time="0.0275" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Skips comments and empty lines" name="ConfigLoader — Offline.Import-EnvFile.Skips comments and empty lines" time="0.0286" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Skips the literal placeholder value your-*" name="ConfigLoader — Offline.Import-EnvFile.Skips the literal placeholder value your-*" time="0.0169" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Sets environment variables for parsed keys" name="ConfigLoader — Offline.Import-EnvFile.Sets environment variables for parsed keys" time="0.02" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Handles single-line .env file without char coercion" name="ConfigLoader — Offline.Import-EnvFile.Handles single-line .env file without char coercion" time="0.0171" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Explicit -Framework powershell-module override works" name="AppBuilder — Pipeline v2.Framework Routing — powershell-module.Explicit -Framework powershell-module override works" time="0.0083" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Does not route generic app prompts to powershell-module" name="AppBuilder — Pipeline v2.Framework Routing — powershell-module.Does not route generic app prompts to powershell-module" time="0.005" asserts="0" success="True" result="Success" executed="True" />
+                  <test-suite type="ParameterizedTest" name="AppBuilder — Pipeline v2.Framework Routing — powershell-module.Routes &quot;&lt;prompt&gt;&quot; to powershell-module" executed="True" result="Success" success="True" time="0.0369" asserts="0" description="Routes &quot;&lt;prompt&gt;&quot; to powershell-module">
+                    <results>
+                      <test-case description="Routes &quot;a powershell module for log parsing&quot; to powershell-module" name="AppBuilder — Pipeline v2.Framework Routing — powershell-module.Routes &quot;a powershell module for log parsing&quot; to powershell-module" time="0.0286" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Routes &quot;create a ps module for Azure backups&quot; to powershell-module" name="AppBuilder — Pipeline v2.Framework Routing — powershell-module.Routes &quot;create a ps module for Azure backups&quot; to powershell-module" time="0.0025" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Routes &quot;build a cmdlet collection for file management&quot; to powershell-module" name="AppBuilder — Pipeline v2.Framework Routing — powershell-module.Routes &quot;build a cmdlet collection for file management&quot; to powershell-module" time="0.0018" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Routes &quot;an automation module for CI/CD&quot; to powershell-module" name="AppBuilder — Pipeline v2.Framework Routing — powershell-module.Routes &quot;an automation module for CI/CD&quot; to powershell-module" time="0.0016" asserts="0" success="True" result="Success" executed="True" />
+                      <test-case description="Routes &quot;a profile module for my powershell setup&quot; to powershell-module" name="AppBuilder — Pipeline v2.Framework Routing — powershell-module.Routes &quot;a profile module for my powershell setup&quot; to powershell-module" time="0.0024" asserts="0" success="True" result="Success" executed="True" />
+                    </results>
+                  </test-suite>
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="ConfigLoader — Offline.Get-ConfigValue" executed="True" result="Success" success="True" time="0.2603" asserts="0" description="ConfigLoader — Offline.Get-ConfigValue">
+              <test-suite type="TestFixture" name="AppBuilder — Pipeline v2.Tauri HTML Validation" executed="True" result="Success" success="True" time="0.1875" asserts="0" description="AppBuilder — Pipeline v2.Tauri HTML Validation">
                 <results>
-                  <test-case description="Returns value from loaded config" name="ConfigLoader — Offline.Get-ConfigValue.Returns value from loaded config" time="0.0114" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Falls back to environment variable" name="ConfigLoader — Offline.Get-ConfigValue.Falls back to environment variable" time="0.0133" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Returns default when key not found anywhere" name="ConfigLoader — Offline.Get-ConfigValue.Returns default when key not found anywhere" time="0.0091" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Returns null when key not found and no default" name="ConfigLoader — Offline.Get-ConfigValue.Returns null when key not found and no default" time="0.0128" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Flags missing DOCTYPE in Tauri HTML" name="AppBuilder — Pipeline v2.Tauri HTML Validation.Flags missing DOCTYPE in Tauri HTML" time="0.0143" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Flags missing  in Tauri HTML" name="AppBuilder — Pipeline v2.Tauri HTML Validation.Flags missing  in Tauri HTML" time="0.0156" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Flags missing  in Tauri HTML" name="AppBuilder — Pipeline v2.Tauri HTML Validation.Flags missing  in Tauri HTML" time="0.0162" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Flags external script sources in Tauri HTML" name="AppBuilder — Pipeline v2.Tauri HTML Validation.Flags external script sources in Tauri HTML" time="0.0163" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Flags external link sources in Tauri HTML" name="AppBuilder — Pipeline v2.Tauri HTML Validation.Flags external link sources in Tauri HTML" time="0.0297" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Passes valid self-contained Tauri HTML" name="AppBuilder — Pipeline v2.Tauri HTML Validation.Passes valid self-contained Tauri HTML" time="0.0233" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Does NOT apply HTML checks to non-Tauri frameworks" name="AppBuilder — Pipeline v2.Tauri HTML Validation.Does NOT apply HTML checks to non-Tauri frameworks" time="0.016" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="ConfigLoader — Offline.Set-ConfigValue" executed="True" result="Success" success="True" time="0.4418" asserts="0" description="ConfigLoader — Offline.Set-ConfigValue">
+              <test-suite type="TestFixture" name="AppBuilder — Pipeline v2.Tauri JS Security Validation" executed="True" result="Success" success="True" time="0.3279" asserts="0" description="AppBuilder — Pipeline v2.Tauri JS Security Validation">
                 <results>
-                  <test-case description="Creates .env file and writes key" name="ConfigLoader — Offline.Set-ConfigValue.Creates .env file and writes key" time="0.0258" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Updates existing key in .env file" name="ConfigLoader — Offline.Set-ConfigValue.Updates existing key in .env file" time="0.0737" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Handles single-line .env file update without crash" name="ConfigLoader — Offline.Set-ConfigValue.Handles single-line .env file update without crash" time="0.0469" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Updates in-memory config and environment variable" name="ConfigLoader — Offline.Set-ConfigValue.Updates in-memory config and environment variable" time="0.0296" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Flags eval() in Tauri JS files" name="AppBuilder — Pipeline v2.Tauri JS Security Validation.Flags eval() in Tauri JS files" time="0.014" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Flags innerHTML assignment in Tauri JS" name="AppBuilder — Pipeline v2.Tauri JS Security Validation.Flags innerHTML assignment in Tauri JS" time="0.0144" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Flags document.write in Tauri JS" name="AppBuilder — Pipeline v2.Tauri JS Security Validation.Flags document.write in Tauri JS" time="0.0177" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Flags new Function() in Tauri JS" name="AppBuilder — Pipeline v2.Tauri JS Security Validation.Flags new Function() in Tauri JS" time="0.0155" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Passes clean Tauri JS" name="AppBuilder — Pipeline v2.Tauri JS Security Validation.Passes clean Tauri JS" time="0.0408" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Does NOT apply JS security checks to non-Tauri frameworks" name="AppBuilder — Pipeline v2.Tauri JS Security Validation.Does NOT apply JS security checks to non-Tauri frameworks" time="0.0238" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="AppBuilder — Pipeline v2.PowerShell Module Validators" executed="True" result="Success" success="True" time="0.5441" asserts="0" description="AppBuilder — Pipeline v2.PowerShell Module Validators">
+                <results>
+                  <test-case description="Flags unapproved verb in module function" name="AppBuilder — Pipeline v2.PowerShell Module Validators.Flags unapproved verb in module function" time="0.0336" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Passes approved verb-noun function names" name="AppBuilder — Pipeline v2.PowerShell Module Validators.Passes approved verb-noun function names" time="0.0216" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Flags missing ModuleVersion in manifest" name="AppBuilder — Pipeline v2.PowerShell Module Validators.Flags missing ModuleVersion in manifest" time="0.025" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Flags missing FunctionsToExport in manifest" name="AppBuilder — Pipeline v2.PowerShell Module Validators.Flags missing FunctionsToExport in manifest" time="0.0225" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Flags module with no exported functions" name="AppBuilder — Pipeline v2.PowerShell Module Validators.Flags module with no exported functions" time="0.0192" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Flags New-Object -ComObject in modules" name="AppBuilder — Pipeline v2.PowerShell Module Validators.Flags New-Object -ComObject in modules" time="0.0221" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Flags remote WMI queries in modules" name="AppBuilder — Pipeline v2.PowerShell Module Validators.Flags remote WMI queries in modules" time="0.0176" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Flags network listeners in modules" name="AppBuilder — Pipeline v2.PowerShell Module Validators.Flags network listeners in modules" time="0.0216" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Passes a complete well-formed module" name="AppBuilder — Pipeline v2.PowerShell Module Validators.Passes a complete well-formed module" time="0.0283" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="AppBuilder — Pipeline v2.PowerShell Module Branding" executed="True" result="Success" success="True" time="0.5761" asserts="0" description="AppBuilder — Pipeline v2.PowerShell Module Branding">
+                <results>
+                  <test-case description="Injects attribution header into .psm1" name="AppBuilder — Pipeline v2.PowerShell Module Branding.Injects attribution header into .psm1" time="0.0127" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Does not double-inject attribution" name="AppBuilder — Pipeline v2.PowerShell Module Branding.Does not double-inject attribution" time="0.0089" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="NoBranding strips attribution from module" name="AppBuilder — Pipeline v2.PowerShell Module Branding.NoBranding strips attribution from module" time="0.0075" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="AppBuilder — Pipeline v2.Build Memory" executed="True" result="Success" success="True" time="0.6755" asserts="0" description="AppBuilder — Pipeline v2.Build Memory">
+                <results>
+                  <test-case description="Initialize-BuildMemoryTable creates the table" name="AppBuilder — Pipeline v2.Build Memory.Initialize-BuildMemoryTable creates the table" time="0.0064" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Save-BuildConstraint stores a new constraint" name="AppBuilder — Pipeline v2.Build Memory.Save-BuildConstraint stores a new constraint" time="0.0302" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Save-BuildConstraint increments hit_count on duplicate" name="AppBuilder — Pipeline v2.Build Memory.Save-BuildConstraint increments hit_count on duplicate" time="0.0215" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-BuildConstraints retrieves stored constraints" name="AppBuilder — Pipeline v2.Build Memory.Get-BuildConstraints retrieves stored constraints" time="0.0158" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-BuildConstraints returns empty for unknown framework" name="AppBuilder — Pipeline v2.Build Memory.Get-BuildConstraints returns empty for unknown framework" time="0.0108" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="AppBuilder — Pipeline v2.Error Categorizer (ConvertTo-BuildConstraint)" executed="True" result="Success" success="True" time="0.7292" asserts="0" description="AppBuilder — Pipeline v2.Error Categorizer (ConvertTo-BuildConstraint)">
+                <results>
+                  <test-case description="Categorizes PowerShell variable scope error" name="AppBuilder — Pipeline v2.Error Categorizer (ConvertTo-BuildConstraint).Categorizes PowerShell variable scope error" time="0.01" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Categorizes PowerShell null-coalescing error" name="AppBuilder — Pipeline v2.Error Categorizer (ConvertTo-BuildConstraint).Categorizes PowerShell null-coalescing error" time="0.0096" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Categorizes Tauri unresolved import error" name="AppBuilder — Pipeline v2.Error Categorizer (ConvertTo-BuildConstraint).Categorizes Tauri unresolved import error" time="0.0067" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Categorizes Tauri borrow checker error" name="AppBuilder — Pipeline v2.Error Categorizer (ConvertTo-BuildConstraint).Categorizes Tauri borrow checker error" time="0.0101" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Categorizes Python import error" name="AppBuilder — Pipeline v2.Error Categorizer (ConvertTo-BuildConstraint).Categorizes Python import error" time="0.0062" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns generic fallback for unknown errors" name="AppBuilder — Pipeline v2.Error Categorizer (ConvertTo-BuildConstraint).Returns generic fallback for unknown errors" time="0.0079" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="AppBuilder — Pipeline v2.Planning Agent Threshold" executed="True" result="Success" success="True" time="0.777" asserts="0" description="AppBuilder — Pipeline v2.Planning Agent Threshold">
+                <results>
+                  <test-case description="Skips planning for short specs (≤150 words)" name="AppBuilder — Pipeline v2.Planning Agent Threshold.Skips planning for short specs (≤150 words)" time="0.0152" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Would trigger planning for long specs (&gt;150 words)" name="AppBuilder — Pipeline v2.Planning Agent Threshold.Would trigger planning for long specs (&gt;150 words)" time="0.0295" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="AppBuilder — Pipeline v2.Theme Preset Colors" executed="True" result="Success" success="True" time="0.7902" asserts="0" description="AppBuilder — Pipeline v2.Theme Preset Colors">
+                <results>
+                  <test-case description="Dark theme accent is Bildsy blue (#4A90E2) not purple" name="AppBuilder — Pipeline v2.Theme Preset Colors.Dark theme accent is Bildsy blue (#4A90E2) not purple" time="0.0097" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="AppBuilder — Pipeline v2.Code Repair — .psm1 support" executed="True" result="Success" success="True" time="0.815" asserts="0" description="AppBuilder — Pipeline v2.Code Repair — .psm1 support">
+                <results>
+                  <test-case description="Repairs variable scope errors in .psm1 files" name="AppBuilder — Pipeline v2.Code Repair — .psm1 support.Repairs variable scope errors in .psm1 files" time="0.0216" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
             </results>
           </test-suite>
-        </results>
-      </test-suite>
-      <test-suite type="TestFixture" name="C:\Users\georg\Documents\PowerShell\Tests\IntentRouting.Tests.ps1" executed="True" result="Success" success="True" time="2.5512" asserts="0" description="C:\Users\georg\Documents\PowerShell\Tests\IntentRouting.Tests.ps1">
-        <results>
-          <test-suite type="TestFixture" name="Intent Routing — Offline" executed="True" result="Success" success="True" time="1.6999" asserts="0" description="Intent Routing — Offline">
+          <test-suite type="TestFixture" name="AppBuilder — Pipeline Fixes" executed="True" result="Success" success="True" time="4.0758" asserts="0" description="AppBuilder — Pipeline Fixes">
             <results>
-              <test-suite type="TestFixture" name="Intent Routing — Offline.Intent Lookup" executed="True" result="Success" success="True" time="0.1316" asserts="0" description="Intent Routing — Offline.Intent Lookup">
+              <test-suite type="TestFixture" name="AppBuilder — Pipeline Fixes.Token Cap Removal (Get-BuildMaxTokens)" executed="True" result="Success" success="True" time="0.0355" asserts="0" description="AppBuilder — Pipeline Fixes.Token Cap Removal (Get-BuildMaxTokens)">
                 <results>
-                  <test-case description="Routes a known intent successfully" name="Intent Routing — Offline.Intent Lookup.Routes a known intent successfully" time="0.1113" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Rejects an unknown intent" name="Intent Routing — Offline.Intent Lookup.Rejects an unknown intent" time="0.0122" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns full 64000 for claude-sonnet-4-6 (no cap)" name="AppBuilder — Pipeline Fixes.Token Cap Removal (Get-BuildMaxTokens).Returns full 64000 for claude-sonnet-4-6 (no cap)" time="0.0135" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns full 128000 for claude-opus-4-6 (no cap)" name="AppBuilder — Pipeline Fixes.Token Cap Removal (Get-BuildMaxTokens).Returns full 128000 for claude-opus-4-6 (no cap)" time="0.0059" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns full 16384 for gpt-4o (no cap)" name="AppBuilder — Pipeline Fixes.Token Cap Removal (Get-BuildMaxTokens).Returns full 16384 for gpt-4o (no cap)" time="0.007" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Override still works" name="AppBuilder — Pipeline Fixes.Token Cap Removal (Get-BuildMaxTokens).Override still works" time="0.0062" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="Intent Routing — Offline.Parameter Validation" executed="True" result="Success" success="True" time="0.223" asserts="0" description="Intent Routing — Offline.Parameter Validation">
+              <test-suite type="TestFixture" name="AppBuilder — Pipeline Fixes.Get-CodeBlocks Filename Extraction" executed="True" result="Success" success="True" time="0.1274" asserts="0" description="AppBuilder — Pipeline Fixes.Get-CodeBlocks Filename Extraction">
                 <results>
-                  <test-case description="Rejects missing required parameters" name="Intent Routing — Offline.Parameter Validation.Rejects missing required parameters" time="0.0131" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Rejects unknown parameters" name="Intent Routing — Offline.Parameter Validation.Rejects unknown parameters" time="0.0175" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Accepts valid parameters via Payload" name="Intent Routing — Offline.Parameter Validation.Accepts valid parameters via Payload" time="0.057" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Extracts filename from fence line" name="AppBuilder — Pipeline Fixes.Get-CodeBlocks Filename Extraction.Extracts filename from fence line" time="0.0133" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Extracts path with subdirectory from fence line" name="AppBuilder — Pipeline Fixes.Get-CodeBlocks Filename Extraction.Extracts path with subdirectory from fence line" time="0.0189" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns null FileName when no filename in fence" name="AppBuilder — Pipeline Fixes.Get-CodeBlocks Filename Extraction.Returns null FileName when no filename in fence" time="0.0206" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Handles multiple blocks with different filenames" name="AppBuilder — Pipeline Fixes.Get-CodeBlocks Filename Extraction.Handles multiple blocks with different filenames" time="0.0214" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Preserves backward compatibility — Language still works" name="AppBuilder — Pipeline Fixes.Get-CodeBlocks Filename Extraction.Preserves backward compatibility — Language still works" time="0.0145" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="Intent Routing — Offline.Safety Tier Enforcement" executed="True" result="Success" success="True" time="1.5488" asserts="0" description="Intent Routing — Offline.Safety Tier Enforcement">
+              <test-suite type="TestFixture" name="AppBuilder — Pipeline Fixes.Merge-PowerShellSources" executed="True" result="Success" success="True" time="0.2565" asserts="0" description="AppBuilder — Pipeline Fixes.Merge-PowerShellSources">
                 <results>
-                  <test-case description="RequiresConfirmation intent prompts even with AutoConfirm" name="Intent Routing — Offline.Safety Tier Enforcement.RequiresConfirmation intent prompts even with AutoConfirm" time="0.7143" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="RequiresConfirmation proceeds when user confirms" name="Intent Routing — Offline.Safety Tier Enforcement.RequiresConfirmation proceeds when user confirms" time="0.5305" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Force flag bypasses confirmation" name="Intent Routing — Offline.Safety Tier Enforcement.Force flag bypasses confirmation" time="0.0762" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns app.ps1 directly for single-file projects" name="AppBuilder — Pipeline Fixes.Merge-PowerShellSources.Returns app.ps1 directly for single-file projects" time="0.03" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Merges multiple files and strips dot-source lines" name="AppBuilder — Pipeline Fixes.Merge-PowerShellSources.Merges multiple files and strips dot-source lines" time="0.0647" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns failure when app.ps1 is missing" name="AppBuilder — Pipeline Fixes.Merge-PowerShellSources.Returns failure when app.ps1 is missing" time="0.0132" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="Intent Routing — Offline.Result Structure" executed="True" result="Success" success="True" time="1.6973" asserts="0" description="Intent Routing — Offline.Result Structure">
+              <test-suite type="TestFixture" name="AppBuilder — Pipeline Fixes.Multi-File Code Generation Mapping" executed="True" result="Success" success="True" time="0.3732" asserts="0" description="AppBuilder — Pipeline Fixes.Multi-File Code Generation Mapping">
                 <results>
-                  <test-case description="Returns required fields" name="Intent Routing — Offline.Result Structure.Returns required fields" time="0.0749" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="ExecutionTime is a positive number" name="Intent Routing — Offline.Result Structure.ExecutionTime is a positive number" time="0.0684" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Maps Tauri files correctly using fence filenames" name="AppBuilder — Pipeline Fixes.Multi-File Code Generation Mapping.Maps Tauri files correctly using fence filenames" time="0.0482" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Maps multi-file PowerShell correctly using fence filenames" name="AppBuilder — Pipeline Fixes.Multi-File Code Generation Mapping.Maps multi-file PowerShell correctly using fence filenames" time="0.0647" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
-            </results>
-          </test-suite>
-          <test-suite type="TestFixture" name="Command Validation — Offline" executed="True" result="Success" success="True" time="2.1307" asserts="0" description="Command Validation — Offline">
-            <results>
-              <test-suite type="TestFixture" name="Command Validation — Offline.Whitelist Check" executed="True" result="Success" success="True" time="0.0311" asserts="0" description="Command Validation — Offline.Whitelist Check">
+              <test-suite type="TestFixture" name="AppBuilder — Pipeline Fixes.Fix Loop MaxRetries Default" executed="True" result="Success" success="True" time="0.387" asserts="0" description="AppBuilder — Pipeline Fixes.Fix Loop MaxRetries Default">
                 <results>
-                  <test-case description="Validates a whitelisted read-only command" name="Command Validation — Offline.Whitelist Check.Validates a whitelisted read-only command" time="0.0162" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Rejects a non-whitelisted command" name="Command Validation — Offline.Whitelist Check.Rejects a non-whitelisted command" time="0.01" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="Command Validation — Offline.Invoke-AIExec" executed="True" result="Success" success="True" time="0.3564" asserts="0" description="Command Validation — Offline.Invoke-AIExec">
-                <results>
-                  <test-case description="Executes a whitelisted read-only command with AutoConfirm" name="Command Validation — Offline.Invoke-AIExec.Executes a whitelisted read-only command with AutoConfirm" time="0.2613" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Rejects a non-whitelisted command" name="Command Validation — Offline.Invoke-AIExec.Rejects a non-whitelisted command" time="0.0326" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="DryRun flag prevents actual execution" name="Command Validation — Offline.Invoke-AIExec.DryRun flag prevents actual execution" time="0.0262" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="Command Validation — Offline.Confirmation Prompt" executed="True" result="Success" success="True" time="0.4283" asserts="0" description="Command Validation — Offline.Confirmation Prompt">
-                <results>
-                  <test-case description="Show-CommandConfirmation returns true for ReadOnly" name="Command Validation — Offline.Confirmation Prompt.Show-CommandConfirmation returns true for ReadOnly" time="0.016" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Show-CommandConfirmation prompts for RequiresConfirmation" name="Command Validation — Offline.Confirmation Prompt.Show-CommandConfirmation prompts for RequiresConfirmation" time="0.0291" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Show-CommandConfirmation denies on no" name="Command Validation — Offline.Confirmation Prompt.Show-CommandConfirmation denies on no" time="0.0215" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-            </results>
-          </test-suite>
-        </results>
-      </test-suite>
-      <test-suite type="TestFixture" name="C:\Users\georg\Documents\PowerShell\Tests\NaturalLanguage.Tests.ps1" executed="True" result="Success" success="True" time="0.4921" asserts="0" description="C:\Users\georg\Documents\PowerShell\Tests\NaturalLanguage.Tests.ps1">
-        <results>
-          <test-suite type="TestFixture" name="NaturalLanguage — Offline" executed="True" result="Success" success="True" time="0.1736" asserts="0" description="NaturalLanguage — Offline">
-            <results>
-              <test-suite type="TestFixture" name="NaturalLanguage — Offline.Convert-NaturalLanguageToCommand" executed="True" result="Success" success="True" time="0.0748" asserts="0" description="NaturalLanguage — Offline.Convert-NaturalLanguageToCommand">
-                <results>
-                  <test-case description="Translates &quot;list files&quot; to Get-ChildItem" name="NaturalLanguage — Offline.Convert-NaturalLanguageToCommand.Translates &quot;list files&quot; to Get-ChildItem" time="0.0206" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Translates &quot;open notepad&quot; to Start-Process notepad" name="NaturalLanguage — Offline.Convert-NaturalLanguageToCommand.Translates &quot;open notepad&quot; to Start-Process notepad" time="0.0147" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Returns input unchanged when no mapping found" name="NaturalLanguage — Offline.Convert-NaturalLanguageToCommand.Returns input unchanged when no mapping found" time="0.0095" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Is case-insensitive" name="NaturalLanguage — Offline.Convert-NaturalLanguageToCommand.Is case-insensitive" time="0.0128" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Handles &quot;show processes&quot; mapping" name="NaturalLanguage — Offline.Convert-NaturalLanguageToCommand.Handles &quot;show processes&quot; mapping" time="0.0125" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="NaturalLanguage — Offline.Get-TokenEstimate" executed="True" result="Success" success="True" time="0.1039" asserts="0" description="NaturalLanguage — Offline.Get-TokenEstimate">
-                <results>
-                  <test-case description="Returns a positive number" name="NaturalLanguage — Offline.Get-TokenEstimate.Returns a positive number" time="0.0129" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Returns default fallback of 4.0 when no mappings loaded" name="NaturalLanguage — Offline.Get-TokenEstimate.Returns default fallback of 4.0 when no mappings loaded" time="0.0113" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="NaturalLanguage — Offline.Get-EstimatedTokenCount" executed="True" result="Success" success="True" time="0.1471" asserts="0" description="NaturalLanguage — Offline.Get-EstimatedTokenCount">
-                <results>
-                  <test-case description="Returns 0 for empty chat history" name="NaturalLanguage — Offline.Get-EstimatedTokenCount.Returns 0 for empty chat history" time="0.0189" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Returns positive count for non-empty history" name="NaturalLanguage — Offline.Get-EstimatedTokenCount.Returns positive count for non-empty history" time="0.0202" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="NaturalLanguage — Offline.Import-NaturalLanguageMappings" executed="True" result="Success" success="True" time="0.1699" asserts="0" description="NaturalLanguage — Offline.Import-NaturalLanguageMappings">
-                <results>
-                  <test-case description="Returns false when mappings file does not exist" name="NaturalLanguage — Offline.Import-NaturalLanguageMappings.Returns false when mappings file does not exist" time="0.019" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-            </results>
-          </test-suite>
-        </results>
-      </test-suite>
-      <test-suite type="TestFixture" name="C:\Users\georg\Documents\PowerShell\Tests\PluginLoader.Tests.ps1" executed="True" result="Success" success="True" time="1.4724" asserts="0" description="C:\Users\georg\Documents\PowerShell\Tests\PluginLoader.Tests.ps1">
-        <results>
-          <test-suite type="TestFixture" name="PluginLoader — Offline" executed="True" result="Success" success="True" time="0.776" asserts="0" description="PluginLoader — Offline">
-            <results>
-              <test-suite type="TestFixture" name="PluginLoader — Offline.Import-BildsyPSPlugins with valid plugin" executed="True" result="Success" success="True" time="0.2475" asserts="0" description="PluginLoader — Offline.Import-BildsyPSPlugins with valid plugin">
-                <results>
-                  <test-case description="Loads the plugin into LoadedPlugins" name="PluginLoader — Offline.Import-BildsyPSPlugins with valid plugin.Loads the plugin into LoadedPlugins" time="0.0134" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Merges plugin intents into IntentAliases" name="PluginLoader — Offline.Import-BildsyPSPlugins with valid plugin.Merges plugin intents into IntentAliases" time="0.0097" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Merges plugin metadata into IntentMetadata" name="PluginLoader — Offline.Import-BildsyPSPlugins with valid plugin.Merges plugin metadata into IntentMetadata" time="0.0215" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Plugin intent is callable via Invoke-IntentAction" name="PluginLoader — Offline.Import-BildsyPSPlugins with valid plugin.Plugin intent is callable via Invoke-IntentAction" time="0.0804" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="PluginLoader — Offline.Unregister-BildsyPSPlugin" executed="True" result="Success" success="True" time="0.3514" asserts="0" description="PluginLoader — Offline.Unregister-BildsyPSPlugin">
-                <results>
-                  <test-case description="Removes plugin intents from registries" name="PluginLoader — Offline.Unregister-BildsyPSPlugin.Removes plugin intents from registries" time="0.0205" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Handles unregistering a non-loaded plugin gracefully" name="PluginLoader — Offline.Unregister-BildsyPSPlugin.Handles unregistering a non-loaded plugin gracefully" time="0.0189" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="PluginLoader — Offline.Plugin conflict detection" executed="True" result="Success" success="True" time="0.4791" asserts="0" description="PluginLoader — Offline.Plugin conflict detection">
-                <results>
-                  <test-case description="Does not overwrite core intents with plugin intents" name="PluginLoader — Offline.Plugin conflict detection.Does not overwrite core intents with plugin intents" time="0.0626" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="PluginLoader — Offline.Plugin validation" executed="True" result="Success" success="True" time="0.5531" asserts="0" description="PluginLoader — Offline.Plugin validation">
-                <results>
-                  <test-case description="Skips files with no PluginIntents" name="PluginLoader — Offline.Plugin validation.Skips files with no PluginIntents" time="0.043" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Skips files starting with underscore" name="PluginLoader — Offline.Plugin validation.Skips files starting with underscore" time="0.0276" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="PluginLoader — Offline.Plugin configuration" executed="True" result="Success" success="True" time="0.656" asserts="0" description="PluginLoader — Offline.Plugin configuration">
-                <results>
-                  <test-case description="Loads default config values" name="PluginLoader — Offline.Plugin configuration.Loads default config values" time="0.0167" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Set-PluginConfig persists to JSON file" name="PluginLoader — Offline.Plugin configuration.Set-PluginConfig persists to JSON file" time="0.0213" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="PluginLoader — Offline.Version compatibility" executed="True" result="Success" success="True" time="0.7239" asserts="0" description="PluginLoader — Offline.Version compatibility">
-                <results>
-                  <test-case description="Skips plugin requiring higher BildsyPS version" name="PluginLoader — Offline.Version compatibility.Skips plugin requiring higher BildsyPS version" time="0.0645" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="PluginLoader — Offline.Get-BildsyPSPlugins" executed="True" result="Success" success="True" time="0.7583" asserts="0" description="PluginLoader — Offline.Get-BildsyPSPlugins">
-                <results>
-                  <test-case description="Does not throw" name="PluginLoader — Offline.Get-BildsyPSPlugins.Does not throw" time="0.0306" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-            </results>
-          </test-suite>
-        </results>
-      </test-suite>
-      <test-suite type="TestFixture" name="C:\Users\georg\Documents\PowerShell\Tests\ResponseParser.Tests.ps1" executed="True" result="Success" success="True" time="0.5834" asserts="0" description="C:\Users\georg\Documents\PowerShell\Tests\ResponseParser.Tests.ps1">
-        <results>
-          <test-suite type="TestFixture" name="ResponseParser — Offline" executed="True" result="Success" success="True" time="0.2403" asserts="0" description="ResponseParser — Offline">
-            <results>
-              <test-suite type="TestFixture" name="ResponseParser — Offline.Convert-JsonIntent" executed="True" result="Success" success="True" time="0.1923" asserts="0" description="ResponseParser — Offline.Convert-JsonIntent">
-                <results>
-                  <test-case description="Passes through plain text unchanged" name="ResponseParser — Offline.Convert-JsonIntent.Passes through plain text unchanged" time="0.0203" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Detects and annotates valid PowerShell commands in code blocks" name="ResponseParser — Offline.Convert-JsonIntent.Detects and annotates valid PowerShell commands in code blocks" time="0.0197" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Annotates unrecognized commands as not in safe list" name="ResponseParser — Offline.Convert-JsonIntent.Annotates unrecognized commands as not in safe list" time="0.0125" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Parses inline JSON intent action" name="ResponseParser — Offline.Convert-JsonIntent.Parses inline JSON intent action" time="0.0692" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Respects MaxExecutionsPerMessage limit" name="ResponseParser — Offline.Convert-JsonIntent.Respects MaxExecutionsPerMessage limit" time="0.0665" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="ResponseParser — Offline.Format-Markdown" executed="True" result="Success" success="True" time="0.2367" asserts="0" description="ResponseParser — Offline.Format-Markdown">
-                <results>
-                  <test-case description="Function exists" name="ResponseParser — Offline.Format-Markdown.Function exists" time="0.0124" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Does not throw on plain text" name="ResponseParser — Offline.Format-Markdown.Does not throw on plain text" time="0.0159" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Does not throw on markdown with headers" name="ResponseParser — Offline.Format-Markdown.Does not throw on markdown with headers" time="0.0121" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-            </results>
-          </test-suite>
-        </results>
-      </test-suite>
-      <test-suite type="TestFixture" name="C:\Users\georg\Documents\PowerShell\Tests\SafetySystem.Tests.ps1" executed="True" result="Success" success="True" time="0.5982" asserts="0" description="C:\Users\georg\Documents\PowerShell\Tests\SafetySystem.Tests.ps1">
-        <results>
-          <test-suite type="TestFixture" name="SafetySystem — Offline" executed="True" result="Success" success="True" time="0.3042" asserts="0" description="SafetySystem — Offline">
-            <results>
-              <test-suite type="TestFixture" name="SafetySystem — Offline.Rate Limiting" executed="True" result="Success" success="True" time="0.0624" asserts="0" description="SafetySystem — Offline.Rate Limiting">
-                <results>
-                  <test-case description="Allows execution when under rate limit" name="SafetySystem — Offline.Rate Limiting.Allows execution when under rate limit" time="0.0158" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Blocks execution when rate limit exceeded" name="SafetySystem — Offline.Rate Limiting.Blocks execution when rate limit exceeded" time="0.0165" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Clears expired timestamps outside the window" name="SafetySystem — Offline.Rate Limiting.Clears expired timestamps outside the window" time="0.0159" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Add-ExecutionTimestamp increments the list" name="SafetySystem — Offline.Rate Limiting.Add-ExecutionTimestamp increments the list" time="0.0109" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="SafetySystem — Offline.File Operation Tracking" executed="True" result="Success" success="True" time="0.1221" asserts="0" description="SafetySystem — Offline.File Operation Tracking">
-                <results>
-                  <test-case description="Add-FileOperation records an entry" name="SafetySystem — Offline.File Operation Tracking.Add-FileOperation records an entry" time="0.0231" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Tracks session ID and user ID" name="SafetySystem — Offline.File Operation Tracking.Tracks session ID and user ID" time="0.015" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Enforces MaxUndoHistory limit" name="SafetySystem — Offline.File Operation Tracking.Enforces MaxUndoHistory limit" time="0.0177" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="SafetySystem — Offline.Undo-LastFileOperation" executed="True" result="Success" success="True" time="0.2168" asserts="0" description="SafetySystem — Offline.Undo-LastFileOperation">
-                <results>
-                  <test-case description="Undoes a Create operation by deleting the file" name="SafetySystem — Offline.Undo-LastFileOperation.Undoes a Create operation by deleting the file" time="0.0446" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Undoes a Delete operation by restoring from backup" name="SafetySystem — Offline.Undo-LastFileOperation.Undoes a Delete operation by restoring from backup" time="0.0359" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Reports no operations to undo when history is empty" name="SafetySystem — Offline.Undo-LastFileOperation.Reports no operations to undo when history is empty" time="0.0102" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="SafetySystem — Offline.Session Info" executed="True" result="Success" success="True" time="0.2579" asserts="0" description="SafetySystem — Offline.Session Info">
-                <results>
-                  <test-case description="Get-SessionInfo does not throw" name="SafetySystem — Offline.Session Info.Get-SessionInfo does not throw" time="0.0243" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Session globals are initialized" name="SafetySystem — Offline.Session Info.Session globals are initialized" time="0.0128" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="SafetySystem — Offline.Get-FileOperationHistory" executed="True" result="Success" success="True" time="0.3019" asserts="0" description="SafetySystem — Offline.Get-FileOperationHistory">
-                <results>
-                  <test-case description="Does not throw with empty history" name="SafetySystem — Offline.Get-FileOperationHistory.Does not throw with empty history" time="0.019" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Does not throw with populated history" name="SafetySystem — Offline.Get-FileOperationHistory.Does not throw with populated history" time="0.0214" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-            </results>
-          </test-suite>
-        </results>
-      </test-suite>
-      <test-suite type="TestFixture" name="C:\Users\georg\Documents\PowerShell\Tests\SecretScanner.Tests.ps1" executed="True" result="Success" success="True" time="0.539" asserts="0" description="C:\Users\georg\Documents\PowerShell\Tests\SecretScanner.Tests.ps1">
-        <results>
-          <test-suite type="TestFixture" name="SecretScanner — Offline" executed="True" result="Success" success="True" time="0.2392" asserts="0" description="SecretScanner — Offline">
-            <results>
-              <test-suite type="TestFixture" name="SecretScanner — Offline.Invoke-SecretScan" executed="True" result="Success" success="True" time="0.2078" asserts="0" description="SecretScanner — Offline.Invoke-SecretScan">
-                <results>
-                  <test-case description="Returns empty array for nonexistent files" name="SecretScanner — Offline.Invoke-SecretScan.Returns empty array for nonexistent files" time="0.0155" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Detects Anthropic API key pattern" name="SecretScanner — Offline.Invoke-SecretScan.Detects Anthropic API key pattern" time="0.0203" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Detects OpenAI API key pattern" name="SecretScanner — Offline.Invoke-SecretScan.Detects OpenAI API key pattern" time="0.0169" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Detects generic secret assignment" name="SecretScanner — Offline.Invoke-SecretScan.Detects generic secret assignment" time="0.0184" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Skips comment lines" name="SecretScanner — Offline.Invoke-SecretScan.Skips comment lines" time="0.0202" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Returns correct file and line number" name="SecretScanner — Offline.Invoke-SecretScan.Returns correct file and line number" time="0.0269" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Masks secrets in output" name="SecretScanner — Offline.Invoke-SecretScan.Masks secrets in output" time="0.0175" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Handles single-line file without char coercion" name="SecretScanner — Offline.Invoke-SecretScan.Handles single-line file without char coercion" time="0.0252" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Returns empty for clean file with no secrets" name="SecretScanner — Offline.Invoke-SecretScan.Returns empty for clean file with no secrets" time="0.0215" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Scans multiple files" name="SecretScanner — Offline.Invoke-SecretScan.Scans multiple files" time="0.0212" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="SecretScanner — Offline.Show-SecretScanReport" executed="True" result="Success" success="True" time="0.2356" asserts="0" description="SecretScanner — Offline.Show-SecretScanReport">
-                <results>
-                  <test-case description="Produces no output for empty findings" name="SecretScanner — Offline.Show-SecretScanReport.Produces no output for empty findings" time="0.0235" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-            </results>
-          </test-suite>
-        </results>
-      </test-suite>
-      <test-suite type="TestFixture" name="C:\Users\georg\Documents\PowerShell\Tests\UserSkills.Tests.ps1" executed="True" result="Success" success="True" time="2.0858" asserts="0" description="C:\Users\georg\Documents\PowerShell\Tests\UserSkills.Tests.ps1">
-        <results>
-          <test-suite type="TestFixture" name="UserSkills — Offline" executed="True" result="Success" success="True" time="1.3709" asserts="0" description="UserSkills — Offline">
-            <results>
-              <test-suite type="TestFixture" name="UserSkills — Offline.Import-UserSkills" executed="True" result="Success" success="True" time="0.3459" asserts="0" description="UserSkills — Offline.Import-UserSkills">
-                <results>
-                  <test-case description="Registers a simple skill into IntentAliases and LoadedUserSkills" name="UserSkills — Offline.Import-UserSkills.Registers a simple skill into IntentAliases and LoadedUserSkills" time="0.0662" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Stores metadata with correct description" name="UserSkills — Offline.Import-UserSkills.Stores metadata with correct description" time="0.0335" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Registers multiple skills from a single JSON file" name="UserSkills — Offline.Import-UserSkills.Registers multiple skills from a single JSON file" time="0.033" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Creates a shell-invocable function for each skill" name="UserSkills — Offline.Import-UserSkills.Creates a shell-invocable function for each skill" time="0.0302" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Skips skills that conflict with existing built-in intents" name="UserSkills — Offline.Import-UserSkills.Skips skills that conflict with existing built-in intents" time="0.0244" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Preserves existing built-in intent when a conflict occurs" name="UserSkills — Offline.Import-UserSkills.Preserves existing built-in intent when a conflict occurs" time="0.0293" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Handles missing UserSkills.json without throwing" name="UserSkills — Offline.Import-UserSkills.Handles missing UserSkills.json without throwing" time="0.0208" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Handles malformed JSON without throwing" name="UserSkills — Offline.Import-UserSkills.Handles malformed JSON without throwing" time="0.0258" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Handles JSON missing the skills property without throwing" name="UserSkills — Offline.Import-UserSkills.Handles JSON missing the skills property without throwing" time="0.0244" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Skips a skill definition with no steps array" name="UserSkills — Offline.Import-UserSkills.Skips a skill definition with no steps array" time="0.0275" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Skips a skill definition with an empty steps array" name="UserSkills — Offline.Import-UserSkills.Skips a skill definition with an empty steps array" time="0.0273" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="UserSkills — Offline.Unregister-UserSkills" executed="True" result="Success" success="True" time="0.5928" asserts="0" description="UserSkills — Offline.Unregister-UserSkills">
-                <results>
-                  <test-case description="Removes all user skills from both registries" name="UserSkills — Offline.Unregister-UserSkills.Removes all user skills from both registries" time="0.0496" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Removes shell functions when unregistering" name="UserSkills — Offline.Unregister-UserSkills.Removes shell functions when unregistering" time="0.0978" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Does not throw when called with no skills loaded" name="UserSkills — Offline.Unregister-UserSkills.Does not throw when called with no skills loaded" time="0.0248" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Does not remove built-in intents" name="UserSkills — Offline.Unregister-UserSkills.Does not remove built-in intents" time="0.0625" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="UserSkills — Offline.Remove-UserSkill" executed="True" result="Success" success="True" time="0.7047" asserts="0" description="UserSkills — Offline.Remove-UserSkill">
-                <results>
-                  <test-case description="Removes a specific skill from registries and JSON file" name="UserSkills — Offline.Remove-UserSkill.Removes a specific skill from registries and JSON file" time="0.0708" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Does not throw when removing a nonexistent skill" name="UserSkills — Offline.Remove-UserSkill.Does not throw when removing a nonexistent skill" time="0.0373" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="UserSkills — Offline.Parameter Substitution" executed="True" result="Success" success="True" time="0.8691" asserts="0" description="UserSkills — Offline.Parameter Substitution">
-                <results>
-                  <test-case description="Substitutes a single parameter placeholder in step commands" name="UserSkills — Offline.Parameter Substitution.Substitutes a single parameter placeholder in step commands" time="0.0891" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Substitutes multiple distinct parameters across steps" name="UserSkills — Offline.Parameter Substitution.Substitutes multiple distinct parameters across steps" time="0.0401" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Leaves placeholder literal when parameter value is not supplied" name="UserSkills — Offline.Parameter Substitution.Leaves placeholder literal when parameter value is not supplied" time="0.0325" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="UserSkills — Offline.Invoke-UserSkill" executed="True" result="Success" success="True" time="1.0615" asserts="0" description="UserSkills — Offline.Invoke-UserSkill">
-                <results>
-                  <test-case description="Executes a single-step skill and returns output" name="UserSkills — Offline.Invoke-UserSkill.Executes a single-step skill and returns output" time="0.0364" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Executes multi-step skills in order" name="UserSkills — Offline.Invoke-UserSkill.Executes multi-step skills in order" time="0.0772" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Returns failure result for a nonexistent skill" name="UserSkills — Offline.Invoke-UserSkill.Returns failure result for a nonexistent skill" time="0.0117" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Handles a step that throws without killing the entire skill" name="UserSkills — Offline.Invoke-UserSkill.Handles a step that throws without killing the entire skill" time="0.0628" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="UserSkills — Offline.Trigger Registration" executed="True" result="Success" success="True" time="1.1444" asserts="0" description="UserSkills — Offline.Trigger Registration">
-                <results>
-                  <test-case description="Registers trigger phrases into IntentAliases" name="UserSkills — Offline.Trigger Registration.Registers trigger phrases into IntentAliases" time="0.0291" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Cleans up triggers when skill is unregistered" name="UserSkills — Offline.Trigger Registration.Cleans up triggers when skill is unregistered" time="0.0494" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="UserSkills — Offline.Idempotency" executed="True" result="Success" success="True" time="1.2134" asserts="0" description="UserSkills — Offline.Idempotency">
-                <results>
-                  <test-case description="Is idempotent when called multiple times" name="UserSkills — Offline.Idempotency.Is idempotent when called multiple times" time="0.0645" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="UserSkills — Offline.Safety via confirm field" executed="True" result="Success" success="True" time="1.2809" asserts="0" description="UserSkills — Offline.Safety via confirm field">
-                <results>
-                  <test-case description="Sets RequiresConfirmation when confirm is true" name="UserSkills — Offline.Safety via confirm field.Sets RequiresConfirmation when confirm is true" time="0.0346" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Defaults to null safety when confirm is not set" name="UserSkills — Offline.Safety via confirm field.Defaults to null safety when confirm is not set" time="0.0293" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="UserSkills — Offline.Get-UserSkillsPrompt" executed="True" result="Success" success="True" time="1.367" asserts="0" description="UserSkills — Offline.Get-UserSkillsPrompt">
-                <results>
-                  <test-case description="Returns prompt text containing skill names when skills are loaded" name="UserSkills — Offline.Get-UserSkillsPrompt.Returns prompt text containing skill names when skills are loaded" time="0.0321" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Includes parameter info in prompt text" name="UserSkills — Offline.Get-UserSkillsPrompt.Includes parameter info in prompt text" time="0.0326" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Returns empty string when no skills are loaded" name="UserSkills — Offline.Get-UserSkillsPrompt.Returns empty string when no skills are loaded" time="0.0174" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-            </results>
-          </test-suite>
-        </results>
-      </test-suite>
-      <test-suite type="TestFixture" name="C:\Users\georg\Documents\PowerShell\Tests\VisionTools.Tests.ps1" executed="True" result="Success" success="True" time="1.1073" asserts="0" description="C:\Users\georg\Documents\PowerShell\Tests\VisionTools.Tests.ps1">
-        <results>
-          <test-suite type="TestFixture" name="VisionTools — Offline" executed="True" result="Success" success="True" time="0.6685" asserts="0" description="VisionTools — Offline">
-            <results>
-              <test-suite type="TestFixture" name="VisionTools — Offline.Test-VisionSupport" executed="True" result="Success" success="True" time="0.0875" asserts="0" description="VisionTools — Offline.Test-VisionSupport">
-                <results>
-                  <test-case description="Returns true for gpt-4o" name="VisionTools — Offline.Test-VisionSupport.Returns true for gpt-4o" time="0.0148" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Returns true for llava" name="VisionTools — Offline.Test-VisionSupport.Returns true for llava" time="0.0138" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Returns true for claude-sonnet-4-5-20250929" name="VisionTools — Offline.Test-VisionSupport.Returns true for claude-sonnet-4-5-20250929" time="0.0145" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Returns false for gpt-3.5-turbo" name="VisionTools — Offline.Test-VisionSupport.Returns false for gpt-3.5-turbo" time="0.0128" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Handles partial match for llava:13b-v1.6" name="VisionTools — Offline.Test-VisionSupport.Handles partial match for llava:13b-v1.6" time="0.0145" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Handles partial match for llama3.2-vision:11b" name="VisionTools — Offline.Test-VisionSupport.Handles partial match for llama3.2-vision:11b" time="0.0139" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="VisionTools — Offline.ConvertTo-ImageBase64" executed="True" result="Success" success="True" time="0.2292" asserts="0" description="VisionTools — Offline.ConvertTo-ImageBase64">
-                <results>
-                  <test-case description="Encodes a PNG to base64 successfully" name="VisionTools — Offline.ConvertTo-ImageBase64.Encodes a PNG to base64 successfully" time="0.0377" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Encodes a JPG to base64 with correct media type" name="VisionTools — Offline.ConvertTo-ImageBase64.Encodes a JPG to base64 with correct media type" time="0.0134" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Fails for unsupported extension" name="VisionTools — Offline.ConvertTo-ImageBase64.Fails for unsupported extension" time="0.0148" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Fails for missing file" name="VisionTools — Offline.ConvertTo-ImageBase64.Fails for missing file" time="0.0127" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="VisionTools — Offline.New-VisionMessage" executed="True" result="Success" success="True" time="0.2783" asserts="0" description="VisionTools — Offline.New-VisionMessage">
-                <results>
-                  <test-case description="Builds OpenAI format with image_url and text elements" name="VisionTools — Offline.New-VisionMessage.Builds OpenAI format with image_url and text elements" time="0.0216" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Builds Anthropic format with image source block" name="VisionTools — Offline.New-VisionMessage.Builds Anthropic format with image source block" time="0.0161" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="VisionTools — Offline.Resize-ImageBitmap" executed="True" result="Success" success="True" time="0.5458" asserts="0" description="VisionTools — Offline.Resize-ImageBitmap">
-                <results>
-                  <test-case description="Leaves small images unchanged" name="VisionTools — Offline.Resize-ImageBitmap.Leaves small images unchanged" time="0.022" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Resizes large images to MaxEdge on longest side" name="VisionTools — Offline.Resize-ImageBitmap.Resizes large images to MaxEdge on longest side" time="0.1453" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Maintains aspect ratio" name="VisionTools — Offline.Resize-ImageBitmap.Maintains aspect ratio" time="0.0952" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="VisionTools — Offline.Capture-Screenshot" executed="True" result="Success" success="True" time="0.6653" asserts="0" description="VisionTools — Offline.Capture-Screenshot">
-                <results>
-                  <test-case description="Captures a screenshot on Windows with a display" name="VisionTools — Offline.Capture-Screenshot.Captures a screenshot on Windows with a display" time="0.1147" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-            </results>
-          </test-suite>
-        </results>
-      </test-suite>
-      <test-suite type="TestFixture" name="C:\Users\georg\Documents\PowerShell\Tests\WorkflowEngine.Tests.ps1" executed="True" result="Success" success="True" time="0.805" asserts="0" description="C:\Users\georg\Documents\PowerShell\Tests\WorkflowEngine.Tests.ps1">
-        <results>
-          <test-suite type="TestFixture" name="WorkflowEngine — Offline" executed="True" result="Success" success="True" time="0.5228" asserts="0" description="WorkflowEngine — Offline">
-            <results>
-              <test-suite type="TestFixture" name="WorkflowEngine — Offline.Workflow Registry" executed="True" result="Success" success="True" time="0.0471" asserts="0" description="WorkflowEngine — Offline.Workflow Registry">
-                <results>
-                  <test-case description="Workflows hashtable is populated" name="WorkflowEngine — Offline.Workflow Registry.Workflows hashtable is populated" time="0.0144" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Each workflow has Name, Description, and Steps" name="WorkflowEngine — Offline.Workflow Registry.Each workflow has Name, Description, and Steps" time="0.0152" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Each step has an Intent field" name="WorkflowEngine — Offline.Workflow Registry.Each step has an Intent field" time="0.0142" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="WorkflowEngine — Offline.Invoke-Workflow" executed="True" result="Success" success="True" time="0.4993" asserts="0" description="WorkflowEngine — Offline.Invoke-Workflow">
-                <results>
-                  <test-case description="Rejects unknown workflow name" name="WorkflowEngine — Offline.Invoke-Workflow.Rejects unknown workflow name" time="0.022" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Executes a known workflow and returns result structure" name="WorkflowEngine — Offline.Invoke-Workflow.Executes a known workflow and returns result structure" time="0.1483" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="StopOnError halts after first failing step" name="WorkflowEngine — Offline.Invoke-Workflow.StopOnError halts after first failing step" time="0.0792" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Passes parameters through ParamMap" name="WorkflowEngine — Offline.Invoke-Workflow.Passes parameters through ParamMap" time="0.1996" asserts="0" success="True" result="Success" executed="True" />
-                </results>
-              </test-suite>
-              <test-suite type="TestFixture" name="WorkflowEngine — Offline.Get-Workflows" executed="True" result="Success" success="True" time="0.5208" asserts="0" description="WorkflowEngine — Offline.Get-Workflows">
-                <results>
-                  <test-case description="Does not throw" name="WorkflowEngine — Offline.Get-Workflows.Does not throw" time="0.0193" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Invoke-BuildFixLoop accepts MaxRetries parameter" name="AppBuilder — Pipeline Fixes.Fix Loop MaxRetries Default.Invoke-BuildFixLoop accepts MaxRetries parameter" time="0.01" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
             </results>

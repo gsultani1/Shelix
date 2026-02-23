@@ -447,10 +447,14 @@ function Invoke-AnthropicChat {
         }
     }
     
+    # Always use streaming to keep the connection alive during long generations.
+    # Non-streaming requests fail with ResponseEnded on large outputs (64K+ tokens)
+    # because intermediate infrastructure drops idle HTTP connections.
     $body = @{
         model      = $Model
         max_tokens = $MaxTokens
         messages   = $anthropicMessages
+        stream     = $true
     }
     
     if ($SystemPrompt) {
@@ -467,9 +471,24 @@ function Invoke-AnthropicChat {
     $attempt = 0
     $lastError = $null
 
-    # Use HttpClient for reliable large response handling (Invoke-RestMethod drops connections on big payloads)
-    $handler = [System.Net.Http.HttpClientHandler]::new()
-    $handler.AutomaticDecompression = [System.Net.DecompressionMethods]::GZip -bor [System.Net.DecompressionMethods]::Deflate
+    # Use HttpClient with SocketsHttpHandler for reliable streaming
+    $handler = $null
+    $client = $null
+    try {
+        $handler = [System.Net.Http.SocketsHttpHandler]::new()
+        $handler.AutomaticDecompression = [System.Net.DecompressionMethods]::GZip -bor [System.Net.DecompressionMethods]::Deflate
+        $handler.PooledConnectionLifetime = [TimeSpan]::FromMinutes(15)
+        $handler.PooledConnectionIdleTimeout = [TimeSpan]::FromMinutes(10)
+        $handler.KeepAlivePingPolicy = [System.Net.Http.HttpKeepAlivePingPolicy]::WithActiveRequests
+        $handler.KeepAlivePingDelay = [TimeSpan]::FromSeconds(15)
+        $handler.KeepAlivePingTimeout = [TimeSpan]::FromSeconds(10)
+    }
+    catch {
+        # Fallback for older runtimes without SocketsHttpHandler
+        if ($handler) { $handler.Dispose() }
+        $handler = [System.Net.Http.HttpClientHandler]::new()
+        $handler.AutomaticDecompression = [System.Net.DecompressionMethods]::GZip -bor [System.Net.DecompressionMethods]::Deflate
+    }
     $client = [System.Net.Http.HttpClient]::new($handler)
     $client.Timeout = [TimeSpan]::FromSeconds($TimeoutSec)
 
@@ -483,40 +502,77 @@ function Invoke-AnthropicChat {
                 $request.Headers.Add('x-api-key', $ApiKey)
                 $request.Headers.Add('anthropic-version', '2023-06-01')
 
-                # Read response with streaming to avoid premature connection drops
+                # ResponseHeadersRead: start reading as soon as headers arrive (required for SSE streaming)
                 $httpResponse = $client.SendAsync($request, [System.Net.Http.HttpCompletionOption]::ResponseHeadersRead).GetAwaiter().GetResult()
-                $responseBody = $httpResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult()
 
                 if (-not $httpResponse.IsSuccessStatusCode) {
+                    $errBody = $httpResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult()
                     $statusCode = [int]$httpResponse.StatusCode
-                    # Rate limit or server error — retryable
                     if ($statusCode -ge 429) {
-                        throw "HTTP $statusCode`: $responseBody"
+                        throw "HTTP $statusCode`: $errBody"
                     }
-                    # Client error — not retryable
-                    throw "Anthropic API error (HTTP $statusCode`): $responseBody"
+                    throw "Anthropic API error (HTTP $statusCode`): $errBody"
                 }
 
-                $apiResponse = $responseBody | ConvertFrom-Json
+                # Read SSE stream: accumulate text deltas from content_block_delta events
+                $responseStream = $httpResponse.Content.ReadAsStreamAsync().GetAwaiter().GetResult()
+                $reader = [System.IO.StreamReader]::new($responseStream, [System.Text.Encoding]::UTF8)
 
-                if ($null -eq $apiResponse.content -or $apiResponse.content.Count -eq 0) {
-                    throw "Anthropic returned empty response"
+                $textBuilder = [System.Text.StringBuilder]::new(65536)
+                $responseModel = $Model
+                $stopReason = 'stop'
+                $inputTokens = 0
+                $outputTokens = 0
+
+                while (-not $reader.EndOfStream) {
+                    $line = $reader.ReadLine()
+
+                    # SSE format: "event: <type>" then "data: <json>" then blank line
+                    if (-not $line -or -not $line.StartsWith('data: ')) { continue }
+
+                    $data = $line.Substring(6)
+                    if ($data -eq '[DONE]') { break }
+
+                    try { $evt = $data | ConvertFrom-Json } catch { continue }
+
+                    switch ($evt.type) {
+                        'message_start' {
+                            if ($evt.message.model) { $responseModel = $evt.message.model }
+                            if ($evt.message.usage) {
+                                $inputTokens = [int]$evt.message.usage.input_tokens
+                            }
+                        }
+                        'content_block_delta' {
+                            if ($evt.delta.type -eq 'text_delta' -and $evt.delta.text) {
+                                $null = $textBuilder.Append($evt.delta.text)
+                            }
+                        }
+                        'message_delta' {
+                            if ($evt.delta.stop_reason) { $stopReason = $evt.delta.stop_reason }
+                            if ($evt.usage.output_tokens) {
+                                $outputTokens = [int]$evt.usage.output_tokens
+                            }
+                        }
+                    }
                 }
 
-                $reply = ($apiResponse.content | Where-Object { $_.type -eq 'text' } | Select-Object -First 1).text
+                $reader.Dispose()
+                $responseStream.Dispose()
+
+                $reply = $textBuilder.ToString()
                 if ([string]::IsNullOrWhiteSpace($reply)) {
-                    throw "Anthropic returned empty message content"
+                    throw "Anthropic returned empty message content (streamed)"
                 }
 
                 return @{
                     Content    = $reply
-                    Model      = $apiResponse.model
+                    Model      = $responseModel
                     Usage      = @{
-                        prompt_tokens     = $apiResponse.usage.input_tokens
-                        completion_tokens = $apiResponse.usage.output_tokens
-                        total_tokens      = $apiResponse.usage.input_tokens + $apiResponse.usage.output_tokens
+                        prompt_tokens     = $inputTokens
+                        completion_tokens = $outputTokens
+                        total_tokens      = $inputTokens + $outputTokens
                     }
-                    StopReason = $apiResponse.stop_reason
+                    StopReason = $stopReason
                 }
             }
             catch {
@@ -544,8 +600,8 @@ function Invoke-AnthropicChat {
         }
     }
     finally {
-        $client.Dispose()
-        $handler.Dispose()
+        if ($client) { $client.Dispose() }
+        if ($handler) { $handler.Dispose() }
     }
 }
 
