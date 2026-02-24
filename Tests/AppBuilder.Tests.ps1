@@ -721,11 +721,34 @@ Describe 'AppBuilder — Pipeline v2' {
             ($result.Errors -join "`n") | Should -Match 'eval\(\)'
         }
 
-        It 'Flags innerHTML assignment in Tauri JS' {
+        It 'Flags innerHTML assigned from bare variable in Tauri JS' {
             $files = @{ 'web/script.js' = 'document.getElementById("app").innerHTML = userInput;' }
             $result = Test-GeneratedCode -Files $files -Framework 'tauri'
             $result.Success | Should -BeFalse
-            ($result.Errors -join "`n") | Should -Match 'innerHTML'
+            ($result.Errors -join "`n") | Should -Match 'innerHTML.*variable.*userInput'
+        }
+
+        It 'Allows innerHTML with string literal in Tauri JS' {
+            $toml = "[package]`nname = `"t`"`nversion = `"0.1.0`"`nedition = `"2021`"`n[dependencies]`ntauri = `"2`""
+            $files = @{
+                'web/script.js'         = 'el.innerHTML = ''<div class="empty">No items</div>'';'
+                'src-tauri/Cargo.toml'  = $toml
+                'src-tauri/src/main.rs' = 'fn main() {}'
+            }
+            $result = Test-GeneratedCode -Files $files -Framework 'tauri'
+            ($result.Errors -join "`n") | Should -Not -Match 'innerHTML'
+        }
+
+        It 'Allows innerHTML with template literal in Tauri JS' {
+            $toml = "[package]`nname = `"t`"`nversion = `"0.1.0`"`nedition = `"2021`"`n[dependencies]`ntauri = `"2`""
+            $code = 'tbody.innerHTML = items.map(i => `<tr><td>${i.name}</td></tr>`).join("");'
+            $files = @{
+                'web/script.js'         = $code
+                'src-tauri/Cargo.toml'  = $toml
+                'src-tauri/src/main.rs' = 'fn main() {}'
+            }
+            $result = Test-GeneratedCode -Files $files -Framework 'tauri'
+            ($result.Errors -join "`n") | Should -Not -Match 'innerHTML'
         }
 
         It 'Flags document.write in Tauri JS' {
@@ -910,13 +933,13 @@ function Set-Greeting {
 
         It 'Get-BuildConstraints retrieves stored constraints' {
             if (-not $script:DbAvailable) { Set-ItResult -Skipped -Because 'SQLite not available' }
-            Save-BuildConstraint -Framework 'get-test-fw' -Constraint 'Constraint A'
-            Save-BuildConstraint -Framework 'get-test-fw' -Constraint 'Constraint B'
+            Save-BuildConstraint -Framework 'get-test-fw' -Constraint 'Do not use eval() or dynamic code execution in JavaScript files'
+            Save-BuildConstraint -Framework 'get-test-fw' -Constraint 'Ensure all Rust struct fields have explicit lifetime annotations'
 
             $results = Get-BuildConstraints -Framework 'get-test-fw'
             $results.Count | Should -BeGreaterOrEqual 2
-            $results | Should -Contain 'Constraint A'
-            $results | Should -Contain 'Constraint B'
+            $results | Should -Contain 'Do not use eval() or dynamic code execution in JavaScript files'
+            $results | Should -Contain 'Ensure all Rust struct fields have explicit lifetime annotations'
         }
 
         It 'Get-BuildConstraints returns empty for unknown framework' {
@@ -1236,6 +1259,121 @@ function New-MainForm { return New-Object System.Windows.Forms.Form }
         It 'Invoke-BuildFixLoop accepts MaxRetries parameter' {
             $params = (Get-Command Invoke-BuildFixLoop).Parameters
             $params.ContainsKey('MaxRetries') | Should -BeTrue
+        }
+    }
+
+    # ── REPAIR-GENERATEDCODE: PYTHON INDENTATION ─────────────
+    Context 'Repair-GeneratedCode — Python indentation' {
+
+        It 'Fixes missing indentation after def/if/for blocks' {
+            $pyCode = "def greet(name):`nprint(name)"
+            $files = @{ 'app.py' = $pyCode }
+            $count = Repair-GeneratedCode -Files $files -Framework 'python-tk'
+            $count | Should -BeGreaterThan 0
+            $files['app.py'] | Should -Match '(?m)^\s{4}print\(name\)'
+        }
+
+        It 'Does not modify already-correct Python indentation' {
+            $pyCode = "def greet(name):`n    print(name)"
+            $files = @{ 'app.py' = $pyCode }
+            $count = Repair-GeneratedCode -Files $files -Framework 'python-tk'
+            $count | Should -Be 0
+        }
+    }
+
+    # ── REPAIR-GENERATEDCODE: RUST LIFETIME ──────────────────
+    Context 'Repair-GeneratedCode — Rust lifetime annotation' {
+
+        It 'Adds lifetime to struct with bare &str fields' {
+            $rsCode = "struct Config {`n    name: &str,`n    value: &str`n}"
+            $files = @{ 'src/lib.rs' = $rsCode }
+            $count = Repair-GeneratedCode -Files $files -Framework 'tauri'
+            $count | Should -BeGreaterThan 0
+            $files['src/lib.rs'] | Should -Match "struct Config<'a>"
+            $files['src/lib.rs'] | Should -Match "&'a str"
+        }
+
+        It 'Skips struct that already has lifetime annotation' {
+            $rsCode = "struct Config<'a> {`n    name: &'a str`n}"
+            $files = @{ 'src/lib.rs' = $rsCode }
+            $count = Repair-GeneratedCode -Files $files -Framework 'tauri'
+            $count | Should -Be 0
+        }
+    }
+
+    # ── REPAIR-GENERATEDCODE: PS7 OPERATOR DOWNGRADE ─────────
+    Context 'Repair-GeneratedCode — PS7 operator downgrade' {
+
+        It 'Replaces ?? with if/else equivalent' {
+            $qq = '??' # avoid PS7 parsing ?? as null-coalescing operator
+            $psCode = '$result = $value ' + $qq + ' "default"' + "`n"
+            $files = @{ 'app.ps1' = $psCode }
+            $null = Repair-GeneratedCode -Files $files -Framework 'powershell'
+            $files['app.ps1'] | Should -Not -Match '\?\?'
+            $files['app.ps1'] | Should -Match 'if \(\$null -ne'
+        }
+    }
+
+    # ── INNERHTML XSS TEMPLATE DETECTION ─────────────────────
+    Context 'innerHTML — user-controlled template interpolation' {
+
+        It 'Flags innerHTML with .value interpolation' {
+            $code = 'el.innerHTML = `<div>${document.getElementById("name").value}</div>`;'
+            $files = @{ 'web/script.js' = $code }
+            $result = Test-GeneratedCode -Files $files -Framework 'tauri'
+            ($result.Errors -join "`n") | Should -Match 'user-controlled data'
+        }
+
+        It 'Flags innerHTML with location interpolation' {
+            $code = 'el.innerHTML = `<span>${location.search}</span>`;'
+            $files = @{ 'web/script.js' = $code }
+            $result = Test-GeneratedCode -Files $files -Framework 'tauri'
+            ($result.Errors -join "`n") | Should -Match 'user-controlled data'
+        }
+
+        It 'Allows innerHTML with safe app-data interpolation' {
+            $toml = "[package]`nname = `"t`"`nversion = `"0.1.0`"`nedition = `"2021`"`n[dependencies]`ntauri = `"2`""
+            $code = 'el.innerHTML = `<div>${product.name}</div>`;'
+            $files = @{
+                'web/script.js'         = $code
+                'src-tauri/Cargo.toml'  = $toml
+                'src-tauri/src/main.rs' = 'fn main() {}'
+            }
+            $result = Test-GeneratedCode -Files $files -Framework 'tauri'
+            ($result.Errors -join "`n") | Should -Not -Match 'innerHTML'
+        }
+    }
+
+    # ── FRAMEWORK-AWARE COMPLEXITY GATE ──────────────────────
+    Context 'Complexity gate — framework-aware base cost' {
+
+        It 'Get-BuildMaxTokens returns a value for tauri framework' {
+            $result = Get-BuildMaxTokens -Framework 'tauri' -Model 'claude-sonnet-4-6'
+            $result | Should -BeGreaterThan 0
+        }
+    }
+
+    # ── BUILD MEMORY FUZZY DEDUP ─────────────────────────────
+    Context 'Build Memory — fuzzy deduplication' {
+
+        It 'Fuzzy dedup merges similar constraints instead of duplicating' {
+            if (-not $script:DbAvailable) { Set-ItResult -Skipped -Because 'SQLite not available' }
+            # Nearly identical phrasing — should trigger >60% keyword overlap
+            Save-BuildConstraint -Framework 'fuzzy-test' -Constraint 'Never use eval() or dynamic code execution inside JavaScript files during code generation'
+            Save-BuildConstraint -Framework 'fuzzy-test' -Constraint 'Never use eval() or dynamic code execution inside JavaScript output during code generation'
+
+            $results = Get-BuildConstraints -Framework 'fuzzy-test'
+            # Should have merged into one constraint, not two
+            $results.Count | Should -Be 1
+        }
+
+        It 'Does not merge constraints with low keyword overlap' {
+            if (-not $script:DbAvailable) { Set-ItResult -Skipped -Because 'SQLite not available' }
+            Save-BuildConstraint -Framework 'fuzzy-test2' -Constraint 'Use Tauri v2 config format with frontendDist key'
+            Save-BuildConstraint -Framework 'fuzzy-test2' -Constraint 'Ensure all Rust struct fields have explicit lifetime annotations'
+
+            $results = Get-BuildConstraints -Framework 'fuzzy-test2'
+            $results.Count | Should -Be 2
         }
     }
 }

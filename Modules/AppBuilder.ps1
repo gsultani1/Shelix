@@ -33,7 +33,6 @@ $script:DangerousJavaScriptPatterns = @(
     @{ Pattern = '\beval\s*\(';           Name = 'eval()' }
     @{ Pattern = 'new\s+Function\s*\(';   Name = 'new Function()' }
     @{ Pattern = '\bdocument\.write\s*\('; Name = 'document.write()' }
-    @{ Pattern = '\.innerHTML\s*=';        Name = 'innerHTML assignment' }
     @{ Pattern = '\bsetTimeout\s*\(\s*["'']'; Name = 'setTimeout with string argument' }
     @{ Pattern = '\bsetInterval\s*\(\s*["'']'; Name = 'setInterval with string argument' }
 )
@@ -786,7 +785,8 @@ function Repair-GeneratedCode {
     <#
     .SYNOPSIS
     Auto-repair common LLM code generation mistakes before validation.
-    Uses the PowerShell parser to locate exact error positions and fix them.
+    Handles PowerShell variable/scope errors, PS7+ operator downgrades,
+    Python indentation issues, and Rust lifetime annotation omissions.
     #>
     [CmdletBinding()]
     param(
@@ -799,43 +799,94 @@ function Repair-GeneratedCode {
 
     foreach ($fileName in @($Files.Keys)) {
         $ext = [System.IO.Path]::GetExtension($fileName).ToLower()
-        if ($ext -ne '.ps1' -and $ext -ne '.psm1') { continue }
-
         $code = $Files[$fileName]
         $fileFixes = 0
-        $maxPasses = 30
 
-        for ($pass = 0; $pass -lt $maxPasses; $pass++) {
-            $tokens = $null
-            $errors = $null
-            $null = [System.Management.Automation.Language.Parser]::ParseInput($code, [ref]$tokens, [ref]$errors)
+        # ── PowerShell repairs (.ps1, .psm1) ──
+        if ($ext -eq '.ps1' -or $ext -eq '.psm1') {
+            $maxPasses = 30
 
-            $varErr = $errors | Where-Object { $_.Message -match 'Variable reference is not valid' } | Select-Object -First 1
-            if (-not $varErr) { break }
+            for ($pass = 0; $pass -lt $maxPasses; $pass++) {
+                $tokens = $null
+                $errors = $null
+                $null = [System.Management.Automation.Language.Parser]::ParseInput($code, [ref]$tokens, [ref]$errors)
 
-            $startOff = $varErr.Extent.StartOffset
-            $errText  = $varErr.Extent.Text
+                $varErr = $errors | Where-Object { $_.Message -match 'Variable reference is not valid' } | Select-Object -First 1
+                if (-not $varErr) { break }
 
-            if ($varErr.Message -match "':' was not followed") {
-                # Pattern: $varName: where varName is not a valid scope
-                if ($errText -match '^\$(\w+):') {
-                    $varName = $Matches[1]
-                    if ($knownScopes -contains $varName.ToLower()) {
-                        $code = $code.Substring(0, $startOff) + '`' + $code.Substring($startOff)
+                $startOff = $varErr.Extent.StartOffset
+                $errText  = $varErr.Extent.Text
+
+                if ($varErr.Message -match "':' was not followed") {
+                    if ($errText -match '^\$(\w+):') {
+                        $varName = $Matches[1]
+                        if ($knownScopes -contains $varName.ToLower()) {
+                            $code = $code.Substring(0, $startOff) + '`' + $code.Substring($startOff)
+                        }
+                        else {
+                            $endOff = $startOff + $errText.Length
+                            $code = $code.Substring(0, $startOff) + "`$(`$$varName):" + $code.Substring($endOff)
+                        }
                     }
                     else {
-                        $endOff = $startOff + $errText.Length
-                        $code = $code.Substring(0, $startOff) + "`$(`$$varName):" + $code.Substring($endOff)
+                        $code = $code.Substring(0, $startOff) + '`' + $code.Substring($startOff)
                     }
+                    $fileFixes++
                 }
                 else {
-                    $code = $code.Substring(0, $startOff) + '`' + $code.Substring($startOff)
+                    $code = $code.Substring(0, $startOff) + '`$' + $code.Substring($startOff + 1)
+                    $fileFixes++
                 }
-                $fileFixes++
             }
-            else {
-                # Pattern: bare $ not followed by valid variable name char — escape it
-                $code = $code.Substring(0, $startOff) + '`$' + $code.Substring($startOff + 1)
+
+            # PS7+ operator downgrades: replace ?? with if/else, ?. with null-check
+            # In .NET regex replacements: $$ = literal $, $1 = group 1, so $$$$1 = literal $ + group 1
+            # $a ?? $b  →  $(if ($null -ne $a) { $a } else { $b })
+            $ps7Before = $code
+            $code = [regex]::Replace($code, '\$(\w+)\s*\?\?\s*(.+?)(?=[\r\n;])', '$$(if ($$null -ne $$$1) { $$$1 } else { $2 })')
+            # $a?.Method()  →  $(if ($null -ne $a) { $a.Method() })
+            $code = [regex]::Replace($code, '\$(\w+)\?\.([\w]+\([^)]*\))', '$$(if ($$null -ne $$$1) { $$$1.$2 })')
+            # $a?[index]  →  $(if ($null -ne $a) { $a[index] })
+            $code = [regex]::Replace($code, '\$(\w+)\?\[([^\]]+)\]', '$$(if ($$null -ne $$$1) { $$$1[$2] })')
+            if ($code -ne $ps7Before) {
+                $ps7Fixes = ([regex]::Matches($ps7Before, '\?\?|\?\.\w|\?\[').Count) - ([regex]::Matches($code, '\?\?|\?\.\w|\?\[').Count)
+                if ($ps7Fixes -gt 0) { $fileFixes += $ps7Fixes }
+            }
+        }
+
+        # ── Python repairs (.py) ──
+        if ($ext -eq '.py') {
+            $lines = $code -split "`n"
+            $newLines = [System.Collections.Generic.List[string]]::new()
+            $prevIndent = 0
+            $needsIndent = $false
+
+            for ($i = 0; $i -lt $lines.Count; $i++) {
+                $line = $lines[$i]
+                $trimmed = $line.TrimStart()
+                $currentIndent = $line.Length - $trimmed.Length
+
+                # If previous line ended with : and this line is at same or lesser indent, fix it
+                if ($needsIndent -and $trimmed.Length -gt 0 -and $currentIndent -le $prevIndent) {
+                    $fixedIndent = ' ' * ($prevIndent + 4)
+                    $line = $fixedIndent + $trimmed
+                    $fileFixes++
+                }
+
+                $needsIndent = ($trimmed -match ':\s*$' -and $trimmed -notmatch '^\s*#' -and $trimmed -match '^\s*(if|elif|else|for|while|def|class|try|except|finally|with|async)\b')
+                if ($trimmed.Length -gt 0) { $prevIndent = $line.Length - $line.TrimStart().Length }
+
+                $newLines.Add($line)
+            }
+            $code = $newLines -join "`n"
+        }
+
+        # ── Rust repairs (.rs) ──
+        if ($ext -eq '.rs') {
+            # Fix missing lifetime on &str in struct definitions: field: &str → field: &'a str
+            if ($code -match "struct\s+\w+\s*\{[^}]*:\s*&str" -and $code -notmatch "struct\s+\w+<'") {
+                $code = [regex]::Replace($code, "(struct\s+\w+)(\s*\{)", '$1<''a>$2')
+                $code = [regex]::Replace($code, '(:\s*)&str', '$1&''a str')
                 $fileFixes++
             }
         }
@@ -938,6 +989,25 @@ function Test-GeneratedCode {
             foreach ($jp in $script:DangerousJavaScriptPatterns) {
                 if ($code -match $jp.Pattern) {
                     $errors.Add("[$fileName] JS Security: contains $($jp.Name)")
+                }
+            }
+            # Context-aware innerHTML check: flag bare variables and unsafe template interpolations
+            $codeLines = $code -split "`n"
+            foreach ($codeLine in $codeLines) {
+                if ($codeLine -match '\.innerHTML\s*=\s*(.+)') {
+                    $rhs = $Matches[1].Trim().TrimEnd(';')
+                    # Flag bare identifier assignments: .innerHTML = variable
+                    if ($rhs -match '^\w+$') {
+                        $errors.Add("[$fileName] JS Security: innerHTML assigned from variable '$rhs' — use textContent or sanitize first")
+                        continue
+                    }
+                    # Flag template literals interpolating user-controlled sources (XSS risk)
+                    if ($rhs -match '`' -and $rhs -match '\$\{') {
+                        # Check for user-controlled interpolations: form .value, URL params, API response data
+                        if ($rhs -match '\$\{[^}]*(\.value|\.search|\.hash|location\.|searchParams|URLSearchParams|response\.|request\.|\.innerHTML|\.outerHTML)') {
+                            $errors.Add("[$fileName] JS Security: innerHTML template literal interpolates user-controlled data — sanitize with textContent or DOMPurify")
+                        }
+                    }
                 }
             }
         }
@@ -1116,8 +1186,17 @@ function Invoke-BuildFixLoop {
             $fixSpec = "PREVIOUS ATTEMPT FAILED with these errors:`n$errorBlock`n`nFix ALL of the above errors. Original specification:`n$Spec"
         }
         else {
-            # On later retries, use focused context to avoid prompt bloat
-            $fixSpec = "ATTEMPT $retry FIX — the following errors STILL remain:`n$errorBlock`n`nFix ONLY these remaining errors. Keep all working code intact. Original app name and framework from spec:`n$($Spec -split "`n" | Select-Object -First 10 | Out-String)"
+            # On later retries, preserve FEATURES + DATA_MODEL sections but trim the rest
+            $specSections = [System.Collections.Generic.List[string]]::new()
+            $specLines = $Spec -split "`n"
+            $inKeepSection = $false
+            foreach ($sl in $specLines) {
+                if ($sl -match '^\s*(FEATURES|DATA_MODEL|APP_NAME|FRAMEWORK)\s*:') { $inKeepSection = $true }
+                elseif ($sl -match '^\s*[A-Z_]{3,}\s*:' -and $sl -notmatch 'FEATURES|DATA_MODEL|APP_NAME|FRAMEWORK') { $inKeepSection = $false }
+                if ($inKeepSection -or $specSections.Count -lt 5) { $specSections.Add($sl) }
+            }
+            $condensedSpec = $specSections -join "`n"
+            $fixSpec = "ATTEMPT $retry FIX — the following errors STILL remain:`n$errorBlock`n`nFix ONLY these remaining errors. Keep all working code intact. Key spec sections:`n$condensedSpec"
         }
 
         Write-Host "[AppBuilder] Fix attempt $retry/$MaxRetries..." -ForegroundColor Yellow
@@ -1646,13 +1725,34 @@ function Build-TauriExecutable {
 
         $elapsed = [math]::Round(((Get-Date) - $startTime).TotalSeconds, 1)
 
-        # Tauri outputs to src-tauri/target/release/bundle/nsis/*.exe or src-tauri/target/release/<name>.exe
-        $releaseExe = Get-ChildItem (Join-Path $tauriDir 'target\release') -Filter '*.exe' -ErrorAction SilentlyContinue |
+        # Tauri outputs to multiple locations depending on bundler config:
+        # 1. src-tauri/target/release/<name>.exe (standalone binary)
+        # 2. src-tauri/target/release/bundle/nsis/*.exe (NSIS installer)
+        # 3. src-tauri/target/release/bundle/msi/*.msi (MSI installer — extract or report)
+        $releaseDir = Join-Path $tauriDir 'target\release'
+        $releaseExe = Get-ChildItem $releaseDir -Filter '*.exe' -ErrorAction SilentlyContinue |
             Where-Object { $_.Name -notmatch 'build-script' } | Select-Object -First 1
 
-        # Also check NSIS bundle
+        # Check NSIS bundle
         if (-not $releaseExe) {
-            $releaseExe = Get-ChildItem (Join-Path $tauriDir 'target\release\bundle') -Filter '*.exe' -Recurse -ErrorAction SilentlyContinue |
+            $nsisDir = Join-Path $releaseDir 'bundle\nsis'
+            if (Test-Path $nsisDir) {
+                $releaseExe = Get-ChildItem $nsisDir -Filter '*.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
+            }
+        }
+
+        # Check WiX/MSI bundle — copy .msi as fallback if no .exe found
+        $releaseMsi = $null
+        if (-not $releaseExe) {
+            $msiDir = Join-Path $releaseDir 'bundle\msi'
+            if (Test-Path $msiDir) {
+                $releaseMsi = Get-ChildItem $msiDir -Filter '*.msi' -ErrorAction SilentlyContinue | Select-Object -First 1
+            }
+        }
+
+        # Also do a recursive search as a final fallback
+        if (-not $releaseExe -and -not $releaseMsi) {
+            $releaseExe = Get-ChildItem (Join-Path $releaseDir 'bundle') -Filter '*.exe' -Recurse -ErrorAction SilentlyContinue |
                 Select-Object -First 1
         }
 
@@ -1667,6 +1767,22 @@ function Build-TauriExecutable {
                 Size      = $sizeStr
                 BuildTime = $elapsed
                 Output    = "Built $AppName.exe ($sizeStr) in ${elapsed}s via Tauri"
+            }
+        }
+
+        # MSI fallback: Tauri produced an installer instead of standalone exe
+        if ($releaseMsi) {
+            $finalMsi = Join-Path $OutputDir "$AppName.msi"
+            Copy-Item $releaseMsi.FullName $finalMsi -Force
+            $size = (Get-Item $finalMsi).Length
+            $sizeStr = if ($size -lt 1MB) { "$([math]::Round($size/1KB))KB" } else { "$([math]::Round($size/1MB, 1))MB" }
+            Write-Host "[AppBuilder] Tauri produced MSI installer instead of standalone .exe" -ForegroundColor Yellow
+            return @{
+                Success   = $true
+                ExePath   = $finalMsi
+                Size      = $sizeStr
+                BuildTime = $elapsed
+                Output    = "Built $AppName.msi ($sizeStr) in ${elapsed}s via Tauri (MSI installer)"
             }
         }
 
@@ -1871,9 +1987,9 @@ function Save-BuildConstraint {
 
     try {
         $conn = Get-ChatDbConnection
-        $cmd = $conn.CreateCommand()
 
-        # Check for existing constraint (dedup by constraint_text + framework)
+        # Step 1: Exact match dedup
+        $cmd = $conn.CreateCommand()
         $cmd.CommandText = "SELECT id, hit_count FROM build_memory WHERE framework = @fw AND constraint_text = @ct LIMIT 1"
         $cmd.Parameters.Add([Microsoft.Data.Sqlite.SqliteParameter]::new("@fw", $Framework)) | Out-Null
         $cmd.Parameters.Add([Microsoft.Data.Sqlite.SqliteParameter]::new("@ct", $Constraint)) | Out-Null
@@ -1891,11 +2007,46 @@ function Save-BuildConstraint {
             $updateCmd.Parameters.Add([Microsoft.Data.Sqlite.SqliteParameter]::new("@id", $existingId)) | Out-Null
             $updateCmd.ExecuteNonQuery() | Out-Null
             $updateCmd.Dispose()
+            $conn.Close(); $conn.Dispose()
+            return
+        }
+        $reader.Close()
+        $cmd.Dispose()
+
+        # Step 2: Fuzzy dedup — check keyword overlap with existing constraints
+        $newKeywords = @($Constraint.ToLower() -split '\W+' | Where-Object { $_.Length -gt 3 } | Sort-Object -Unique)
+        $fuzzyCmd = $conn.CreateCommand()
+        $fuzzyCmd.CommandText = "SELECT id, constraint_text, hit_count FROM build_memory WHERE framework = @fw"
+        $fuzzyCmd.Parameters.Add([Microsoft.Data.Sqlite.SqliteParameter]::new("@fw", $Framework)) | Out-Null
+        $fuzzyReader = $fuzzyCmd.ExecuteReader()
+        $fuzzyMatch = $null
+
+        while ($fuzzyReader.Read()) {
+            $existingText = [string]$fuzzyReader['constraint_text']
+            $existingKeywords = @($existingText.ToLower() -split '\W+' | Where-Object { $_.Length -gt 3 } | Sort-Object -Unique)
+            if ($newKeywords.Count -eq 0 -or $existingKeywords.Count -eq 0) { continue }
+            $overlap = @($newKeywords | Where-Object { $existingKeywords -contains $_ }).Count
+            $maxKeys = [math]::Max($newKeywords.Count, $existingKeywords.Count)
+            $similarity = $overlap / $maxKeys
+            if ($similarity -gt 0.6) {
+                $fuzzyMatch = @{ Id = $fuzzyReader['id']; HitCount = [int]$fuzzyReader['hit_count'] }
+                break
+            }
+        }
+        $fuzzyReader.Close()
+        $fuzzyCmd.Dispose()
+
+        if ($fuzzyMatch) {
+            # Similar constraint exists — bump its hit count instead of adding a duplicate
+            $bumpCmd = $conn.CreateCommand()
+            $bumpCmd.CommandText = "UPDATE build_memory SET hit_count = @hc, last_hit_at = datetime('now') WHERE id = @id"
+            $bumpCmd.Parameters.Add([Microsoft.Data.Sqlite.SqliteParameter]::new("@hc", $fuzzyMatch.HitCount + 1)) | Out-Null
+            $bumpCmd.Parameters.Add([Microsoft.Data.Sqlite.SqliteParameter]::new("@id", $fuzzyMatch.Id)) | Out-Null
+            $bumpCmd.ExecuteNonQuery() | Out-Null
+            $bumpCmd.Dispose()
         }
         else {
-            $reader.Close()
-            $cmd.Dispose()
-
+            # No match — insert new constraint
             $insertCmd = $conn.CreateCommand()
             $insertCmd.CommandText = "INSERT INTO build_memory (framework, constraint_text, error_pattern) VALUES (@fw, @ct, @ep)"
             $insertCmd.Parameters.Add([Microsoft.Data.Sqlite.SqliteParameter]::new("@fw", $Framework)) | Out-Null
@@ -1913,6 +2064,42 @@ function Save-BuildConstraint {
     }
 }
 
+function Invoke-BuildMemoryCleanup {
+    <#
+    .SYNOPSIS
+    Expire stale build constraints that haven't been hit in over 90 days.
+    Called automatically during Get-BuildConstraints.
+    #>
+    if (-not (Initialize-BuildMemoryTable)) { return }
+
+    try {
+        $conn = Get-ChatDbConnection
+        $cmd = $conn.CreateCommand()
+        # Delete constraints not hit in 90 days with only 1 hit (likely too specific)
+        $cmd.CommandText = "DELETE FROM build_memory WHERE hit_count <= 1 AND last_hit_at < datetime('now', '-90 days')"
+        $deleted = $cmd.ExecuteNonQuery()
+        $cmd.Dispose()
+        # Also cap total per framework at 50 — keep highest hit_count
+        $capCmd = $conn.CreateCommand()
+        $capCmd.CommandText = @"
+DELETE FROM build_memory WHERE id IN (
+    SELECT id FROM build_memory bm
+    WHERE (SELECT COUNT(*) FROM build_memory bm2 WHERE bm2.framework = bm.framework AND bm2.hit_count > bm.hit_count) >= 50
+)
+"@
+        $deleted += $capCmd.ExecuteNonQuery()
+        $capCmd.Dispose()
+        $conn.Close()
+        $conn.Dispose()
+        if ($deleted -gt 0) {
+            Write-Verbose "AppBuilder: Cleaned up $deleted stale build constraint(s)"
+        }
+    }
+    catch {
+        Write-Verbose "AppBuilder: Build memory cleanup failed: $($_.Exception.Message)"
+    }
+}
+
 function Get-BuildConstraints {
     [CmdletBinding()]
     param(
@@ -1921,6 +2108,9 @@ function Get-BuildConstraints {
     )
 
     if (-not (Initialize-BuildMemoryTable)) { return @() }
+
+    # Periodic cleanup of stale constraints
+    Invoke-BuildMemoryCleanup
 
     try {
         $conn = Get-ChatDbConnection
@@ -2256,9 +2446,19 @@ function New-AppBuild {
     $codeMaxTokens = Get-BuildMaxTokens -Framework $framework -Model $resolvedModel -Override $MaxTokens
     $featureLines = @($generationSpec -split "`n" | Where-Object { $_ -match '^\s*-\s+' })
     $featureCount = $featureLines.Count
-    # Heuristic: base 4000 tokens + ~1500 per feature for PowerShell, ~2000 for Tauri
-    $tokensPerFeature = if ($framework -eq 'tauri') { 2000 } else { 1500 }
-    $estimatedTokens = 4000 + ($featureCount * $tokensPerFeature)
+    # Framework-aware base cost: Tauri needs Rust+HTML+CSS+JS+TOML+conf, python-web needs Py+HTML+CSS
+    $baseCost = switch ($framework) {
+        'tauri'      { 8000 }
+        'python-web' { 5000 }
+        'python-tk'  { 4500 }
+        default      { 4000 }
+    }
+    $tokensPerFeature = switch ($framework) {
+        'tauri'      { 2000 }
+        'python-web' { 1800 }
+        default      { 1500 }
+    }
+    $estimatedTokens = $baseCost + ($featureCount * $tokensPerFeature)
     if ($estimatedTokens -gt ($codeMaxTokens * 0.8)) {
         Write-Host "[AppBuilder] WARNING: Estimated complexity (~$featureCount features, ~$estimatedTokens tokens) may exceed output budget ($codeMaxTokens tokens)." -ForegroundColor Yellow
         Write-Host "[AppBuilder] Consider simplifying the prompt or using a model with higher output limits." -ForegroundColor Yellow

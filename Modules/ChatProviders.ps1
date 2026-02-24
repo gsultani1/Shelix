@@ -3,6 +3,10 @@
 # Provides unified interface for different AI backends
 # If Warp had this, they wouldn't need $73M
 
+# Session-scoped HttpClient for Anthropic — reused across calls to avoid TCP/TLS overhead
+$script:AnthropicHttpClient = $null
+$script:AnthropicHttpHandler = $null
+
 # ===== Provider Configuration =====
 
 # Per-model context window sizes (tokens). Used for intelligent budget management.
@@ -471,26 +475,26 @@ function Invoke-AnthropicChat {
     $attempt = 0
     $lastError = $null
 
-    # Use HttpClient with SocketsHttpHandler for reliable streaming
-    $handler = $null
-    $client = $null
-    try {
-        $handler = [System.Net.Http.SocketsHttpHandler]::new()
-        $handler.AutomaticDecompression = [System.Net.DecompressionMethods]::GZip -bor [System.Net.DecompressionMethods]::Deflate
-        $handler.PooledConnectionLifetime = [TimeSpan]::FromMinutes(15)
-        $handler.PooledConnectionIdleTimeout = [TimeSpan]::FromMinutes(10)
-        $handler.KeepAlivePingPolicy = [System.Net.Http.HttpKeepAlivePingPolicy]::WithActiveRequests
-        $handler.KeepAlivePingDelay = [TimeSpan]::FromSeconds(15)
-        $handler.KeepAlivePingTimeout = [TimeSpan]::FromSeconds(10)
+    # Reuse session-scoped HttpClient to avoid TCP/TLS overhead on consecutive calls
+    if ($null -eq $script:AnthropicHttpClient) {
+        try {
+            $script:AnthropicHttpHandler = [System.Net.Http.SocketsHttpHandler]::new()
+            $script:AnthropicHttpHandler.AutomaticDecompression = [System.Net.DecompressionMethods]::GZip -bor [System.Net.DecompressionMethods]::Deflate
+            $script:AnthropicHttpHandler.PooledConnectionLifetime = [TimeSpan]::FromMinutes(15)
+            $script:AnthropicHttpHandler.PooledConnectionIdleTimeout = [TimeSpan]::FromMinutes(10)
+            $script:AnthropicHttpHandler.KeepAlivePingPolicy = [System.Net.Http.HttpKeepAlivePingPolicy]::WithActiveRequests
+            $script:AnthropicHttpHandler.KeepAlivePingDelay = [TimeSpan]::FromSeconds(15)
+            $script:AnthropicHttpHandler.KeepAlivePingTimeout = [TimeSpan]::FromSeconds(10)
+        }
+        catch {
+            if ($script:AnthropicHttpHandler) { $script:AnthropicHttpHandler.Dispose(); $script:AnthropicHttpHandler = $null }
+            $script:AnthropicHttpHandler = [System.Net.Http.HttpClientHandler]::new()
+            $script:AnthropicHttpHandler.AutomaticDecompression = [System.Net.DecompressionMethods]::GZip -bor [System.Net.DecompressionMethods]::Deflate
+        }
+        $script:AnthropicHttpClient = [System.Net.Http.HttpClient]::new($script:AnthropicHttpHandler)
     }
-    catch {
-        # Fallback for older runtimes without SocketsHttpHandler
-        if ($handler) { $handler.Dispose() }
-        $handler = [System.Net.Http.HttpClientHandler]::new()
-        $handler.AutomaticDecompression = [System.Net.DecompressionMethods]::GZip -bor [System.Net.DecompressionMethods]::Deflate
-    }
-    $client = [System.Net.Http.HttpClient]::new($handler)
-    $client.Timeout = [TimeSpan]::FromSeconds($TimeoutSec)
+    $script:AnthropicHttpClient.Timeout = [TimeSpan]::FromSeconds($TimeoutSec)
+    $client = $script:AnthropicHttpClient
 
     try {
         while ($attempt -lt $maxRetries) {
@@ -600,8 +604,8 @@ function Invoke-AnthropicChat {
         }
     }
     finally {
-        if ($client) { $client.Dispose() }
-        if ($handler) { $handler.Dispose() }
+        # Client is session-scoped — do NOT dispose here. It persists for connection reuse.
+        # Dispose only if a fatal error corrupted the client state.
     }
 }
 
