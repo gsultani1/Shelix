@@ -1543,6 +1543,78 @@ $form = New-Object System.Windows.Forms.Form
             $src = Get-Content (Join-Path $PSScriptRoot '..\Modules\AppBuilder.ps1') -Raw
             $src | Should -Match "notmatch.*\\\[Review\\\]"
         }
+
+        It 'Empty DEFECTS section does not capture SCOPE_GAPS content as defects' {
+            # Simulates LLM output where DEFECTS is empty, immediately followed by SCOPE_GAPS
+            $reviewOutput = @"
+PASSED: false
+DEFECTS:
+SCOPE_GAPS:
+- Missing export to PDF feature
+- No dark mode toggle
+- Search doesn't support fuzzy matching
+"@
+            $sectionHeaderRe = '^(PASSED|DEFECTS|SCOPE_GAPS|ISSUES):'
+            $defects = [System.Collections.Generic.List[string]]::new()
+            $scopeGaps = [System.Collections.Generic.List[string]]::new()
+
+            if ($reviewOutput -match '(?sm)^DEFECTS:\s*\n(.*?)(?=^(?:SCOPE_GAPS|PASSED|ISSUES):|\z)') {
+                foreach ($line in ($Matches[1] -split "`n")) {
+                    $trimmed = $line.Trim() -replace '^-\s*', ''
+                    if ($trimmed -and $trimmed.Length -gt 3 -and $trimmed -notmatch '^(None|N/A|No defects)' -and $trimmed -notmatch $sectionHeaderRe) {
+                        $defects.Add($trimmed)
+                    }
+                }
+            }
+            if ($reviewOutput -match '(?sm)^SCOPE_GAPS:\s*\n(.*?)(?=^(?:DEFECTS|PASSED|ISSUES):|\z)') {
+                foreach ($line in ($Matches[1] -split "`n")) {
+                    $trimmed = $line.Trim() -replace '^-\s*', ''
+                    if ($trimmed -and $trimmed.Length -gt 3 -and $trimmed -notmatch '^(None|N/A|No scope gaps)' -and $trimmed -notmatch $sectionHeaderRe) {
+                        $scopeGaps.Add($trimmed)
+                    }
+                }
+            }
+
+            $defects.Count | Should -Be 0
+            $scopeGaps.Count | Should -Be 3
+        }
+
+        It 'Properly separates DEFECTS and SCOPE_GAPS when both have items' {
+            $reviewOutput = @"
+PASSED: false
+DEFECTS:
+- [main.rs] Missing import for serde::Deserialize
+- [app.py] Undefined variable db_path on line 42
+SCOPE_GAPS:
+- No dark mode toggle
+- Missing batch export feature
+"@
+            $sectionHeaderRe = '^(PASSED|DEFECTS|SCOPE_GAPS|ISSUES):'
+            $defects = [System.Collections.Generic.List[string]]::new()
+            $scopeGaps = [System.Collections.Generic.List[string]]::new()
+
+            if ($reviewOutput -match '(?sm)^DEFECTS:\s*\n(.*?)(?=^(?:SCOPE_GAPS|PASSED|ISSUES):|\z)') {
+                foreach ($line in ($Matches[1] -split "`n")) {
+                    $trimmed = $line.Trim() -replace '^-\s*', ''
+                    if ($trimmed -and $trimmed.Length -gt 3 -and $trimmed -notmatch '^(None|N/A|No defects)' -and $trimmed -notmatch $sectionHeaderRe) {
+                        $defects.Add($trimmed)
+                    }
+                }
+            }
+            if ($reviewOutput -match '(?sm)^SCOPE_GAPS:\s*\n(.*?)(?=^(?:DEFECTS|PASSED|ISSUES):|\z)') {
+                foreach ($line in ($Matches[1] -split "`n")) {
+                    $trimmed = $line.Trim() -replace '^-\s*', ''
+                    if ($trimmed -and $trimmed.Length -gt 3 -and $trimmed -notmatch '^(None|N/A|No scope gaps)' -and $trimmed -notmatch $sectionHeaderRe) {
+                        $scopeGaps.Add($trimmed)
+                    }
+                }
+            }
+
+            $defects.Count | Should -Be 2
+            $scopeGaps.Count | Should -Be 2
+            $defects[0] | Should -Match 'serde'
+            $scopeGaps[0] | Should -Match 'dark mode'
+        }
     }
 
     # ── RUST DEPENDENCY CROSS-REFERENCE ──────────────────────

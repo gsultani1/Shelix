@@ -735,28 +735,32 @@ Set PASSED: false only if there are DEFECTS. Scope gaps alone do NOT cause failu
         $defects = [System.Collections.Generic.List[string]]::new()
         $scopeGaps = [System.Collections.Generic.List[string]]::new()
 
-        # Parse DEFECTS section
-        if ($content -match '(?s)DEFECTS:\s*\n(.+?)(?:\nSCOPE_GAPS:|\nPASSED:|\z)') {
+        # Section header pattern — used to filter leaked headers from capture groups
+        $sectionHeaderRe = '^(PASSED|DEFECTS|SCOPE_GAPS|ISSUES):'
+
+        # Parse DEFECTS section — (?sm): s=dot-matches-newlines, m=^-matches-line-starts
+        # Lookahead (?=^...) detects next section at line start without consuming the boundary newline
+        if ($content -match '(?sm)^DEFECTS:\s*\n(.*?)(?=^(?:SCOPE_GAPS|PASSED|ISSUES):|\z)') {
             foreach ($line in ($Matches[1] -split "`n")) {
                 $trimmed = $line.Trim() -replace '^-\s*', ''
-                if ($trimmed -and $trimmed.Length -gt 3 -and $trimmed -notmatch '^(None|N/A|No defects)') {
+                if ($trimmed -and $trimmed.Length -gt 3 -and $trimmed -notmatch '^(None|N/A|No defects)' -and $trimmed -notmatch $sectionHeaderRe) {
                     $defects.Add($trimmed)
                 }
             }
         }
 
         # Parse SCOPE_GAPS section
-        if ($content -match '(?s)SCOPE_GAPS:\s*\n(.+?)(?:\nDEFECTS:|\nPASSED:|\z)') {
+        if ($content -match '(?sm)^SCOPE_GAPS:\s*\n(.*?)(?=^(?:DEFECTS|PASSED|ISSUES):|\z)') {
             foreach ($line in ($Matches[1] -split "`n")) {
                 $trimmed = $line.Trim() -replace '^-\s*', ''
-                if ($trimmed -and $trimmed.Length -gt 3 -and $trimmed -notmatch '^(None|N/A|No scope gaps)') {
+                if ($trimmed -and $trimmed.Length -gt 3 -and $trimmed -notmatch '^(None|N/A|No scope gaps)' -and $trimmed -notmatch $sectionHeaderRe) {
                     $scopeGaps.Add($trimmed)
                 }
             }
         }
 
         # Legacy fallback: if no DEFECTS/SCOPE_GAPS sections, parse ISSUES as defects
-        if ($defects.Count -eq 0 -and $scopeGaps.Count -eq 0 -and $content -match '(?s)ISSUES:\s*\n(.+)') {
+        if ($defects.Count -eq 0 -and $scopeGaps.Count -eq 0 -and $content -match '(?sm)^ISSUES:\s*\n(.*?)(?=^(?:PASSED|DEFECTS|SCOPE_GAPS):|\z)') {
             foreach ($line in ($Matches[1] -split "`n")) {
                 $trimmed = $line.Trim() -replace '^-\s*', ''
                 if ($trimmed -and $trimmed.Length -gt 3) {
@@ -1982,11 +1986,82 @@ function Build-TauriExecutable {
             }
         }
 
-        # Optionally inject icon
+        # ── Tauri scaffolding injection ──
+        # Ensure icons/icon.ico exists — tauri-build requires it for Windows resource embedding.
+        # LLMs cannot generate binary files, so we always scaffold this.
+        $iconDir = Join-Path $tauriDir 'icons'
+        $icoPath = Join-Path $iconDir 'icon.ico'
+        if (-not (Test-Path $iconDir)) { New-Item -ItemType Directory -Path $iconDir -Force | Out-Null }
+
         if ($IconPath -and (Test-Path $IconPath)) {
-            $iconDir = Join-Path $tauriDir 'icons'
-            if (-not (Test-Path $iconDir)) { New-Item -ItemType Directory -Path $iconDir -Force | Out-Null }
-            Copy-Item $IconPath (Join-Path $iconDir 'icon.ico') -Force
+            Copy-Item $IconPath $icoPath -Force
+            Write-Host "[AppBuilder] Using provided icon: $IconPath" -ForegroundColor DarkGray
+        }
+        elseif (-not (Test-Path $icoPath)) {
+            # Generate a minimal 32x32 placeholder ICO via System.Drawing
+            try {
+                Add-Type -AssemblyName System.Drawing -ErrorAction Stop
+                $bmp = [System.Drawing.Bitmap]::new(32, 32)
+                $g = [System.Drawing.Graphics]::FromImage($bmp)
+                $g.Clear([System.Drawing.Color]::FromArgb(41, 98, 255))
+                $g.Dispose()
+                $hIcon = $bmp.GetHicon()
+                $icon = [System.Drawing.Icon]::FromHandle($hIcon)
+                $fs = [System.IO.FileStream]::new($icoPath, [System.IO.FileMode]::Create)
+                $icon.Save($fs)
+                $fs.Close()
+                $icon.Dispose()
+                $bmp.Dispose()
+                Write-Host "[AppBuilder] Generated placeholder icon.ico (32x32)" -ForegroundColor DarkGray
+            }
+            catch {
+                Write-Host "[AppBuilder] Warning: Could not generate icon.ico: $($_.Exception.Message)" -ForegroundColor Yellow
+            }
+        }
+
+        # Also generate icon.png for Linux/macOS targets if missing
+        $pngPath = Join-Path $iconDir 'icon.png'
+        if (-not (Test-Path $pngPath) -and (Test-Path $icoPath)) {
+            try {
+                Add-Type -AssemblyName System.Drawing -ErrorAction Stop
+                $bmp = [System.Drawing.Bitmap]::new(32, 32)
+                $g = [System.Drawing.Graphics]::FromImage($bmp)
+                $g.Clear([System.Drawing.Color]::FromArgb(41, 98, 255))
+                $g.Dispose()
+                $bmp.Save($pngPath, [System.Drawing.Imaging.ImageFormat]::Png)
+                $bmp.Dispose()
+            }
+            catch { }
+        }
+
+        # Ensure build.rs exists with standard tauri_build::build() call
+        $buildRsPath = Join-Path $tauriDir 'build.rs'
+        if (-not (Test-Path $buildRsPath)) {
+            Set-Content $buildRsPath "fn main() { tauri_build::build() }" -Encoding UTF8
+            Write-Host "[AppBuilder] Scaffolded missing build.rs" -ForegroundColor DarkGray
+        }
+
+        # Patch Cargo.toml: ensure tauri has required features for production builds
+        $cargoTomlPath = Join-Path $tauriDir 'Cargo.toml'
+        if (Test-Path $cargoTomlPath) {
+            $cargoContent = Get-Content $cargoTomlPath -Raw -Encoding UTF8
+            $cargoPatched = $false
+
+            # Ensure tauri dependency includes "tray-icon" feature if not present (common need)
+            # Ensure tauri-build is in [build-dependencies]
+            if ($cargoContent -notmatch '\[build-dependencies\]') {
+                $cargoContent += "`n`n[build-dependencies]`ntauri-build = { version = `"2`", features = [] }`n"
+                $cargoPatched = $true
+            }
+            elseif ($cargoContent -notmatch 'tauri-build') {
+                $cargoContent = $cargoContent -replace '(\[build-dependencies\])', "`$1`ntauri-build = { version = `"2`", features = [] }"
+                $cargoPatched = $true
+            }
+
+            if ($cargoPatched) {
+                Set-Content $cargoTomlPath $cargoContent -Encoding UTF8
+                Write-Host "[AppBuilder] Patched Cargo.toml (ensured build-dependencies)" -ForegroundColor DarkGray
+            }
         }
 
         Write-Host "[AppBuilder] Building Tauri app (this may take several minutes on first build)..." -ForegroundColor Cyan
