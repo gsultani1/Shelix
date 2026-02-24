@@ -270,7 +270,16 @@ Change the default chat provider in `ChatConfig.json`:
 {
   "defaults": {
     "provider": "ollama",
-    "model": null
+    "model": "llama3.2"
+  }
+}
+```
+
+Provider-level overrides (e.g. default model per provider) are also supported:
+```json
+{
+  "providers": {
+    "anthropic": { "defaultModel": "claude-sonnet-4-6" }
   }
 }
 ```
@@ -286,8 +295,8 @@ BildsyPS/
 ├── UserSkills.json                   # Custom user-defined intents (your file)
 ├── UserSkills.example.json           # Template for user skills
 ├── UserAliases.ps1                   # Your custom persistent aliases
-├── BildsyPS.psm1                       # Module loader
-├── BildsyPS.psd1                       # Module manifest (186 functions, 73 aliases)
+├── BildsyPS.psm1                     # Module loader
+├── BildsyPS.psd1                     # Module manifest
 ├── Modules/
 │   ├── ConfigLoader.ps1              # .env and config loading
 │   ├── PlatformUtils.ps1             # Cross-platform helpers
@@ -302,6 +311,7 @@ BildsyPS/
 │   ├── ResponseParser.ps1            # Parse AI responses, format markdown
 │   ├── DocumentTools.ps1             # OpenXML document creation
 │   ├── SafetySystem.ps1              # AI execution safety + secret scanning
+│   ├── SystemCleanup.ps1             # Wrapped cleanup commands (flush DNS, restart explorer)
 │   ├── TerminalTools.ps1             # bat, glow, broot, fzf integration
 │   ├── NavigationUtils.ps1           # Navigation & git shortcuts
 │   ├── PackageManager.ps1            # Tool installation
@@ -337,7 +347,12 @@ BildsyPS/
 │   ├── _Pomodoro.ps1                 # Pomodoro timer plugin
 │   ├── _QuickNotes.ps1               # Note-taking plugin
 │   └── Config/                       # Per-plugin configuration overrides
-└── README.md
+├── Tests/                            # 17 Pester test files (368 tests)
+├── README.md
+├── VISION.md                         # Product direction and roadmap
+├── CHANGELOG.md                      # Release history
+├── CONTRIBUTING.md                   # Contributor guide
+└── SETUP.md                          # Detailed setup instructions
 ```
 
 ## Chat Commands
@@ -482,12 +497,9 @@ See [VISION.md](VISION.md) for the full product direction.
 | ✅ | **Agent heartbeat** — cron-triggered background tasks via Windows Task Scheduler |
 | ✅ | **App Builder** — describe an app in English → get a compiled .exe (PowerShell, Python-TK, Python-Web) |
 | ✅ | **Hierarchical agent orchestration** — `spawn_agent` tool, depth-limited recursion, memory isolation, parallel thread jobs |
-| ✅ | **E2E test suite** — 368 tests across 17 modules, 0 failures; 11 defects fixed; Pester v5 hardened |
+| ✅ | **E2E test suite** — 368 tests across 17 modules, 0 failures; Pester v5 hardened |
 | ✅ | **UserSkills v2** — shell-invocable functions, `Invoke-UserSkill`, trigger phrase registration, auto-created JSON |
 | ✅ | **Tab completion** — 37 dynamic argument completers across 10 modules; `gm` → `gmerge` alias conflict resolved |
-| ✅ | **Model token limits** — claude-sonnet-4-6 (64K output), claude-opus-4-6 (128K output); truncation guard; config overrides |
-| ✅ | **Agent heartbeat hardening** — input validation, atomic save, day-name normalization, lazy-init SQLite, bootstrap fixes |
-| ✅ | **Secret scanner improvements** — lookbehind regex for false-positive reduction; `-ExcludePatterns` parameter; prompt rules forbidding placeholder keys |
 | 🔜 | Browser automation — Selenium WebDriver integration |
 | 🔜 | Remote listener + webhooks — receive commands via Twilio/HTTP |
 | 🔜 | GUI layer — mission control dashboard for your entire computer |

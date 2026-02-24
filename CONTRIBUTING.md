@@ -14,7 +14,7 @@ Thank you for your interest in contributing! This document provides guidelines f
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/my-feature`)
 3. Make your changes
-4. Test on PowerShell 5.1 (for Windows compatibility)
+4. Test on PowerShell 7.0+ (`Invoke-Pester ./Tests -Output Detailed`)
 5. Commit with clear messages (`git commit -m "Add: new intent for X"`)
 6. Push to your fork (`git push origin feature/my-feature`)
 7. Open a Pull Request
@@ -25,8 +25,7 @@ Thank you for your interest in contributing! This document provides guidelines f
 - Use approved PowerShell verbs (`Get-`, `Set-`, `New-`, `Invoke-`, etc.)
 - Use PascalCase for function names and parameters
 - Use `$camelCase` for local variables
-- Add comment-based help for public functions
-- Maintain PowerShell 5.1 compatibility
+- Target PowerShell 7.0+ (the minimum supported version)
 
 ### Example Function
 ```powershell

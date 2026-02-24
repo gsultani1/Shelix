@@ -147,6 +147,9 @@ chat-anthropic       # Claude API (needs key)
 
 # With options
 chat -Provider ollama -Model llama3.2 -Stream
+
+# Anthropic models: claude-sonnet-4-6 (default), claude-opus-4-6, claude-haiku-4-5-20251001
+chat -Provider anthropic -Model claude-opus-4-6
 ```
 
 ### In-Chat Commands
@@ -208,7 +211,7 @@ agent -Memory @{ budget = "5000" } "calculate 8% tax on the budget"
 agent-steps    # Show what the agent did
 agent-memory   # Show stored values
 agent-plan     # Show the agent's plan
-agent-tools    # List all available tools
+agent-tools    # List all available tools (17 built-in, incl. spawn_agent for sub-tasks)
 ```
 
 ---
@@ -223,7 +226,7 @@ BildsyPS/
 ├── NaturalLanguageMappings.json       # Command translations
 ├── UserSkills.json                    # Your custom intents (JSON)
 ├── UserAliases.ps1                    # Your custom aliases
-├── Modules/                           # 30+ focused modules
+├── Modules/                           # 40+ focused modules
 │   ├── ChatProviders.ps1              # LLM backends (Ollama, Anthropic, OpenAI, LM Studio, llm CLI)
 │   ├── ChatSession.ps1                # Chat loop + session management
 │   ├── ChatStorage.ps1                # SQLite persistence + FTS5 full-text search
