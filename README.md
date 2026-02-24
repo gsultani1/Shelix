@@ -7,7 +7,7 @@
 > Your terminal, orchestrated. BildsyPS is an AI shell environment that understands your context — your files, your git state, your running processes — and acts on your behalf. Chat with Claude, GPT, or local LLMs. Execute commands, manage files, search the web, run autonomous agents, and connect to MCP servers. All from PowerShell, all local-first, nothing phoning home.
 
 ![PowerShell](https://img.shields.io/badge/PowerShell-7.0%2B-blue)
-![Version](https://img.shields.io/badge/Version-1.3.1-blue)
+![Version](https://img.shields.io/badge/Version-1.4.1-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![AI](https://img.shields.io/badge/AI-Claude%20%7C%20GPT%20%7C%20Ollama-purple)
 
@@ -63,8 +63,24 @@ agent -Memory @{ budget = "5000" } "calculate 8% tax on the budget"
 | `ocr` | Extract text from images and PDFs via Tesseract |
 | `build_app` | Build a standalone .exe from a natural language prompt |
 | `search_history` | Full-text search across past conversations |
+| `spawn_agent` | Delegate sub-tasks to child agents (parallel or sequential, depth-limited) |
 
 Plugins can register additional tools via `Register-AgentTool`.
+
+### Hierarchical Agent Orchestration
+
+Agents can spawn sub-agents for focused sub-tasks with depth-limited recursion (max depth 2):
+
+```powershell
+# The LLM can dynamically delegate during an agent run:
+# Single sub-task
+{"tool":"spawn_agent","task":"research PowerShell async patterns"}
+
+# Parallel sub-tasks via thread jobs
+{"tool":"spawn_agent","tasks":"[{\"task\":\"research X\"},{\"task\":\"research Y\"}]","parallel":"true"}
+```
+
+**Memory isolation:** depth 0-1 shares parent memory; depth 1-2 gets an isolated copy. Parallel jobs are fully isolated per thread with results merged on completion.
 
 ### 🏗️ App Builder — Prompt to .exe
 
@@ -283,7 +299,6 @@ BildsyPS/
 │   ├── DockerTools.ps1               # Docker shortcuts
 │   ├── DevTools.ps1                  # IDE launchers, dev checks
 │   ├── NaturalLanguage.ps1           # NL to command translation
-│   ├── AIExecution.ps1               # AI command gateway, rate limiting
 │   ├── ResponseParser.ps1            # Parse AI responses, format markdown
 │   ├── DocumentTools.ps1             # OpenXML document creation
 │   ├── SafetySystem.ps1              # AI execution safety + secret scanning
@@ -315,8 +330,8 @@ BildsyPS/
 │   ├── IntentActionsSystem.ps1       # System/filesystem/workflow/vision/build scriptblocks
 │   ├── WorkflowEngine.ps1            # Multi-step workflow engine
 │   ├── IntentRouter.ps1              # Intent router, help, tab completion
-│   ├── AgentTools.ps1                # Agent tool registry (17 built-in tools)
-│   └── AgentLoop.ps1                 # Autonomous agent engine (ReAct + tools + memory)
+│   ├── AgentTools.ps1                # Agent tool registry (17 built-in tools incl. spawn_agent)
+│   └── AgentLoop.ps1                 # Autonomous agent engine (ReAct + tools + memory + sub-agents)
 ├── Plugins/
 │   ├── _Example.ps1                  # Reference plugin template
 │   ├── _Pomodoro.ps1                 # Pomodoro timer plugin
@@ -369,8 +384,8 @@ chat -AutoTrim      # automatically trim context when approaching model limits
 - **Execution logging**: All AI commands are logged
 - **Path security**: File read/write operations validated against allowed roots
 - **Calculator sandboxing**: Only `[math]::` .NET calls permitted; arbitrary type access blocked
-- **Secret scanning**: Detects API keys, tokens, and credentials in files and staged git commits at startup
-- **Code validation**: App Builder validates generated code for syntax errors, dangerous patterns, and secret leaks before compilation
+- **Secret scanning**: Detects API keys, tokens, and credentials in files and staged git commits at startup; lookbehind-aware regex avoids false positives on UI variable names
+- **Code validation**: App Builder validates generated code for syntax errors, dangerous patterns, and secret leaks before compilation; code generation prompts forbid hardcoded/placeholder API keys and require runtime settings UI instead
 
 ## Requirements
 
@@ -459,16 +474,20 @@ See [VISION.md](VISION.md) for the full product direction.
 | ✅ | Custom user skills — define intents via JSON config, no PowerShell required |
 | ✅ | Browser awareness — read active tab URL, fetch page content via UI Automation |
 | ✅ | Code artifacts — save, execute, and track AI-generated code blocks |
-| ✅ | **Autonomous agent** — ReAct loop, 17 built-in tools, working memory, interactive mode |
+| ✅ | **Autonomous agent** — ReAct loop, 17 built-in tools, working memory, interactive mode, hierarchical sub-agents |
 | ✅ | **Codebase audit** — security hardening, parse fixes, duplicate removal, deterministic ordering |
 | ✅ | **Vision model support** — send screenshots/images to Claude/GPT-4o, auto-resize, clipboard capture |
 | ✅ | **OCR integration** — Tesseract for scanned docs, pdftotext for PDFs, vision API fallback |
 | ✅ | **SQLite + FTS5** — full-text search over all conversation history, session persistence |
 | ✅ | **Agent heartbeat** — cron-triggered background tasks via Windows Task Scheduler |
 | ✅ | **App Builder** — describe an app in English → get a compiled .exe (PowerShell, Python-TK, Python-Web) |
-| ✅ | **E2E test suite** — 276 tests across 15 modules, 0 failures; 11 defects fixed; Pester v5 hardened |
+| ✅ | **Hierarchical agent orchestration** — `spawn_agent` tool, depth-limited recursion, memory isolation, parallel thread jobs |
+| ✅ | **E2E test suite** — 368 tests across 17 modules, 0 failures; 11 defects fixed; Pester v5 hardened |
 | ✅ | **UserSkills v2** — shell-invocable functions, `Invoke-UserSkill`, trigger phrase registration, auto-created JSON |
 | ✅ | **Tab completion** — 37 dynamic argument completers across 10 modules; `gm` → `gmerge` alias conflict resolved |
+| ✅ | **Model token limits** — claude-sonnet-4-6 (64K output), claude-opus-4-6 (128K output); truncation guard; config overrides |
+| ✅ | **Agent heartbeat hardening** — input validation, atomic save, day-name normalization, lazy-init SQLite, bootstrap fixes |
+| ✅ | **Secret scanner improvements** — lookbehind regex for false-positive reduction; `-ExcludePatterns` parameter; prompt rules forbidding placeholder keys |
 | 🔜 | Browser automation — Selenium WebDriver integration |
 | 🔜 | Remote listener + webhooks — receive commands via Twilio/HTTP |
 | 🔜 | GUI layer — mission control dashboard for your entire computer |

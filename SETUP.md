@@ -1,5 +1,5 @@
 # BildsyPS Setup Guide
-> **v1.3.1** — 313 tests, 0 failures
+> **v1.4.1** — 368 tests, 0 failures
 
 ## Quick Start
 
@@ -231,11 +231,11 @@ BildsyPS/
 │   ├── VisionTools.ps1                # Screenshot capture + vision model analysis
 │   ├── OCRTools.ps1                   # Tesseract OCR + pdftotext integration
 │   ├── SecretScanner.ps1              # API key / credential leak detection
-│   ├── AgentLoop.ps1                  # Autonomous agent (ReAct + 17 tools + memory)
+│   ├── AgentLoop.ps1                  # Autonomous agent (ReAct + 17 tools + memory + sub-agents)
 │   ├── AgentHeartbeat.ps1             # Cron-triggered background tasks
 │   ├── PluginLoader.ps1               # Plugin system (deps, config, hooks, tests)
 │   ├── IntentAliasSystem.ps1          # Intent routing (80+ intents)
-│   └── ...                            # See README for full module list
+│   └── ...                            # See README for full list (43 modules total)
 └── Plugins/                           # Drop-in plugin directory
     ├── _Example.ps1                   # Reference template
     ├── _Pomodoro.ps1                  # Timer plugin

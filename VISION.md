@@ -28,7 +28,7 @@ Today it does things like:
 
 All of it runs locally. Nothing phones home. The AI can only run commands you've explicitly whitelisted.
 
-As of v1.3.1, the codebase has been fully audited: security hardened, parse errors eliminated, duplicate code removed, and intent ordering made deterministic. A comprehensive E2E test suite now covers 313 tests across 16 modules with 0 failures — the foundation is clean and verified. Every public function has dynamic tab completion; the `gm` alias conflict with `Get-Member` has been resolved (`gmerge`).
+As of v1.4.1, the codebase has been fully audited: security hardened, parse errors eliminated, duplicate code removed, and intent ordering made deterministic. A comprehensive E2E test suite now covers 368 tests across 17 modules with 0 failures — the foundation is clean and verified. Every public function has dynamic tab completion; the `gm` alias conflict with `Get-Member` has been resolved (`gmerge`). Agents can now spawn sub-agents for hierarchical task decomposition with depth-limited recursion and memory isolation.
 
 ---
 
@@ -53,13 +53,16 @@ Persistent memory across sessions via SQLite with FTS5 full-text search. The AI 
 Vision model support for screenshots and images — send to Claude, GPT-4o, or local multimodal models. Browser tab awareness via UI Automation. Tesseract OCR for scanned documents and images, pdftotext for text PDFs, with vision API fallback. The AI sees what you see.
 
 **5. Agent architecture** *(✅ complete)*
-Dynamic multi-step task planning via the ReAct (Reason + Act) loop. The agent has 17 built-in tools (calculator, web search, stock quotes, Wikipedia, datetime, JSON parsing, regex, file reading, shell execution, working memory, screenshot, OCR, app building, chat history search), unified tool+intent dispatch, an ASK protocol for mid-task user input, PLAN display, and interactive multi-turn sessions with shared memory. Background agent heartbeat for cron-triggered scheduled tasks.
+Dynamic multi-step task planning via the ReAct (Reason + Act) loop. The agent has 17 built-in tools (calculator, web search, stock quotes, Wikipedia, datetime, JSON parsing, regex, file reading, shell execution, working memory, screenshot, OCR, app building, chat history search, sub-agent spawning), unified tool+intent dispatch, an ASK protocol for mid-task user input, PLAN display, and interactive multi-turn sessions with shared memory. Background agent heartbeat for cron-triggered scheduled tasks. **Hierarchical orchestration**: agents can spawn sub-agents via `spawn_agent` with depth-limited recursion (max depth 2), memory isolation (shared at depth 0→1, isolated at depth 1→2), and parallel execution via thread jobs.
 
 **6. App Builder** *(✅ complete)*
 Prompt-to-executable pipeline. Describe an app in plain English and get a compiled Windows `.exe`. Three build lanes: PowerShell/WinForms (default — zero external deps beyond ps2exe), Python-TK (Tkinter + PyInstaller), and Python-Web (PyWebView + PyInstaller). Token budget auto-detects from model context window. Generated code is validated for syntax errors, dangerous patterns, and secret leaks before compilation. Diff-based rebuild modifies existing builds without full regeneration. Every app includes "Built with BildsyPS" branding. All builds tracked in SQLite.
 
 **6b. Developer ergonomics** *(✅ complete)*
 Dynamic tab completion on all 22 newly covered public functions across 10 modules — providers, session names, skill names, workflow names, build names, MCP server names, heartbeat task IDs, artifact files, persistent alias names, and git branches. Completers are live-data: session names come from SQLite, build names from the filesystem, branch names from `git branch --list`. The `gm` alias conflict with PowerShell's built-in `Get-Member` was resolved by renaming to `gmerge`. 37 new tests verify all completers.
+
+**6c. Reliability hardening** *(✅ complete)*
+Model token limits corrected: claude-sonnet-4-6 output cap set to 64K, claude-opus-4-6 to 128K. AppBuilder truncation guard now fails early on `max_tokens` stop reason instead of passing incomplete code to the validator. AgentHeartbeat hardened: input validation on `Add-AgentTask` (time format, interval syntax, day names), atomic save via temp-file-then-rename, pre-scan for due tasks (skip overhead when nothing fires), lazy-init SQLite table, bootstrap module load order fixed, execution time limit capped at 10 minutes. Secret scanner regex refined with `(?<![A-Za-z])` lookbehind to prevent false positives on UI variable names like `$tbApiKey`; all three code generation prompts now forbid placeholder API keys and require a runtime settings UI instead.
 
 **7. Mission control GUI** *(next)*
 A dashboard layer over the shell. Not a replacement — an amplifier. The terminal stays the engine; the GUI surfaces context, history, running tasks, and agent state in a way that's faster to scan than a command line.
