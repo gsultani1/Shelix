@@ -1677,6 +1677,59 @@ fn main() {
             ($result.Errors -join "`n") | Should -Not -Match "not in Cargo.toml"
         }
 
+        It 'Ignores internal module declarations (mod X; / pub mod X;) in crate check' {
+            $toml = @"
+[package]
+name = "test-app"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tauri = "2"
+serde = { version = "1", features = ["derive"] }
+rusqlite = "0.31"
+"@
+            $modRs = @"
+pub mod item;
+pub mod category;
+pub mod history;
+pub mod backup;
+
+pub use item::Item;
+pub use category::Category;
+pub use history::HistoryEntry;
+pub use backup::create_backup;
+"@
+            $itemRs = @"
+use serde::{Serialize, Deserialize};
+use rusqlite::Row;
+
+#[derive(Serialize, Deserialize)]
+pub struct Item {
+    pub id: i64,
+    pub name: String,
+}
+"@
+            $mainRs = @"
+mod models;
+use tauri;
+use models::Item;
+
+fn main() {
+    tauri::Builder::default().run(tauri::generate_context!()).unwrap();
+}
+"@
+            $files = New-FileMap @{
+                'src-tauri/Cargo.toml' = $toml
+                'src-tauri/src/models/mod.rs' = $modRs
+                'src-tauri/src/models/item.rs' = $itemRs
+                'src-tauri/src/main.rs' = $mainRs
+            }
+            $result = Test-GeneratedCode -Files $files -Framework 'tauri'
+            # None of the mod declarations (item, category, history, backup, models) should be flagged
+            ($result.Errors -join "`n") | Should -Not -Match "not in Cargo.toml"
+        }
+
         It 'Ignores built-in crate paths (std, core, alloc, self, super)' {
             $toml = @"
 [package]

@@ -86,6 +86,25 @@ Describe 'SecretScanner — Offline' {
             @($result).Count | Should -Be 1
             $result[0].FileName | Should -Be 'multi2.txt'
         }
+
+        It 'Does not flag DOM accessor patterns as secrets (getElementById, querySelector)' {
+            $f = "$global:BildsyPSHome\config\test-dom.txt"
+            Set-Content -Path $f -Value @(
+                'const token = document.getElementById("auth-token-input");'
+                'let secret = document.querySelector(".secret-panel");'
+                'var apiKey = localStorage.getItem("cached_key");'
+            )
+            $result = Invoke-SecretScan -Paths @($f)
+            @($result).Count | Should -Be 0
+        }
+
+        It 'Still detects real secrets even with DOM-like variable names' {
+            $f = "$global:BildsyPSHome\config\test-real-secret.txt"
+            Set-Content -Path $f -Value 'token = abc123def456xyz789'
+            $result = Invoke-SecretScan -Paths @($f)
+            @($result).Count | Should -BeGreaterThan 0
+            $result[0].Pattern | Should -Be 'Generic Secret Assign'
+        }
     }
 
     Context 'Show-SecretScanReport' {

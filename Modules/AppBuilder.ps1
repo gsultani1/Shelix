@@ -1249,6 +1249,18 @@ function Test-GeneratedCode {
             $builtinCrates = @('std', 'core', 'alloc', 'crate', 'self', 'super')
             foreach ($bi in $builtinCrates) { $null = $declaredCrates.Add($bi) }
 
+            # Collect internal module declarations (mod X; / pub mod X;) from ALL .rs files
+            # These are submodules, not external crates — must not be flagged
+            $internalModules = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+            foreach ($rsFile in $rsFiles) {
+                $rsCode = $Files[$rsFile]
+                $modMatches = [regex]::Matches($rsCode, '(?:pub\s+)?mod\s+(\w+)\s*;')
+                foreach ($m in $modMatches) {
+                    $null = $internalModules.Add($m.Groups[1].Value)
+                }
+            }
+            foreach ($im in $internalModules) { $null = $declaredCrates.Add($im) }
+
             foreach ($rsFile in $rsFiles) {
                 $rsCode = $Files[$rsFile]
                 # Match both 'use crate::path' and 'use crate;' patterns

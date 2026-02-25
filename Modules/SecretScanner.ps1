@@ -12,7 +12,7 @@ $global:SecretPatterns = @(
     @{ Name = 'Private Key Block';  Pattern = '-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----' }
     @{ Name = 'Slack Token';        Pattern = 'xox[bpors]-[A-Za-z0-9\-]{10,}' }
     @{ Name = 'Discord Token';      Pattern = '[MN][A-Za-z\d]{23,}\.[\w-]{6}\.[\w-]{27,}' }
-    @{ Name = 'Generic Secret Assign'; Pattern = '(?i)(?<![A-Za-z])(password|secret|token|api_?key)\s*[:=]\s*["\x27]?[A-Za-z0-9/_\+\.\-]{12,}' }
+    @{ Name = 'Generic Secret Assign'; Pattern = '(?i)(?<![A-Za-z])(password|secret|token|api_?key)\s*[:=]\s*["\x27]?(?!document\.|window\.|console\.|function\b|return\b|new\s|null\b|true\b|false\b|undefined\b|getElementById|querySelector|getAttribute|localStorage|sessionStorage)[A-Za-z0-9/_\+\.\-]{12,}' }
 )
 
 function Invoke-SecretScan {
