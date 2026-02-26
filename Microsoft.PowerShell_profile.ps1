@@ -3,7 +3,7 @@
 # Profile load timing
 $global:ProfileLoadStart = Get-Date
 $global:ProfileTimings = @{}
-$global:BildsyPSVersion = '1.3.0'
+$global:BildsyPSVersion = '1.4.1'
 
 # Safe Mode - report errors but continue loading
 trap {

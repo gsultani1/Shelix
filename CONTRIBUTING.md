@@ -14,7 +14,7 @@ Thank you for your interest in contributing! This document provides guidelines f
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/my-feature`)
 3. Make your changes
-4. Test on PowerShell 5.1 (for Windows compatibility)
+4. Test on PowerShell 7.0+ (`Invoke-Pester ./Tests -Output Detailed`)
 5. Commit with clear messages (`git commit -m "Add: new intent for X"`)
 6. Push to your fork (`git push origin feature/my-feature`)
 7. Open a Pull Request
@@ -25,8 +25,7 @@ Thank you for your interest in contributing! This document provides guidelines f
 - Use approved PowerShell verbs (`Get-`, `Set-`, `New-`, `Invoke-`, etc.)
 - Use PascalCase for function names and parameters
 - Use `$camelCase` for local variables
-- Add comment-based help for public functions
-- Maintain PowerShell 5.1 compatibility
+- Target PowerShell 7.0+ (the minimum supported version)
 
 ### Example Function
 ```powershell
@@ -48,7 +47,7 @@ function Get-ExampleData {
 ```
 
 ### Intent Guidelines
-When adding new intents to `IntentAliasSystem.ps1`:
+When adding new intents to `IntentRegistry.ps1` / `IntentActions.ps1`:
 - Return a hashtable with `Success`, `Output`, and optionally `Error`
 - Validate required parameters early
 - Handle errors gracefully
@@ -70,44 +69,94 @@ When adding new intents to `IntentAliasSystem.ps1`:
 ```
 ├── Microsoft.PowerShell_profile.ps1  # Main entry point (~150 lines)
 ├── ChatConfig.json                   # User configuration (not tracked)
-├── Modules/                          # All functionality lives here
+├── BildsyPS.psm1 / BildsyPS.psd1    # Module loader + manifest
+├── Modules/                          # 43 focused modules
 │   ├── ConfigLoader.ps1              # .env and config loading
 │   ├── PlatformUtils.ps1             # Cross-platform helpers
 │   ├── SecurityUtils.ps1             # Path/URL security
+│   ├── SecretScanner.ps1             # API key / credential leak detection
 │   ├── CommandValidation.ps1         # Command whitelist & safety levels
 │   ├── SystemUtilities.ps1           # sudo, ports, uptime, PATH
 │   ├── ArchiveUtils.ps1              # zip, unzip
 │   ├── DockerTools.ps1               # Docker shortcuts
 │   ├── DevTools.ps1                  # IDE launchers, dev checks
 │   ├── NaturalLanguage.ps1           # NL to command translation
-│   ├── AIExecution.ps1               # AI command gateway, rate limiting
-│   ├── ResponseParser.ps1            # Parse AI responses
+│   ├── ResponseParser.ps1            # Parse AI responses, format markdown
 │   ├── DocumentTools.ps1             # OpenXML document creation
-│   ├── SafetySystem.ps1              # AI execution safety
+│   ├── SafetySystem.ps1              # AI execution safety + secret scanning
 │   ├── TerminalTools.ps1             # bat, glow, broot, fzf
 │   ├── NavigationUtils.ps1           # Navigation & git shortcuts
 │   ├── PackageManager.ps1            # Tool installation
 │   ├── WebTools.ps1                  # Web search APIs
 │   ├── ProductivityTools.ps1         # Clipboard, Git, Calendar
 │   ├── MCPClient.ps1                 # MCP protocol client
-│   ├── FzfIntegration.ps1            # Fuzzy finder
+│   ├── BrowserAwareness.ps1          # Browser tab URL + content reading
+│   ├── VisionTools.ps1               # Screenshot capture + vision model analysis
+│   ├── OCRTools.ps1                  # Tesseract OCR + pdftotext integration
+│   ├── CodeArtifacts.ps1             # AI code save + execute + tracking
+│   ├── AppBuilder.ps1                # Prompt-to-executable pipeline
+│   ├── FolderContext.ps1             # Folder awareness for AI context
+│   ├── FzfIntegration.ps1            # Fuzzy finder integration
 │   ├── PersistentAliases.ps1         # User-defined aliases
+│   ├── ToastNotifications.ps1        # BurntToast/.NET notifications
 │   ├── ProfileHelp.ps1               # Help, tips, system prompt
-│   ├── ChatSession.ps1               # LLM chat loop
+│   ├── ChatStorage.ps1               # SQLite persistence + FTS5 full-text search
+│   ├── ChatSession.ps1               # LLM chat loop + session management
 │   ├── ChatProviders.ps1             # AI provider implementations
-│   ├── IntentAliasSystem.ps1         # Intent routing and definitions
-│   └── PluginLoader.ps1             # Drop-in plugin system
+│   ├── AgentHeartbeat.ps1            # Cron-triggered background agent tasks
+│   ├── UserSkills.ps1                # JSON user-defined intent loader
+│   ├── PluginLoader.ps1              # Plugin system (deps, config, hooks, tests)
+│   ├── IntentAliasSystem.ps1         # Intent system orchestrator
+│   ├── IntentRegistry.ps1            # Intent metadata + category definitions
+│   ├── IntentActions.ps1             # Core intent scriptblocks
+│   ├── IntentActionsSystem.ps1       # System/filesystem/workflow scriptblocks
+│   ├── WorkflowEngine.ps1            # Multi-step workflow engine
+│   ├── IntentRouter.ps1              # Intent router, help, tab completion
+│   ├── AgentTools.ps1                # Agent tool registry (17 built-in tools)
+│   └── AgentLoop.ps1                 # Autonomous agent engine (ReAct + tools + memory)
 ├── Plugins/
-│   └── _Example.ps1                 # Sample plugin (underscore = inactive)
+│   ├── _Example.ps1                  # Reference plugin template
+│   ├── _Pomodoro.ps1                 # Pomodoro timer plugin
+│   └── _QuickNotes.ps1              # Note-taking plugin
+├── Tests/                            # 17 Pester test files, 368 tests
+│   ├── AgentHeartbeat.Tests.ps1
+│   ├── AgentLoop.Tests.ps1
+│   ├── AppBuilder.Tests.ps1
+│   ├── ChatStorage.Tests.ps1
+│   ├── CodeArtifacts.Tests.ps1
+│   ├── ConfigLoader.Tests.ps1
+│   ├── IntentRouting.Tests.ps1
+│   ├── NaturalLanguage.Tests.ps1
+│   ├── PluginLoader.Tests.ps1
+│   ├── ResponseParser.Tests.ps1
+│   ├── SafetySystem.Tests.ps1
+│   ├── SecretScanner.Tests.ps1
+│   ├── SpawnAgent.Tests.ps1
+│   ├── TabCompletion.Tests.ps1
+│   ├── UserSkills.Tests.ps1
+│   ├── VisionTools.Tests.ps1
+│   └── WorkflowEngine.Tests.ps1
 ```
 
 ## Testing
 
-Before submitting a PR:
-1. Reload your profile: `. $PROFILE`
-2. Test the chat function: `chat` or `chat-anthropic`
-3. Test any new intents you've added
-4. Verify existing functionality still works
+The project has a comprehensive Pester v5 test suite (368 tests, 0 failures). Before submitting a PR:
+
+```powershell
+# Run the full test suite
+Invoke-Pester ./Tests -Output Detailed
+
+# Run a specific test file
+Invoke-Pester ./Tests/SecretScanner.Tests.ps1 -Output Detailed
+
+# Quick smoke test — reload profile
+. $PROFILE
+
+# Test chat function
+chat
+```
+
+When adding new functionality, add corresponding tests in `Tests/`. Follow the existing pattern of using `Describe`/`Context`/`It` blocks with mocked dependencies.
 
 ## Adding New Features
 
@@ -143,10 +192,11 @@ Before submitting a PR:
 8. See `Plugins/_Example.ps1` for the full template with all conventions
 
 ### New Intent (core)
-1. Add to `$global:IntentAliases` in `IntentAliasSystem.ps1`
-2. Add metadata to `$global:IntentMetadata` if needed
-3. Update system prompt in `Get-SafeCommandsPrompt` if AI should know about it
-4. Document in README
+1. Add metadata to `$global:IntentMetadata` in `IntentRegistry.ps1`
+2. Add scriptblock to `$global:IntentAliases` in `IntentActions.ps1` (core) or `IntentActionsSystem.ps1` (system/filesystem)
+3. Add category mapping in `$global:IntentCategories` in `IntentRegistry.ps1` if needed
+4. The intent will auto-register in the LLM system prompt via `Get-SafeCommandsPrompt`
+5. Document in README
 
 ### New Module
 1. Create `Modules/YourModule.ps1`

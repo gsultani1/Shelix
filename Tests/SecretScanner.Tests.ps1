@@ -38,6 +38,13 @@ Describe 'SecretScanner — Offline' {
             $result[0].Pattern | Should -Be 'Generic Secret Assign'
         }
 
+        It 'Skips generic pattern when keyword is embedded in a larger name' {
+            $f = "$global:BildsyPSHome\config\test-embedded.txt"
+            Set-Content -Path $f -Value "`$lblApiKey = New-Object System.Windows.Forms.Label`n`$tbPassword = New-Object System.Windows.Forms.TextBox"
+            $result = Invoke-SecretScan -Paths @($f)
+            @($result).Count | Should -Be 0
+        }
+
         It 'Skips comment lines' {
             $f = "$global:BildsyPSHome\config\test-comment.txt"
             Set-Content -Path $f -Value '# OPENAI_API_KEY=sk-abcdefghijklmnopqrstuvwxyz1234567890'
@@ -104,6 +111,30 @@ Describe 'SecretScanner — Offline' {
             $result = Invoke-SecretScan -Paths @($f)
             @($result).Count | Should -BeGreaterThan 0
             $result[0].Pattern | Should -Be 'Generic Secret Assign'
+        }
+    }
+
+    Context 'Invoke-SecretScan -ExcludePatterns' {
+        It 'Excludes a named pattern from results' {
+            $f = "$global:BildsyPSHome\config\test-exclude.txt"
+            Set-Content -Path $f -Value 'password=SuperSecretPass1234'
+            $result = Invoke-SecretScan -Paths @($f) -ExcludePatterns @('Generic Secret Assign')
+            @($result).Count | Should -Be 0
+        }
+
+        It 'Still detects non-excluded patterns' {
+            $f = "$global:BildsyPSHome\config\test-exclude2.txt"
+            Set-Content -Path $f -Value 'KEY=sk-ant-api03-AAAAAAAAAAAAAAAAAAAAAA'
+            $result = Invoke-SecretScan -Paths @($f) -ExcludePatterns @('Generic Secret Assign')
+            @($result).Count | Should -BeGreaterThan 0
+            $result[0].Pattern | Should -Be 'Anthropic API Key'
+        }
+
+        It 'Supports excluding multiple patterns' {
+            $f = "$global:BildsyPSHome\config\test-exclude3.txt"
+            Set-Content -Path $f -Value "password=SuperSecretPass1234`nKEY=sk-ant-api03-AAAAAAAAAAAAAAAAAAAAAA"
+            $result = Invoke-SecretScan -Paths @($f) -ExcludePatterns @('Generic Secret Assign', 'Anthropic API Key')
+            @($result).Count | Should -Be 0
         }
     }
 

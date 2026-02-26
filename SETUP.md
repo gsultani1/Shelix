@@ -166,6 +166,9 @@ chat-anthropic       # Claude API (needs key)
 
 # With options
 chat -Provider ollama -Model llama3.2 -Stream
+
+# Anthropic models: claude-sonnet-4-6 (default), claude-opus-4-6, claude-haiku-4-5-20251001
+chat -Provider anthropic -Model claude-opus-4-6
 ```
 
 ### In-Chat Commands
@@ -227,7 +230,7 @@ agent -Memory @{ budget = "5000" } "calculate 8% tax on the budget"
 agent-steps    # Show what the agent did
 agent-memory   # Show stored values
 agent-plan     # Show the agent's plan
-agent-tools    # List all available tools
+agent-tools    # List all available tools (17 built-in, incl. spawn_agent for sub-tasks)
 ```
 
 ---
@@ -242,7 +245,7 @@ BildsyPS/
 ├── NaturalLanguageMappings.json       # Command translations
 ├── UserSkills.json                    # Your custom intents (JSON)
 ├── UserAliases.ps1                    # Your custom aliases
-├── Modules/                           # 30+ focused modules
+├── Modules/                           # 40+ focused modules
 │   ├── ChatProviders.ps1              # LLM backends (Ollama, Anthropic, OpenAI, LM Studio, llm CLI)
 │   ├── ChatSession.ps1                # Chat loop + session management
 │   ├── ChatStorage.ps1                # SQLite persistence + FTS5 full-text search
@@ -250,11 +253,11 @@ BildsyPS/
 │   ├── VisionTools.ps1                # Screenshot capture + vision model analysis
 │   ├── OCRTools.ps1                   # Tesseract OCR + pdftotext integration
 │   ├── SecretScanner.ps1              # API key / credential leak detection
-│   ├── AgentLoop.ps1                  # Autonomous agent (ReAct + 17 tools + memory)
+│   ├── AgentLoop.ps1                  # Autonomous agent (ReAct + 17 tools + memory + sub-agents)
 │   ├── AgentHeartbeat.ps1             # Cron-triggered background tasks
 │   ├── PluginLoader.ps1               # Plugin system (deps, config, hooks, tests)
 │   ├── IntentAliasSystem.ps1          # Intent routing (80+ intents)
-│   └── ...                            # See README for full module list
+│   └── ...                            # See README for full list (43 modules total)
 └── Plugins/                           # Drop-in plugin directory
     ├── _Example.ps1                   # Reference template
     ├── _Pomodoro.ps1                  # Timer plugin

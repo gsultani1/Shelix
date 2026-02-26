@@ -216,6 +216,34 @@ $form.Text = Get-Greeting -Name 'World'
             }
         }
 
+        Context 'Secret Scanning in Generated Code' {
+            It 'Allows UI element variables containing API key keywords' {
+                $code = @'
+$lblApiKey = New-Object System.Windows.Forms.Label
+$tbApiKey = New-Object System.Windows.Forms.TextBox
+$lblPassword = New-Object System.Windows.Forms.Label
+$tbPassword = New-Object System.Windows.Forms.TextBox
+$btnSaveToken = New-Object System.Windows.Forms.Button
+'@
+                $files = New-FileMap @{ 'app.ps1' = $code }
+                $result = Test-GeneratedCode -Files $files -Framework 'powershell'
+                $result.Success | Should -BeTrue
+            }
+
+            It 'Still catches standalone secret assignments' {
+                $code = 'password = "SuperSecretPass1234"'
+                $files = New-FileMap @{ 'app.ps1' = $code }
+                $result = Test-GeneratedCode -Files $files -Framework 'powershell'
+                $result.Success | Should -BeFalse
+                ($result.Errors -join "`n") | Should -Match 'Secret detected'
+            }
+
+            It 'Still catches real Anthropic API keys in generated code' {
+                $code = '$key = "sk-ant-api03-AAAAAAAAAAAAAAAAAAAAAA"'
+                $files = New-FileMap @{ 'app.ps1' = $code }
+                $result = Test-GeneratedCode -Files $files -Framework 'powershell'
+                $result.Success | Should -BeFalse
+                ($result.Errors -join "`n") | Should -Match 'Secret detected'
         Context 'PowerShell — PS7+ Operator Compatibility' {
             It 'Flags ?? null-coalescing operator' {
                 $files = New-FileMap @{ 'app.ps1' = '$x = $a ?? "default"' }

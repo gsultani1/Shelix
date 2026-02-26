@@ -1,6 +1,6 @@
 # BildsyPS Vision
 
-> Shell + Helix. A shell environment with interconnected, spiraling capability.
+> Your terminal, orchestrated. An AI shell environment with interconnected, spiraling capability.
 
 ---
 
@@ -54,9 +54,13 @@ Persistent memory across sessions via SQLite with FTS5 full-text search. The AI 
 Vision model support for screenshots and images — send to Claude, GPT-4o, or local multimodal models. Browser tab awareness via UI Automation. Tesseract OCR for scanned documents and images, pdftotext for text PDFs, with vision API fallback. The AI sees what you see.
 
 **5. Agent architecture** *(✅ complete)*
-Dynamic multi-step task planning via the ReAct (Reason + Act) loop. The agent has 17 built-in tools (calculator, web search, stock quotes, Wikipedia, datetime, JSON parsing, regex, file reading, shell execution, working memory, screenshot, OCR, app building, chat history search), unified tool+intent dispatch, an ASK protocol for mid-task user input, PLAN display, and interactive multi-turn sessions with shared memory. Background agent heartbeat for cron-triggered scheduled tasks.
+Dynamic multi-step task planning via the ReAct (Reason + Act) loop. The agent has 17 built-in tools (calculator, web search, stock quotes, Wikipedia, datetime, JSON parsing, regex, file reading, shell execution, working memory, screenshot, OCR, app building, chat history search, sub-agent spawning), unified tool+intent dispatch, an ASK protocol for mid-task user input, PLAN display, and interactive multi-turn sessions with shared memory. Background agent heartbeat for cron-triggered scheduled tasks. **Hierarchical orchestration**: agents can spawn sub-agents via `spawn_agent` with depth-limited recursion (max depth 2), memory isolation (shared at depth 0→1, isolated at depth 1→2), and parallel execution via thread jobs.
 
 **6. App Builder** *(✅ complete)*
+Prompt-to-executable pipeline. Describe an app in plain English and get a compiled Windows `.exe`. Three build lanes: PowerShell/WinForms (default — zero external deps beyond ps2exe), Python-TK (Tkinter + PyInstaller), and Python-Web (PyWebView + PyInstaller). Token budget auto-detects from model context window. Generated code is validated for syntax errors, dangerous patterns, and secret leaks before compilation. Diff-based rebuild modifies existing builds without full regeneration. Every app includes "Built with BildsyPS" branding. All builds tracked in SQLite. Code generation prompts forbid placeholder API keys and require runtime settings UI instead.
+
+**7. Developer ergonomics** *(✅ complete)*
+Dynamic tab completion on all 22 newly covered public functions across 10 modules — providers, session names, skill names, workflow names, build names, MCP server names, heartbeat task IDs, artifact files, persistent alias names, and git branches. Completers are live-data: session names come from SQLite, build names from the filesystem, branch names from `git branch --list`. The `gm` alias conflict with PowerShell's built-in `Get-Member` was resolved by renaming to `gmerge`. 37 new tests verify all completers.
 Prompt-to-executable pipeline. Describe an app in plain English and get a compiled Windows `.exe` — or a packaged PowerShell module. Five build lanes: PowerShell/WinForms (default — zero external deps beyond ps2exe), PowerShell Module (`.psm1`/`.psd1` zip, zero deps), Python-TK (Tkinter + PyInstaller), Python-Web (PyWebView + PyInstaller), and Tauri (Rust + HTML/CSS/JS). Token budget auto-detects from model context window. Generated code is validated for syntax errors, dangerous patterns, and secret leaks before compilation. Diff-based rebuild modifies existing builds without full regeneration. Every app includes "Built with BildsyPS" branding. All builds tracked in SQLite.
 
 **6b. Build Pipeline v2** *(✅ complete)*
@@ -65,7 +69,10 @@ Self-improving generation loop. A **planning agent** decomposes complex specs (>
 **6c. Developer ergonomics** *(✅ complete)*
 Dynamic tab completion on all public functions — providers, session names, skill names, workflow names, build names, MCP server names, heartbeat task IDs, artifact files, persistent alias names, git branches, and now framework names. Completers are live-data: session names come from SQLite, build names from the filesystem, branch names from `git branch --list`. The `gm` alias conflict with PowerShell's built-in `Get-Member` was resolved by renaming to `gmerge`.
 
-**7. Mission control GUI** *(next)*
+**8. Reliability hardening** *(✅ complete)*
+Model token limits corrected: claude-sonnet-4-6 output cap set to 64K, claude-opus-4-6 to 128K. AppBuilder truncation guard now fails early on `max_tokens` stop reason instead of passing incomplete code to the validator. AgentHeartbeat hardened: input validation on `Add-AgentTask` (time format, interval syntax, day names), atomic save via temp-file-then-rename, pre-scan for due tasks (skip overhead when nothing fires), lazy-init SQLite table, bootstrap module load order fixed, execution time limit capped at 10 minutes. Secret scanner regex refined with `(?<![A-Za-z])` lookbehind to prevent false positives on UI variable names like `$tbApiKey`.
+
+**9. Mission control GUI** *(next)*
 A dashboard layer over the shell. Not a replacement — an amplifier. The terminal stays the engine; the GUI surfaces context, history, running tasks, and agent state in a way that's faster to scan than a command line.
 
 ---

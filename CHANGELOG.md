@@ -4,6 +4,39 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.1] - 2026-02-24
+
+### Fixed
+
+#### Model Token Limits & Truncation Guard
+- **`ChatProviders.ps1`** — Added `claude-sonnet-4-6` and `claude-opus-4-6` to `$global:ModelContextLimits`; updated default Anthropic model to `claude-sonnet-4-6`; `Get-ChatModels` display updated for current model lineup
+- **`AppBuilder.ps1`** — Corrected `Get-BuildMaxTokens` output limits: `claude-sonnet-4-6` from 8192 → 64000, added `claude-opus-4-6` at 128000, added `claude-haiku-4-5-20251001`
+- **`AppBuilder.ps1`** — `Invoke-CodeGeneration` now fails early on truncated responses (`max_tokens` stop reason) instead of passing incomplete code to the validator
+- **`AppBuilder.ps1`** — Fixed truncation guard returning `ErrorMessage` key instead of `Output` — callers read `$codeResult.Output`, so the error was silently lost as `$null`
+- **`AppBuilder.ps1`** — Removed redundant `$logsDir` creation; reuse `$logDir` and `$logFile` already created above
+- **`ChatProviders.ps1`** — `Import-ChatConfig` now applies provider-level overrides (`defaultModel`, `endpoint`) from `ChatConfig.json` so config is single source of truth
+
+#### AgentHeartbeat Hardening
+- **Schedule logic** — `ConvertTo-NormalizedDayName` handles both full ("Monday") and abbreviated ("Mon") day names; `ConvertTo-TimeSpanFromInterval` adds `d` (days) unit alongside `h/m/s`
+- **Input validation** — `Add-AgentTask` validates `-Time` as `HH:mm`, requires `-Interval` for interval schedule with syntax check (`digits + d/h/m/s`), validates `-Days` against known day names
+- **Atomic save** — `Save-AgentTaskList` writes to `.tmp` then `Move-Item` to prevent task list corruption on mid-write process kill
+- **Execution efficiency** — `Invoke-AgentHeartbeat` pre-scans for due tasks (skips log/DB/save overhead when nothing fires), moves `Get-Command` check outside loop, lazy-inits SQLite table via `Initialize-HeartbeatTable` with session-scoped flag
+- **Bootstrap** — `Register-AgentHeartbeat` fixes module load order (`ChatProviders.ps1` before `IntentAliasSystem.ps1`), adds `SecretScanner.ps1` and `CodeArtifacts.ps1`, escapes single quotes in paths, ensures error log directory exists, adds `ExecutionTimeLimit` (10-minute cap)
+- **Log rotation** — Trims `heartbeat.log` to 70% of limit when exceeding `HeartbeatMaxLogLines`
+
+#### Secret Scanner — False Positive Fix & Prompt Rules
+- **`SecretScanner.ps1`** — Added `(?<![A-Za-z])` negative lookbehind to `Generic Secret Assign` pattern; prevents matching when keyword (`password`, `secret`, `token`, `api_key`) is embedded in a larger variable name like `$tbApiKey` or `$lblApiKey`, while still catching standalone assignments
+- **`SecretScanner.ps1`** — Added `-ExcludePatterns` parameter to `Invoke-SecretScan` for callers to opt out of specific pattern names
+- **`AppBuilder.ps1`** — All three code generation prompts (PowerShell rule 12, Python-Tk rule 11, Python-Web rule 9) now explicitly forbid hardcoded/placeholder API keys and require a runtime settings UI with masked input fields and JSON config persistence
+- **`AppBuilder.ps1`** — Reverted blanket `-ExcludePatterns @('Generic Secret Assign')` exclusion in `Test-GeneratedCode` since the lookbehind regex precisely targets the false positives
+
+### Added
+
+#### Tests
+- **`Tests/AgentHeartbeat.Tests.ps1`** — Input validation (bad time, missing interval, invalid syntax, `d` unit, invalid/full day names), atomic save (no `.tmp` residue, valid JSON), day name normalization, interval parsing, mocked heartbeat execution
+- **`Tests/AppBuilder.Tests.ps1`** — Truncation guard tests (mock `max_tokens` and `length` stop reasons), updated secret scanning tests for lookbehind behavior (UI element variables pass, standalone assignments caught)
+- **`Tests/SecretScanner.Tests.ps1`** — Embedded keyword test (verifies lookbehind skips `$lblApiKey`, `$tbPassword`)
+- **368 total tests passing, 0 failures** (up from 338)
 ## [1.5.0] - 2026-02-22
 
 ### Added

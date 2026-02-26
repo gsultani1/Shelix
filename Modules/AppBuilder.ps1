@@ -144,6 +144,8 @@ RULES:
    Create the directory if it does not exist. NEVER store data files alongside the script or exe.
 9. Add proper form disposal and cleanup.
 10. The script must work when compiled to .exe via ps2exe.
+11. Start with: Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+12. NEVER hardcode or placeholder API keys/passwords/tokens. If the app needs credentials, create a Settings dialog where the user enters them at runtime (use PasswordChar='*' for sensitive fields) and persist to a JSON config file.
 10b. Do NOT use PowerShell 7+ only operators: ?? (null-coalescing), ??= (null-coalescing
     assignment), or ?. / ?[] (null-conditional). These break ps2exe which targets Windows
     PowerShell 5.1. Use if ($null -ne $x) { $x } else { $default } instead.
@@ -192,6 +194,7 @@ RULES:
    Path.home() / f'.{app_name}' / 'data.json'
 9. Use if __name__ == '__main__': guard.
 10. Use ttk widgets where possible for native look.
+11. NEVER hardcode or placeholder API keys/passwords/tokens. If the app needs credentials, create a Settings window where the user enters them at runtime (use show='*' for sensitive fields) and persist to a JSON config file.
 10b. Use grid() geometry manager for all widget placement (not pack() or place()). Define
     row/column weights so the UI resizes proportionally.
 11. NEVER hardcode or generate placeholder API keys, tokens, passwords, or secrets in the code.
@@ -228,6 +231,7 @@ RULES:
    Path.home() / f'.{app_name}' / 'data.json'
 7. Use if __name__ == '__main__': guard in app.py.
 8. requirements.txt must contain: pywebview
+9. NEVER hardcode or placeholder API keys/passwords/tokens. If the app needs credentials, create a Settings panel where the user enters them at runtime (use <input type="password"> for sensitive fields) and persist via js_api to a JSON config file.
 9. NEVER hardcode or generate placeholder API keys, tokens, passwords, or secrets in the code.
    If the app needs API credentials, create a Settings panel in the HTML UI where the user can
    enter their own key at runtime. Persist settings via the Python js_api to the app's JSON
